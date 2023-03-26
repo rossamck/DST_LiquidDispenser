@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP8266 WebSocket Client</title>
+</head>
+<body>
+  <h1>ESP8266 WebSocket Client</h1>
+  <button onclick="toggleLED()">Toggle LED</button>
+  <p id="ledStatus">LED status: unknown</p>
+  <script>
+    const socket = new WebSocket('ws://192.168.0.183:81');
+    const ledStatusElement = document.getElementById('ledStatus');
+
+    socket.addEventListener('open', (event) => {
+      console.log('WebSocket connection opened:', event);
+    });
+
+    socket.addEventListener('message', (event) => {
+      console.log('WebSocket message received:', event.data);
+      const [command, value] = event.data.split(':');
+
+      if (command === 'LED') {
+        ledStatusElement.textContent = `LED status: ${value}`;
+      }
+    });
+
+    socket.addEventListener('close', (event) => {
+      console.log('WebSocket connection closed:', event);
+    });
+
+    function toggleLED() {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send('toggleLED');
+      } else {
+        console.error('WebSocket connection not open');
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+  <style>
+    /* CSS styles go here */
+  </style>
+</head>
+<body>
+  <h1>WebSocket Test</h1>
+
+  <div id="messages"></div>
+
+  <form>
+    <label for="messageInput">Message:</label>
+    <input type="text" id="messageInput">
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const ws = new WebSocket("ws://192.168.0.183:81");
+
+    ws.addEventListener("open", () => {
+      console.log("WebSocket connected");
+    });
+
+    ws.addEventListener("message", event => {
+      const message = event.data;
+      console.log("Received message:", message);
+      const messageEl = document.createElement("div");
+      messageEl.innerText = message;
+      document.getElementById("messages").appendChild(messageEl);
+    });
+
+    document.querySelector("form").addEventListener("submit", event => {
+      event.preventDefault();
+      const messageInput = document.getElementById("messageInput");
+      const message = messageInput.value;
+      console.log("Sending message:", message);
+      ws.send(message);
+      messageInput.value = "";
+    });
+  </script>
+</body>
+</html>

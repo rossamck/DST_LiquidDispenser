@@ -23,7 +23,7 @@
       background-color: green;
     }
 
-    .highlight {
+    .highlighted {
       background-color: yellow;
     }
   </style>
@@ -56,6 +56,11 @@
       const selectRowButton = document.getElementById('selectRowButton');
       const selectColumnButton = document.getElementById('selectColumnButton');
       const selectedWells = [];
+
+      let selectedVolume = '';
+
+
+
   
       for (let row = 1; row <= 8; row++) {
         const rowElement = document.createElement('tr');
@@ -78,6 +83,11 @@
         isDragging = false;
       });
   
+
+      microLitersSelectButton.addEventListener('click', (event) => {
+        selectedVolume = microLitersInput.value;
+      });
+
       // Add event listeners to each well
       wells.forEach((well) => {
         // Add event listener to prevent default drag-and-drop behavior
@@ -88,14 +98,14 @@
         well.addEventListener('mousedown', (event) => {
           isDragging = true;
           const volume = well.dataset.volume || microLitersInput.value;
-          setVolume(well, volume);
+          // setVolume(well, volume);
           toggleWell(well);
         });
   
         well.addEventListener('mouseenter', (event) => {
           if (isDragging) {
             const volume = well.dataset.volume || microLitersInput.value;
-            setVolume(well, volume);
+            // setVolume(well, volume);
             toggleWell(well);
           }
         });
@@ -119,8 +129,15 @@ clearButton.addEventListener('click', (event) => {
 
 
 
-sendButton.addEventListener('click', (event) => {
-  sendMessage('selectWells', JSON.stringify(selectedWells));
+
+    sendButton.addEventListener('click', (event) => {
+  const data = [];
+  selectedWells.forEach((wellId) => {
+    const well = document.querySelector(`[data-well="${wellId}"]`);
+    const volume = well.dataset.volume || '0';
+    data.push([wellId, volume]);
+  });
+  sendMessage('selectWells', JSON.stringify(data));
 });
 
 selectRowButton.addEventListener('click', (event) => {
@@ -134,7 +151,7 @@ selectRowButton.addEventListener('click', (event) => {
     const wellRowIndex = well.cellIndex - 1;
     if (wellRowIndex === rowIndex) {
       const volume = well.dataset.volume || microLitersInput.value;
-      setVolume(well, volume);
+      // setVolume(well, volume);
       toggleWell(well);
     }
   });
@@ -151,7 +168,7 @@ selectColumnButton.addEventListener('click', (event) => {
     const wellColIndex = well.parentNode.rowIndex - 1;
     if (wellColIndex === colIndex) {
       const volume = well.dataset.volume || microLitersInput.value;
-      setVolume(well, volume);
+      // setVolume(well, volume);
       toggleWell(well);
     }
   });
@@ -161,34 +178,37 @@ microLitersSelectButton.addEventListener('click', (event) => {
   const volume = microLitersInput.value;
   selectedWells.forEach((wellId) => {
     const well = document.querySelector(`[data-well="${wellId}"]`);
+    // console.log(well);
     setVolume(well, volume);
   });
-});
+  selectedWellsElement.textContent = getSelectedWellsText(); // update the selected wells text
 
-microLitersInput.addEventListener('input', (event) => {
-  const volume = microLitersInput.value;
-  selectedWells.forEach((wellId) => {
-    const well = document.querySelector(`[data-well="${wellId}"]`);
-    setVolume(well, volume);
-  });
 });
 
 function toggleWell(well) {
-  const isSelected = well.classList.toggle('selected');
+  const isSelected = well.classList.toggle('highlighted');
   const wellId = well.getAttribute('data-well');
 
-  if (isSelected) {
+  if (isSelected && !well.hasAttribute('data-volume')) {
     selectedWells.push(wellId);
     selectedWellsElement.textContent = getSelectedWellsText();
-  } else {
-    selectedWells.splice(selectedWells.indexOf(wellId), 1);
-    selectedWellsElement.textContent = getSelectedWellsText();
+  } else if (!isSelected) {
+    const index = selectedWells.indexOf(wellId);
+    if (index !== -1) {
+      selectedWells.splice(index, 1);
+      selectedWellsElement.textContent = getSelectedWellsText();
+    }
   }
 }
 
+
 function setVolume(well, volume) {
+  console.log(well);
+  if (well.classList.contains('highlighted')) {
   well.dataset.volume = volume;
   well.innerHTML = `${well.getAttribute('data-well')} (${volume} µL)`;
+  well.classList.replace('highlighted', 'selected'); 
+  }
 }
 
 function clearVolume(well) {

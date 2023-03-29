@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESP8266 WebSocket Client</title>
@@ -203,13 +205,13 @@ function toggleWell(well) {
 
 
 function setVolume(well, volume) {
-  console.log(well);
   if (well.classList.contains('highlighted')) {
-  well.dataset.volume = volume;
-  well.innerHTML = `${well.getAttribute('data-well')} (${volume} µL)`;
-  well.classList.replace('highlighted', 'selected'); 
+    well.dataset.volume = volume;
+    well.innerHTML = `${well.getAttribute('data-well')}<br><span style="font-size: 0.8em;">(${volume} µL)</span>`;
+    well.classList.replace('highlighted', 'selected');
   }
 }
+
 
 function clearVolume(well) {
   delete well.dataset.volume;

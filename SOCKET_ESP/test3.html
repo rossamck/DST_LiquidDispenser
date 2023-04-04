@@ -1,278 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
 
-<head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESP8266 WebSocket Client</title>
     <style>
-        body {
-            background: linear-gradient(to bottom, #4286f4, #00d7ff);
-        }
+      body {
+        background: linear-gradient(to bottom, #4286f4, #00d7ff);
+      }
 
-        td.well {
-            position: relative;
-            /* Add this to enable absolute positioning of volume element */
-            width: 60px;
-            height: 60px;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            border: 1px solid #ddd;
-            padding: 5px;
-        }
+      td.well {
+        position: relative;
+        /* Add this to enable absolute positioning of volume element */
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid #ddd;
+        padding: 5px;
+      }
 
-        .volume-text {
-            font-size: 0.7em;
-            font-weight: bold;
-            font-family: Arial, sans-serif;
-        }
+      .volume-text {
+        font-size: 0.7em;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+      }
 
+      .preset-buttons-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
 
+      .preset-button {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #007bff;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        border: none;
+      }
 
+      td.even-row {
+        background-color: #f2f2f2;
+      }
 
+      td.odd-row {
+        background-color: #fff;
+      }
 
+      td.even-col {
+        border-right: 2px solid #ddd;
+      }
 
-        td.even-row {
-            background-color: #f2f2f2;
-        }
+      td.odd-col {
+        border-left: 2px solid #ddd;
+      }
 
-        td.odd-row {
-            background-color: #fff;
-        }
+      td.selected {
+        background-color: green;
+      }
 
-        td.even-col {
-            border-right: 2px solid #ddd;
-        }
+      td.highlighted {
+        background-color: yellow;
+      }
 
-        td.odd-col {
-            border-left: 2px solid #ddd;
-        }
-
-        td.selected {
-            background-color: green;
-        }
-
-        td.highlighted {
-            background-color: yellow;
-        }
-
-
-        p#selectedWells {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
+      p#selectedWells {
+        font-size: 1.2em;
+        font-weight: bold;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <h1 class="mt-3">ESP8266 WebSocket Client</h1>
-        <div class="table-responsive">
-            <table class="table">
-                <tbody id="wellTableBody"></tbody>
-            </table>
-        </div>
-        <div id="selectedWellsContainer" class="mt-3">
-            <p id="selectedWells"></p>
-        </div>
-        <div class="form-group mt-3">
-            <label for="microLitersInput">Volume (µL):</label>
-            <input id="microLitersInput" class="form-control" type="number" min="0" step="0.1">
-            <button id="microLitersSelectButton" class="btn btn-primary mt-3">Select</button>
-        </div>
-        <button id="clearButton" class="btn">Clear All</button>
-        <button id="sendButton" class="btn">Send Selection</button>
-        <button id="selectRowButton" class="btn">Select Row</button>
-        <button id="selectColumnButton" class="btn">Select Column</button>
+      <h1 class="mt-3">Liquid Dispenser Client</h1>
+      <div class="table-responsive">
+        <table class="table">
+          <tbody id="wellTableBody"></tbody>
+        </table>
+      </div>
+      <div id="selectedWellsContainer" class="mt-3">
+        <p id="selectedWells"></p>
+      </div>
+      <div class="form-group mt-3">
+        <label for="microLitersInput">Volume (µL):</label>
+        <input
+          id="microLitersInput"
+          class="form-control"
+          type="number"
+          min="0"
+          step="0.1"
+        />
+        <button id="microLitersSelectButton" class="btn btn-primary mt-3">
+          Select
+        </button>
+      </div>
+      <button id="clearButton" class="btn">Clear All</button>
+      <button id="sendButton" class="btn">Send Selection</button>
+      <button id="selectRowButton" class="btn">Select Row</button>
+      <button id="selectColumnButton" class="btn">Select Column</button>
+
+      <div class="preset-buttons-container">
+        <button class="preset-button" data-preset="1">1</button>
+        <button class="preset-button" data-preset="2">2</button>
+        <button class="preset-button" data-preset="3">3</button>
+        <button class="preset-button" data-preset="4">4</button>
+        <button class="preset-button" data-preset="5">5</button>
+        <button class="preset-button" data-preset="6">6</button>
+        <button class="preset-button" data-preset="7">7</button>
+        <button class="preset-button" data-preset="8">8</button>
+      </div>
+      <button id="savePresetButton" class="btn btn-warning mt-3">
+        Save Preset
+      </button>
+      <button id="clearPresetsButton" class="btn">Clear All Presets</button>
+      <button id="startDispensing" disabled>Start Dispensing</button>
     </div>
 
     <script>
-        const wellTableBody = document.getElementById('wellTableBody');
-        const selectedWellsContainer = document.getElementById('selectedWellsContainer');
-        const selectedWellsElement = document.getElementById('selectedWells');
-        const microLitersInput = document.getElementById('microLitersInput');
-        const microLitersSelectButton = document.getElementById('microLitersSelectButton');
-        const clearButton = document.getElementById('clearButton');
-        const sendButton = document.getElementById('sendButton');
-        const selectRowButton = document.getElementById('selectRowButton');
-        const selectColumnButton = document.getElementById('selectColumnButton');
-        const selectedWells = [];
+      const wellTableBody = document.getElementById("wellTableBody");
+      const selectedWellsContainer = document.getElementById(
+        "selectedWellsContainer"
+      );
+      const selectedWellsElement = document.getElementById("selectedWells");
+      const microLitersInput = document.getElementById("microLitersInput");
+      const microLitersSelectButton = document.getElementById(
+        "microLitersSelectButton"
+      );
+      const clearButton = document.getElementById("clearButton");
+      const sendButton = document.getElementById("sendButton");
+      const selectRowButton = document.getElementById("selectRowButton");
+      const selectColumnButton = document.getElementById("selectColumnButton");
+      const selectedWells = [];
+      const clearPresetsButton = document.getElementById("clearPresetsButton");
 
-        let selectedVolume = '';
+      const sendSelectionButton = document.getElementById('sendButton');
+      const startDispensingButton = document.getElementById("startDispensing");
 
-        for (let row = 1; row <= 8; row++) {
-            const rowElement = document.createElement('tr');
-            for (let col = 1; col <= 12; col++) {
-                const wellId = String.fromCharCode(64 + row) + col;
-                const cellElement = document.createElement('td');
-                cellElement.className = 'well';
-                cellElement.classList.add((row % 2 === 0) ? 'even-row' : 'odd-row');
-                cellElement.classList.add((col % 2 === 0) ? 'even-col' : 'odd-col');
-                cellElement.dataset.well = wellId;
-                cellElement.innerHTML = `${wellId}<br><span class="volume"></span>`;
-                rowElement.appendChild(cellElement);
-            }
-            wellTableBody.appendChild(rowElement);
+      let selectedVolume = "";
+
+      //Define socket
+      let socket;
+      function initWebSocket() {
+        socket = new WebSocket("ws://192.168.0.183:81");
+        socket.addEventListener("open", (event) => {
+          console.log("WebSocket connection opened:", event);
+        });
+        socket.addEventListener("close", (event) => {
+          console.log("WebSocket connection closed:", event);
+          setTimeout(() => {
+            initWebSocket();
+          }, 1000);
+        });
+
+        //Handle replies from esp
+        socket.onmessage = function (event) {
+          console.log("RECEIVED");
+          console.log(event.data)
+    
+
+          if (event.data === "ready") {
+            console.log("Ready received");
+            startDispensingButton.disabled = false;
+            
+          }
+
+          if (event.data === "dispensefinished") {
+            console.log("Dispensing finished");
+            sendSelectionButton.disabled = false;
+          }
+        };
+      }
+      initWebSocket();
+
+
+
+      for (let row = 1; row <= 8; row++) {
+        const rowElement = document.createElement("tr");
+        for (let col = 1; col <= 12; col++) {
+          const wellId = String.fromCharCode(64 + row) + col;
+          const cellElement = document.createElement("td");
+          cellElement.className = "well";
+          cellElement.classList.add(row % 2 === 0 ? "even-row" : "odd-row");
+          cellElement.classList.add(col % 2 === 0 ? "even-col" : "odd-col");
+          cellElement.dataset.well = wellId;
+          cellElement.innerHTML = `${wellId}<br><span class="volume"></span>`;
+          rowElement.appendChild(cellElement);
+        }
+        wellTableBody.appendChild(rowElement);
+      }
+
+      const wells = document.querySelectorAll(".well");
+      let isDragging = false;
+
+      // Add an event listener to the Start Dispensing button
+      startDispensingButton.addEventListener("click", function () {
+        socket.send("startDispensing");
+        startDispensingButton.disabled = true;
+        
+      });
+      // Add event listener to the document object to detect mouseup outside the well area
+      document.addEventListener("mouseup", (event) => {
+        isDragging = false;
+      });
+
+      microLitersSelectButton.addEventListener("click", (event) => {
+        selectedVolume = microLitersInput.value;
+      });
+
+      // Add event listeners to each well
+      wells.forEach((well) => {
+        // Add event listener to prevent default drag-and-drop behavior
+        well.addEventListener("dragstart", (event) => {
+          event.preventDefault();
+        });
+
+        well.addEventListener("mousedown", (event) => {
+          isDragging = true;
+          const volume = well.dataset.volume || microLitersInput.value;
+          // setVolume(well, volume);
+          toggleWell(well);
+        });
+
+        well.addEventListener("mouseenter", (event) => {
+          if (isDragging) {
+            const volume = well.dataset.volume || microLitersInput.value;
+            // setVolume(well, volume);
+            toggleWell(well);
+          }
+        });
+
+        well.addEventListener("mouseup", (event) => {
+          isDragging = false;
+        });
+      });
+
+      clearPresetsButton.addEventListener("click", (event) => {
+        if (confirm("Are you sure you want to clear all presets?")) {
+          clearAllPresets();
+        }
+      });
+
+      function clearAllPresets() {
+        for (let i = 1; i <= 8; i++) {
+          localStorage.removeItem(`preset${i}`);
+        }
+        alert("All presets have been cleared.");
+      }
+
+      clearButton.addEventListener("click", (event) => {
+        // wells.forEach((well) => {
+        //   if (well.classList.contains("selected")) {
+        //     well.classList.remove("selected");
+        //     const wellId = well.getAttribute("data-well");
+        //     clearVolume(well);
+        //     selectedWells.splice(selectedWells.indexOf(wellId), 1);
+        //     selectedWellsElement.textContent = getSelectedWellsText();
+        //   }
+        // });
+        clearAll();
+      });
+
+      sendButton.addEventListener("click", (event) => {
+        const data = [];
+        sendSelectionButton.disabled = true;
+        selectedWells.forEach((wellId) => {
+          const well = document.querySelector(`[data-well="${wellId}"]`);
+          const volume = well.dataset.volume || "0";
+          data.push([wellId, volume]);
+        });
+        sendMessage("selectWells", JSON.stringify(data));
+      });
+
+      selectRowButton.addEventListener("click", (event) => {
+        const rowIndex = parseInt(prompt("Enter row number (1-8)")) - 1;
+        if (isNaN(rowIndex) || rowIndex < 0 || rowIndex > 7) {
+          alert("Invalid row number!");
+          return;
         }
 
-
-
-        const wells = document.querySelectorAll('.well');
-        let isDragging = false;
-
-        // Add event listener to the document object to detect mouseup outside the well area
-        document.addEventListener('mouseup', (event) => {
-            isDragging = false;
-        });
-
-        microLitersSelectButton.addEventListener('click', (event) => {
-            selectedVolume = microLitersInput.value;
-        });
-
-        // Add event listeners to each well
         wells.forEach((well) => {
-            // Add event listener to prevent default drag-and-drop behavior
-            well.addEventListener('dragstart', (event) => {
-                event.preventDefault();
-            });
-
-            well.addEventListener('mousedown', (event) => {
-                isDragging = true;
-                const volume = well.dataset.volume || microLitersInput.value;
-                // setVolume(well, volume);
-                toggleWell(well);
-            });
-
-            well.addEventListener('mouseenter', (event) => {
-                if (isDragging) {
-                    const volume = well.dataset.volume || microLitersInput.value;
-                    // setVolume(well, volume);
-                    toggleWell(well);
-                }
-            });
-
-            well.addEventListener('mouseup', (event) => {
-                isDragging = false;
-            });
+          const wellRowIndex = well.cellIndex - 1;
+          if (wellRowIndex === rowIndex) {
+            const volume = well.dataset.volume || microLitersInput.value;
+            // setVolume(well, volume);
+            toggleWell(well);
+          }
         });
+      });
 
-        clearButton.addEventListener('click', (event) => {
-            wells.forEach((well) => {
-                if (well.classList.contains('selected')) {
-                    well.classList.remove('selected');
-                    const wellId = well.getAttribute('data-well');
-                    clearVolume(well);
-                    selectedWells.splice(selectedWells.indexOf(wellId), 1);
-                    selectedWellsElement.textContent = getSelectedWellsText();
-                }
-            });
-        });
-
-        sendButton.addEventListener('click', (event) => {
-            const data = [];
-            selectedWells.forEach((wellId) => {
-                const well = document.querySelector(`[data-well="${wellId}"]`);
-                const volume = well.dataset.volume || '0';
-                data.push([wellId, volume]);
-            });
-            sendMessage('selectWells', JSON.stringify(data));
-        });
-
-        selectRowButton.addEventListener('click', (event) => {
-            const rowIndex = parseInt(prompt('Enter row number (1-8)')) - 1;
-            if (isNaN(rowIndex) || rowIndex < 0 || rowIndex > 7) {
-                alert('Invalid row number!');
-                return;
-            }
-
-            wells.forEach((well) => {
-                const wellRowIndex = well.cellIndex - 1;
-                if (wellRowIndex === rowIndex) {
-                    const volume = well.dataset.volume || microLitersInput.value;
-                    // setVolume(well, volume);
-                    toggleWell(well);
-                }
-            });
-        });
-
-        selectColumnButton.addEventListener('click', (event) => {
-            const colIndex = parseInt(prompt('Enter column number (1-12)')) - 1;
-            if (isNaN(colIndex) || colIndex < 0 || colIndex > 11) {
-                alert('Invalid column number!');
-                return;
-            }
-
-            wells.forEach((well) => {
-                const wellColIndex = well.parentNode.rowIndex - 1;
-                if (wellColIndex === colIndex) {
-                    const volume = well.dataset.volume || microLitersInput.value;
-                    // setVolume(well, volume);
-                    toggleWell(well);
-                }
-            });
-        });
-
-        microLitersSelectButton.addEventListener('click', (event) => {
-            const volume = microLitersInput.value;
-            selectedWells.forEach((wellId) => {
-                const well = document.querySelector(`[data-well="${wellId}"]`);
-                // console.log(well);
-                setVolume(well, volume);
-            });
-            selectedWellsElement.textContent = getSelectedWellsText(); // update the selected wells text
-        });
-
-        function toggleWell(well) {
-            const isSelected = well.classList.toggle('highlighted');
-            const wellId = well.getAttribute('data-well');
-
-            if (isSelected && !well.hasAttribute('data-volume')) {
-                selectedWells.push(wellId);
-                selectedWellsElement.textContent = getSelectedWellsText()
-            } else if (!isSelected) {
-                const index = selectedWells.indexOf(wellId);
-                if (index !== -1) {
-                    selectedWells.splice(index, 1);
-                    selectedWellsElement.textContent = getSelectedWellsText();
-                }
-            }
+      selectColumnButton.addEventListener("click", (event) => {
+        const colIndex = parseInt(prompt("Enter column number (1-12)")) - 1;
+        if (isNaN(colIndex) || colIndex < 0 || colIndex > 11) {
+          alert("Invalid column number!");
+          return;
         }
 
-        function setVolume(well, volume) {
-            if (well.classList.contains('highlighted')) {
-                well.dataset.volume = volume;
-                well.innerHTML = `${well.getAttribute('data-well')}<br><span class="volume-text">(${volume} µL)</span>`;
-                well.classList.replace('highlighted', 'selected');
-            }
+        wells.forEach((well) => {
+          const wellColIndex = well.parentNode.rowIndex - 1;
+          if (wellColIndex === colIndex) {
+            const volume = well.dataset.volume || microLitersInput.value;
+            // setVolume(well, volume);
+            toggleWell(well);
+          }
+        });
+      });
+
+      microLitersSelectButton.addEventListener("click", (event) => {
+        const volume = microLitersInput.value;
+        selectedWells.forEach((wellId) => {
+          const well = document.querySelector(`[data-well="${wellId}"]`);
+          // console.log(well);
+          setVolume(well, volume);
+        });
+        selectedWellsElement.textContent = getSelectedWellsText(); // update the selected wells text
+      });
+
+      const presetButtons = document.querySelectorAll(".preset-button");
+      const savePresetButton = document.getElementById("savePresetButton");
+
+      // Load presets from localStorage
+      function loadPreset(presetNumber) {
+        const presetKey = `preset${presetNumber}`;
+        const wellsData = JSON.parse(localStorage.getItem(presetKey));
+
+        if (!wellsData) {
+          alert(`Preset ${presetNumber} is empty.`);
+          return;
         }
 
+        clearAll();
 
-        function clearVolume(well) {
-            delete well.dataset.volume;
-            well.innerHTML = well.getAttribute('data-well');
+        wellsData.forEach(([wellId, volume]) => {
+          const well = document.querySelector(`[data-well="${wellId}"]`);
+          if (well) {
+            well.classList.add("selected");
+            setVolume(well, volume, true);
+            selectedWells.push(wellId);
+          }
+        });
+
+        selectedWellsElement.textContent = getSelectedWellsText();
+      }
+
+      // Save presets to localStorage
+      function savePreset(presetNumber) {
+        const presetKey = `preset${presetNumber}`;
+        const existingData = localStorage.getItem(presetKey);
+
+        if (
+          existingData &&
+          !confirm(`Preset ${presetNumber} already has data. Overwrite?`)
+        ) {
+          return;
         }
 
-        function getSelectedWellsText() {
-            const selectedData = selectedWells.map((wellId) => {
-                const well = document.querySelector(`[data-well="${wellId}"]`);
-                const volume = well.dataset.volume || '0';
-                return `${wellId} (${volume} µL)`;
-            });
-            return selectedData.join(', ');
+        const wellsData = [];
+
+        selectedWells.forEach((wellId) => {
+          const well = document.querySelector(`[data-well="${wellId}"]`);
+          const volume = well.dataset.volume || "0";
+          wellsData.push([wellId, volume]);
+        });
+
+        localStorage.setItem(presetKey, JSON.stringify(wellsData));
+        alert(`Preset ${presetNumber} saved.`);
+      }
+
+      // Add event listeners for preset buttons
+      presetButtons.forEach((presetButton) => {
+        presetButton.addEventListener("click", (event) => {
+          const presetNumber = event.target.dataset.preset;
+          loadPreset(presetNumber);
+        });
+      });
+
+      // Add event listener for 'Save Preset' button
+      savePresetButton.addEventListener("click", (event) => {
+        const presetNumber = prompt("Enter the preset number (1-8) to save:");
+        if (isNaN(presetNumber) || presetNumber < 1 || presetNumber > 8) {
+          alert("Invalid preset number!");
+          return;
         }
 
-        function sendMessage(command, value) {
-            const socket = new WebSocket('ws://192.168.0.183:81');
-            socket.addEventListener('open', (event) => {
-                console.log('WebSocket connection opened:', event);
-                socket.send(`${command}:${value}`);
-                socket.close();
-            });
+        savePreset(presetNumber);
+      });
+
+      function clearAll() {
+  wells.forEach((well) => {
+    if (well.classList.contains("selected")) {
+      well.classList.remove("selected");
+      clearVolume(well);
+    }
+    if (well.classList.contains("highlighted")) {
+      well.classList.remove("highlighted");
+      clearVolume(well);
+    }
+  });
+  selectedWells.length = 0;
+  selectedWellsElement.textContent = "";
+}
+
+
+      function toggleWell(well) {
+        const isSelected = well.classList.toggle("highlighted");
+        const wellId = well.getAttribute("data-well");
+
+        if (isSelected && !well.hasAttribute("data-volume")) {
+          // Find the index where the wellId should be inserted
+          const index = selectedWells.findIndex(
+            (element) => compareWellIds(wellId, element) < 0
+          );
+
+          if (index === -1) {
+            // If the wellId is greater than all elements in the array, push it to the end
+            selectedWells.push(wellId);
+          } else {
+            // Otherwise, insert it at the correct index
+            selectedWells.splice(index, 0, wellId);
+          }
+          selectedWellsElement.textContent = getSelectedWellsText();
+        } else if (!isSelected) {
+          const index = selectedWells.indexOf(wellId);
+          if (index !== -1) {
+            selectedWells.splice(index, 1);
+            selectedWellsElement.textContent = getSelectedWellsText();
+          }
         }
+      }
+
+      function compareWellIds(a, b) {
+        // Compare the row letters
+        const rowComparison = a[0].localeCompare(b[0]);
+        if (rowComparison !== 0) {
+          return rowComparison;
+        }
+
+        // Compare the column numbers
+        const colA = parseInt(a.slice(1));
+        const colB = parseInt(b.slice(1));
+        return colA - colB;
+      }
+
+      function setVolume(well, volume, force = false) {
+        if (well.classList.contains("highlighted") || force) {
+          well.dataset.volume = volume;
+          well.innerHTML = `${well.getAttribute(
+            "data-well"
+          )}<br><span class="volume-text">(${volume} µL)</span>`;
+          if (!force) well.classList.replace("highlighted", "selected");
+        }
+      }
+
+      function clearVolume(well) {
+        delete well.dataset.volume;
+        well.innerHTML = well.getAttribute("data-well");
+      }
+
+      function getSelectedWellsText() {
+        const selectedData = selectedWells.map((wellId) => {
+          const well = document.querySelector(`[data-well="${wellId}"]`);
+          const volume = well.dataset.volume || "0";
+          return `${wellId} (${volume} µL)`;
+        });
+        return selectedData.join(", ");
+      }
+
+      function sendMessage(command, value) {
+        // socket.addEventListener("open", (event) => {
+        //   console.log("WebSocket connection opened:", event);
+        socket.send(`${command}:${value}`);
+        console.log("Send");
+        // socket.close();
+        startDispensingButton.disabled = true;
+        // });
+      }
     </script>
-</body>
-
+  </body>
 </html>

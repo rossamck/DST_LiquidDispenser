@@ -1,23 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useCallback } from 'react';
+import Layout from './Lavout/Layout';
 
 function App() {
+  const [action, setAction] = useState(null);
+  const [actionVersion, setActionVersion] = useState(0);
+
+  const handleButtonClick = useCallback((newAction) => {
+    setAction(newAction);
+    setActionVersion((prevVersion) => prevVersion + 1);
+    console.log(`Button ${newAction} clicked`);
+    console.log(`actionVersion: ${actionVersion + 1}`);
+  }, [actionVersion]);
+
+  const resetAction = useCallback(() => {
+    setAction(null);
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Layout
+        onButtonClick={handleButtonClick}
+        currentAction={action}
+        actionVersion={actionVersion}
+        onActionComplete={resetAction}
+      />
     </div>
   );
 }

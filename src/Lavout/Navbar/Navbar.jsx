@@ -1,3 +1,5 @@
+//Navbar.jsx
+
 // import {
 //     FaSearch,
 //     FaHashtag,
@@ -24,7 +26,7 @@ const Navbar = ( {sidebarOpen, setSidebarOpen} ) => {
 
 
 
-const Title = () => <h5 className='title-text'>Liquid Dispenser Client</h5>;
+const Title = () => <h5 className='title-text '>Liquid Dispenser Client</h5>;
 
 
 export default Navbar;

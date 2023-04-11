@@ -1,141 +1,193 @@
+// WellPlate.jsx 
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const Well = ({ selected, highlighted, label, onMouseDown, onMouseEnter }) => {
-    let backgroundColor = 'bg-white';
-    if (selected) {
-      backgroundColor = 'bg-green-500';
-    } else if (highlighted) {
-      backgroundColor = 'bg-blue-200';
+const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter }) => {
+  let backgroundColor = 'bg-white';
+  if (selected) {
+    backgroundColor = 'bg-green-500';
+  } else if (highlighted) {
+    backgroundColor = 'bg-blue-200';
+  }
+
+  return (
+    <div
+      className={`w-10 h-10 border border-gray-300 flex flex-col justify-center items-center m-0 select-none ${backgroundColor}`}
+      onMouseDown={onMouseDown}
+      onMouseEnter={onMouseEnter}
+    >
+      {label}
+      {volume && <span className="text-xs">{volume} μL</span>}
+    </div>
+  );
+};
+
+const WellPlate = ({
+  currentAction,
+  actionVersion,
+  onActionComplete,
+  actionVolume,
+  allSelectedWells,
+  setAllSelectedWells,
+}) => {
+
+  const [highlightedWells, setHighlightedWells] = useState(new Set());
+  const [isMouseDown, setIsMouseDown] = useState(false);
+
+  const [selectedWells, setSelectedWells] = useState(new Set());
+  // const [selectedWellLabels, setSelectedWellLabels] = useState([]);
+  const [selectedVolumes, setSelectedVolumes] = useState({});
+
+  const selectWells = useCallback(() => {
+    if (!actionVolume) {
+      alert('Please enter a volume before selecting wells.');
+      return;
     }
   
-    return (
-      <div
-        className={`w-10 h-10 border border-gray-300 flex justify-center items-center m-0 select-none ${backgroundColor}`}
-        onMouseDown={onMouseDown}
-        onMouseEnter={onMouseEnter}
-      >
-        {label}
-      </div>
-    );
-  };
-
-  const WellPlate = ({ currentAction, actionVersion, onActionComplete }) => {
-    const [highlightedWells, setHighlightedWells] = useState(new Set());
-    const [selectedWells, setSelectedWells] = useState(new Set());
-    const [isMouseDown, setIsMouseDown] = useState(false);
-    const [selectedWellLabels, setSelectedWellLabels] = useState([]);
+    setSelectedWells((prev) => {
+      const newSelected = new Set(prev);
+      highlightedWells.forEach((well) => newSelected.add(well));
+      return newSelected;
+    });
   
-    const selectWells = useCallback(() => {
-      console.log("Test");
-      setSelectedWells((prev) => {
-        const newSelected = new Set(prev);
-        highlightedWells.forEach((well) => newSelected.add(well));
-        return newSelected;
-      });
+    setSelectedVolumes((prev) => {
+      const newSelectedVolumes = { ...prev };
+      highlightedWells.forEach((well) => (newSelectedVolumes[well] = actionVolume));
+      return newSelectedVolumes;
+    });
   
-      const allSelectedWells = Array.from(selectedWells).concat(Array.from(highlightedWells));
-  
-      const sortedSelectedWells = allSelectedWells.sort((a, b) => {
-        const rowA = a.charAt(0);
-        const rowB = b.charAt(0);
-        const colA = parseInt(a.slice(1), 10);
-        const colB = parseInt(b.slice(1), 10);
-  
+    setAllSelectedWells((prev) => {
+      const newSelectedWells = Array.from(highlightedWells).map((well) => ({
+        wellId: well,
+        volume: selectedVolumes[well] || actionVolume,
+      }));
+    
+      const mergedWells = [...prev, ...newSelectedWells];
+      const deduplicatedWells = mergedWells.filter(
+        (well, index, self) =>
+          index === self.findIndex((w) => w.wellId === well.wellId)
+      );
+    
+      // Sort the deduplicatedWells array alphanumerically
+      const sortedWells = deduplicatedWells.sort((a, b) => {
+        const rowA = a.wellId.charAt(0);
+        const rowB = b.wellId.charAt(0);
+        const colA = parseInt(a.wellId.slice(1), 10);
+        const colB = parseInt(b.wellId.slice(1), 10);
+    
         if (rowA === rowB) {
           return colA - colB;
         }
         return rowA.localeCompare(rowB);
       });
+    
+      return sortedWells;
+    });
+    
   
-      setSelectedWellLabels(sortedSelectedWells);
-      setHighlightedWells(new Set());
-    }, [highlightedWells, selectedWells]);
+    setHighlightedWells(new Set());
+  }, [actionVolume, highlightedWells, selectedVolumes, setAllSelectedWells]);
   
-    const clearWells = useCallback(() => {
-      setSelectedWells(new Set());
-      setSelectedWellLabels([]);
-      setHighlightedWells(new Set());
-    }, []);
-  
-    useEffect(() => {
-        if (currentAction) {
-          switch (currentAction) {
-            case 'selectWellsButton':
-              console.log('Executing selectwells tasks');
-              selectWells();
-              break;
-            case 'clearWellsButton':
-              console.log('Executing clearWellsButton tasks');
-              clearWells();
-              break;
-            case 'action3':
-              console.log('Executing action3 tasks');
-              break;
-            default:
-              console.log('Unknown action:', currentAction);
-          }
-          onActionComplete();
-        }
-      }, [currentAction, actionVersion, selectWells, clearWells, onActionComplete]);
-      
-  
-    const onMouseDown = (label) => {
-      setIsMouseDown(true);
-      if (!selectedWells.has(label)) {
-        setHighlightedWells((prev) => {
-          const newHighlighted = new Set(prev);
-          newHighlighted.add(label);
-          return newHighlighted;
-        });
+
+
+  const clearWells = useCallback(() => {
+    setSelectedWells(new Set());
+    setAllSelectedWells([]);
+
+    setHighlightedWells(new Set());
+    setSelectedVolumes({});
+  }, [setAllSelectedWells]);
+
+  useEffect(() => {
+    if (currentAction) {
+      switch (currentAction) {
+        case 'selectWellsButton':
+          selectWells();
+          break;
+        case 'clearWellsButton':
+          clearWells();
+          break;
+        case 'action3':
+          console.log('Executing action3 tasks');
+          break;
+        default:
+          console.log('Unknown action:', currentAction);
       }
-    };
-  
-    const onMouseEnter = (label) => {
-      if (isMouseDown && !selectedWells.has(label)) {
-        setHighlightedWells((prev) => {
-          const newHighlighted = new Set(prev);
-          newHighlighted.add(label);
-          return newHighlighted;
-        });
+      onActionComplete();
+    }
+  }, [currentAction, actionVersion, selectWells, clearWells, onActionComplete]);
+
+const onMouseDown = (label) => {
+  setIsMouseDown(true);
+  if (!selectedWells.has(label)) {
+    setHighlightedWells((prev) => {
+      const newHighlighted = new Set(prev);
+      if (newHighlighted.has(label)) {
+        newHighlighted.delete(label); // Unhighlight the well if it's already highlighted
+      } else {
+        newHighlighted.add(label); // Highlight the well if it's not highlighted
       }
-    };
-  
-    const onMouseUp = () => {
-      setIsMouseDown(false);
-    };
-  
-    const rows = 'ABCDEFGH';
-    const cols = 12;
-  
-    return (
-      <div
-        className="flex flex-col items-center"
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        <div className="grid grid-cols-12 gap-0">
-          {rows.split('').map((row) =>
-            Array.from({ length: cols }, (_, i) => {
-              const label = `${row}${i + 1}`;
-              const selected = selectedWells.has(label);
-              const highlighted = highlightedWells.has(label);
-              return (
-                <Well
-                  key={label}
-                  label={label}
-                  selected={selected}
-                  highlighted={highlighted}
-                  onMouseDown={() => onMouseDown(label)}
-                  onMouseEnter={() => onMouseEnter(label)}
-                />
-              );
-            }),
-          )}
-        </div>
-        <div>
-          <p>Selected
-   wells: {selectedWellLabels.join(', ')}</p>
+      return newHighlighted;
+    });
+  }
+};
+
+
+  const onMouseEnter = (label) => {
+    if (isMouseDown && !selectedWells.has(label)) {
+      setHighlightedWells((prev) => {
+        const newHighlighted = new Set(prev);
+        newHighlighted.add(label);
+        return newHighlighted;
+      });
+    }
+  };
+
+  const onMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  const rows = 'ABCDEFGH';
+  const cols = 12;
+
+  return (
+    <div
+      className="flex flex-col items-center"
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+    >
+      <div className="grid grid-cols-12 gap-0">
+        {rows.split('').map((row) =>
+          Array.from({ length: cols }, (_, i) => {
+            const label = `${row}${i + 1}`;
+            const selected = selectedWells.has(label);
+            const highlighted = highlightedWells.has(label);
+            const volume = selectedVolumes[label];
+            return (
+              <Well
+                key={label}
+                label={label}
+                selected={selected}
+                highlighted={highlighted}
+                volume={volume}
+                onMouseDown={() => onMouseDown(label)}
+                onMouseEnter={() => onMouseEnter(label)}
+              />
+            );
+          }),
+        )}
+      </div>
+      <div>
+      <div>
+  <p>
+    Selected wells:{" "}
+    {allSelectedWells
+      .map((well) => `${well.wellId} (${well.volume} μL)`)
+      .join(", ")}
+  </p>
+</div>
+
+
       </div>
     </div>
   );

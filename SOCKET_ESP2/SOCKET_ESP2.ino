@@ -2,6 +2,8 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <WebSocketsServer.h>
+#include <ArduinoJson.h>
+
 
 const char* ssid = "VM6701124_2G";
 const char* password = "fnDdpj9q6qdt";
@@ -39,29 +41,48 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         // updateClients(); // Update all clients with new LED state
 
       } else if (message.startsWith("selectWells:")) {
-        String wellsData = message.substring(6);
+        String wellsData = message.substring(12);
         Serial.println("Processing wells data: " + wellsData);
-        int numWells = 0;
-        // Parse the JSON array to count the number of wells
-        for (int i = 0; i < wellsData.length(); i++) {
-          if (wellsData.charAt(i) == '[') {
-            numWells++;
-          }
-        }
-        numWells = numWells - 1; //account for nested array
-        Serial.print("Number of selected wells: ");
-        Serial.println(numWells);
-        delay(2000);  // Simulate processing time
-        // update coordinates list and send to nano
-        webSocket.broadcastTXT("ready");
 
+        // Prepare the JSON buffer
+        DynamicJsonDocument doc(2048);
+
+        // Parse the JSON array
+        DeserializationError error = deserializeJson(doc, wellsData);
+        if (error) {
+          Serial.print(F("deserializeJson() failed: "));
+          Serial.println(error.c_str());
+          return;
+        }
+
+        JsonArray selectedWells = doc.as<JsonArray>();
+
+        // Print the number of selected wells
+        Serial.print("Number of selected wells: ");
+        Serial.println(selectedWells.size());
+        delay(2000);  // Simulate processing time
+
+        // Iterate through the selected wells and parse the well ID and volume
+        for (JsonObject elem : selectedWells) {
+          const char* wellId = elem["wellId"];
+          float volume = elem["volume"];
+          Serial.print("Well ID: ");
+          Serial.print(wellId);
+          Serial.print(", Volume: ");
+          Serial.println(volume, 2);
+        }
+
+        // Update coordinates list and send to nano
+        webSocket.broadcastTXT("ready");
       } else if (message == "startDispensing") {
         Serial.println("Starting dispensing");
         // Add dispensing code here
         delay(1000);
         Serial.println("Dispensing finished");
         webSocket.broadcastTXT("dispensefinished");
-        
+
+      } else if (message == "ping") {
+        webSocket.sendTXT(num, "pong");
       }
       break;
   }
@@ -88,6 +109,13 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   server.begin();
+  server.on("/socket.io/", HTTP_OPTIONS, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Access-Control-Allow-Methods", "GET, POST");
+    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    server.send(200, "text/plain", "");
+  });
+
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }

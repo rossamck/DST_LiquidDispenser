@@ -3,7 +3,7 @@
 import React from 'react';
 import WellPlate from '../../components/WellPlate/WellPlate';
 
-const Content = ({ sidebarOpen, currentAction, actionVersion, onActionComplete, actionVolume, allSelectedWells, setAllSelectedWells }) => {
+const Content = ({ sidebarOpen, currentAction, actionVersion, onActionComplete, actionVolume, allSelectedWells, setAllSelectedWells, onWellPlateUpdate }) => {
     const contentStyle = {
         marginLeft: sidebarOpen ? '16rem' : '0',
         width: sidebarOpen ? 'calc(100% - 16rem)' : '100%',
@@ -27,6 +27,7 @@ const Content = ({ sidebarOpen, currentAction, actionVersion, onActionComplete, 
               onActionComplete={onActionComplete}
               allSelectedWells={allSelectedWells}
               setAllSelectedWells={setAllSelectedWells}
+              onWellPlateUpdate={onWellPlateUpdate}
             />
             {/* ... */}
         </div>

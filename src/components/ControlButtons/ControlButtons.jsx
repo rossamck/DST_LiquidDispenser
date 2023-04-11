@@ -1,5 +1,3 @@
-// ControlButtons.jsx
-
 import React, { useState } from 'react';
 
 const ControlButtons = ({ onButtonClick, onSelectWells, onSendWells }) => {
@@ -12,7 +10,6 @@ const ControlButtons = ({ onButtonClick, onSelectWells, onSendWells }) => {
     }
     onSelectWells(volume);
   };
-
 
   const onSendWellsClick = () => {
     onSendWells();
@@ -47,15 +44,11 @@ const ControlButtons = ({ onButtonClick, onSelectWells, onSendWells }) => {
   );
 };
 
-
 export default ControlButtons;
-
-
-
 
 const NumberInput = ({ value, onChange }) => {
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <input
         type="number"
         step="0.1"

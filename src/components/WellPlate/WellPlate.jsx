@@ -29,6 +29,8 @@ const WellPlate = ({
   actionVolume,
   allSelectedWells,
   setAllSelectedWells,
+  onWellPlateUpdate
+  
 }) => {
 
   const [highlightedWells, setHighlightedWells] = useState(new Set());
@@ -98,6 +100,25 @@ const WellPlate = ({
     setSelectedVolumes({});
   }, [setAllSelectedWells]);
 
+
+    // Add this useEffect block
+    useEffect(() => {
+      onWellPlateUpdate(selectedWells);
+    }, [selectedWells, onWellPlateUpdate]);
+
+    useEffect(() => {
+      const newSelectedWells = new Set();
+      const newSelectedVolumes = {};
+    
+      allSelectedWells.forEach((well) => {
+        newSelectedWells.add(well.wellId);
+        newSelectedVolumes[well.wellId] = well.volume;
+      });
+    
+      setSelectedWells(newSelectedWells);
+      setSelectedVolumes(newSelectedVolumes);
+    }, [allSelectedWells]);
+    
   useEffect(() => {
     if (currentAction) {
       switch (currentAction) {

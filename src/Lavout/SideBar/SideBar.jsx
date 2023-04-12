@@ -1,6 +1,6 @@
 // Sidebar.jsx
 import React from "react";
-import { GiHamburgerMenu } from "react-icons/gi";
+import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
 
 function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const toggleSidebar = () => {
@@ -32,19 +32,17 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </button>
       </div>
 
-      <div id="main">
+      <div className="fixed top-0 left-1 mt-2 mb-2 z-20">
         <button
-          className="bg-black text-white py-2 px-4 fixed top-0 left-0 mt-2 mb-2 z-20 flex items-center justify-center"
+          className="bg-black text-white py-2 px-4 flex items-center justify-center"
           onClick={toggleSidebar}
           style={{
             width: "3rem",
             height: "3rem",
             borderRadius: "50%",
-            left: sidebarOpen ? "calc(4rem - 1.5rem)" : "calc(2rem - 1.5rem)",
-            transition: "left 500ms ease",
           }}
         >
-          <GiHamburgerMenu size={24} />
+          <BurgerMenu open={sidebarOpen} />
         </button>
       </div>
     </>

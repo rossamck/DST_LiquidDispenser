@@ -1,3 +1,5 @@
+// Sidebar.jsx
+
 import React from "react";
 
 function Sidebar({ sidebarOpen, setSidebarOpen }) {

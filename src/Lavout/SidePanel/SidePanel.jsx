@@ -14,6 +14,9 @@ const SidePanel = ({
   clearAllPresets,
   loadPreset,
   presets,
+  startDispensingEnabled,
+  setStartDispensingEnabled,
+  sendSelectionEnabled,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -30,6 +33,9 @@ const SidePanel = ({
             onButtonClick={onButtonClick}
             onSelectWells={(volume) => onButtonClick("selectWellsButton", volume)}
             onSendWells={onSendWells}
+            startDispensingEnabled={startDispensingEnabled}
+            setStartDispensingEnabled={setStartDispensingEnabled}
+            sendSelectionEnabled={sendSelectionEnabled}
           />
         </div>
       ),

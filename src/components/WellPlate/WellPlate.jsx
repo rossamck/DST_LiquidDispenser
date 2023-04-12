@@ -5,14 +5,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter }) => {
   let backgroundColor = 'bg-white';
   if (selected) {
-    backgroundColor = 'bg-green-500';
+    backgroundColor = 'bg-green-300';
   } else if (highlighted) {
     backgroundColor = 'bg-blue-200';
   }
 
   return (
     <div
-      className={`w-10 h-10 border border-gray-300 flex flex-col justify-center items-center m-0 select-none ${backgroundColor}`}
+      className={`w-12 h-12 border border-gray-300 flex flex-col justify-center items-center m-0 select-none rounded-full shadow ${backgroundColor}`}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
     >
@@ -29,7 +29,9 @@ const WellPlate = ({
   actionVolume,
   allSelectedWells,
   setAllSelectedWells,
-  onWellPlateUpdate
+  onWellPlateUpdate,
+  setCompletedWells,
+  setDispensingWell,
   
 }) => {
 
@@ -98,7 +100,9 @@ const WellPlate = ({
 
     setHighlightedWells(new Set());
     setSelectedVolumes({});
-  }, [setAllSelectedWells]);
+    setCompletedWells([]);
+    setDispensingWell(null);
+  }, [setAllSelectedWells, setCompletedWells, setDispensingWell]);
 
 
     // Add this useEffect block
@@ -173,7 +177,7 @@ const onMouseDown = (label) => {
 
   return (
     <div
-      className="flex flex-col items-center"
+      className="flex flex-col items-center font-sans"
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
     >

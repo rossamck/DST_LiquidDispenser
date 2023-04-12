@@ -33,7 +33,7 @@ jobs:
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
           source: "build/"
           target: "/home/ross/Documents/git/DST_LiquidDispenser"
-      
+            
       - name: Start the app
         uses: appleboy/ssh-action@master
         with:
@@ -41,4 +41,11 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-          script: "/home/ross/Documents/git/DST_LiquidDispenser/start-app.sh"
+          script: |
+            cd /home/ross/Documents/git/DST_LiquidDispenser
+            server_pid=$(pgrep -f "serve -s build/")
+            if [ ! -z "$server_pid" ]; then
+              kill "$server_pid"
+            fi
+            serve -s build/ &
+

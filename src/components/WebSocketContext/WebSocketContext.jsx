@@ -23,7 +23,7 @@ const WebSocketProvider = ({ children, handleMessage }) => {
   }, [socket]);
 
   const connectWebSocket = useCallback(() => {
-    const newSocket = new WebSocket('ws://192.168.0.165:81');
+    const newSocket = new WebSocket('ws://192.168.0.183:81');
     newSocket.onopen = () => {
       setStatus('connected');
       newSocket.send('ping');

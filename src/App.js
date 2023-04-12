@@ -16,6 +16,9 @@ function App() {
 
 
 
+  React.useEffect(() => {
+    document.title = "Liquid Dispenser Client";
+  }, []);
 
   const handleButtonClick = useCallback((newAction, volume) => {
     setAction(newAction);

@@ -127,7 +127,8 @@ const Layout = ({
           </div>
         </div>
       </div>
-      <StatusIndicator />
+      <StatusIndicator 
+        sidebarOpen={sidebarOpen}/>
     </div>
   );
 };

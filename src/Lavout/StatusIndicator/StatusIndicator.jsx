@@ -1,10 +1,9 @@
 // StatusIndicator.jsx
-
 import React, { useContext } from 'react';
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineExclamationCircle } from 'react-icons/ai';
 import { WebSocketContext } from '../../components/WebSocketContext/WebSocketContext';
 
-const StatusIndicator = () => {
+const StatusIndicator = ({ sidebarOpen }) => {
     const { status } = useContext(WebSocketContext);
 
     const getStatusIndicator = () => {
@@ -36,7 +35,14 @@ const StatusIndicator = () => {
     };
 
     return (
-        <div className="bg-gray-900 p-2 h-8 w-full fixed bottom-0 left-0 flex items-center justify-left">
+        <div
+            className="bg-gray-900 p-2 h-8 w-full fixed bottom-0 left-0 flex items-center justify-left"
+            style={{
+                marginLeft: sidebarOpen ? "16rem" : "0",
+                paddingLeft: sidebarOpen ? "1rem" : "5rem", // Adjust the padding-left based on the sidebarOpen prop
+                transition: "margin-left 500ms ease, padding-left 500ms ease",
+            }}
+        >
             {getStatusIndicator()}
         </div>
     );

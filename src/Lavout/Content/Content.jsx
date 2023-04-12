@@ -26,7 +26,7 @@ const Content = ({
   return (
     <div
       id="content"
-      className="col-span-9 bg-blue-300 h-[calc(100vh-3.75rem)] p-4"
+      className="col-span-9 bg-blue-900 h-[calc(100vh-3.75rem)] p-4"
       style={contentStyle}
     >
       {/* ... */}

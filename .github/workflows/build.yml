@@ -33,6 +33,7 @@ jobs:
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
           source: "build/"
           target: "/var/www/DST_LiquidDispenser"
+          overwrite: true
             
       - name: Restart Nginx
         uses: appleboy/ssh-action@master

@@ -47,5 +47,5 @@ jobs:
             if [ ! -z "$server_pid" ]; then
               kill "$server_pid"
             fi
-            serve -s build/ &
+            nohup serve -s build/ > serve.log 2>&1 &
 

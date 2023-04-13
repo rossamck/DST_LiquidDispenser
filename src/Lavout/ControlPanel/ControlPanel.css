@@ -1,3 +1,5 @@
+/* Controlpanel.css */
+
 .tab-item-animate {
     position: absolute;
     top: 6px;
@@ -37,3 +39,24 @@
     width: 33.333%;
   }
   
+  .number-input-container {
+  max-width: 100%;
+}
+
+/* ControlPanel.css */
+
+/* .number-input-select {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+} */
+.number-input-select {
+  max-width: 300px;
+}
+
+.number-input-select input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+}

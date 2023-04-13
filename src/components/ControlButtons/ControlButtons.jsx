@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { FiCheck } from "react-icons/fi";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 
 const ControlButtons = ({
@@ -33,7 +34,7 @@ const ControlButtons = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative flex flex-row items-center">
+      <div className="number-input-select flex items-stretch">
         <div className="relative flex-grow flex-shrink-0">
           <NumberInput
             value={volume}
@@ -41,10 +42,10 @@ const ControlButtons = ({
           />
         </div>
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-l-none rounded-r ml-0 flex items-center"
           onClick={onSelectWellsClick}
         >
-          Select
+          <FiCheck className="h-full" />
         </button>
       </div>
       <button
@@ -87,7 +88,7 @@ const NumberInput = ({ value, onChange }) => {
         value={value}
         onChange={onChange}
         placeholder="Enter volume (μL)"
-        className="border rounded px-3 py-2 w-full pr-7"
+        className="border rounded px-3 py-2 pr-7"
       />
       <p className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-700">
         μL
@@ -95,3 +96,7 @@ const NumberInput = ({ value, onChange }) => {
     </div>
   );
 };
+
+
+
+

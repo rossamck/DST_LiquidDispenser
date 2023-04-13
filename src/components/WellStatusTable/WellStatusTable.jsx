@@ -4,7 +4,9 @@
 import React, { useRef, useEffect } from 'react';
 
 
+
 const WellStatusTable = ({ selectedWells, dispensingWell, completedWells }) => {
+  
   const getStatus = (well) => {
     if (completedWells.includes(well.wellId)) {
       return (
@@ -37,7 +39,9 @@ useEffect(() => {
 }, [dispensingWell, selectedWells, completedWells]);
 
 
+
   return (
+    <div className='w-full h-full overflow-x-hidden overflow-y-auto'>
     <table className="w-full table-auto border-collapse border border-gray-300 rounded-lg overflow-hidden">
 <thead>
   <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
@@ -47,7 +51,7 @@ useEffect(() => {
   </tr>
 </thead>
 
-      <tbody className="text-gray-600 text-sm font-light">
+<tbody className="table-tbody-scroll text-gray-600 text-sm font-light ">
       {selectedWells.map((well, index) => (
   <tr
     key={well.wellId}
@@ -62,7 +66,9 @@ useEffect(() => {
 
     </tbody>
     </table>
+    </div>
   );
 };
 
 export default WellStatusTable;
+

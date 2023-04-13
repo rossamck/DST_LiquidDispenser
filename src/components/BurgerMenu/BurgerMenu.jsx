@@ -6,7 +6,7 @@ function BurgerMenu({ open }) {
         <div className="relative w-7 h-7">
           <span
             className={`absolute left-0 w-full h-0.5 bg-white rounded transition-all duration-300 ${
-              open ? "top-3 w-0 left-1/2" : "top-0"
+              open ? "top-3 w-0 opacity-0" : "top-0"
             }`}
           ></span>
           <span

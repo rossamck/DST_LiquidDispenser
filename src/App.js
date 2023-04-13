@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Layout from './Lavout/Layout';
 import { WebSocketProvider } from './components/WebSocketContext/WebSocketContext';
+import './components/scrollbar/scrollbar.css'
 
 function App() {
   const [action, setAction] = useState(null);

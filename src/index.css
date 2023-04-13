@@ -3,3 +3,19 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* body,
+html {
+  height: 100%;
+  overflow: hidden;
+} */
+
+
+/* Add this to your index.css file */
+.custom-info-panel {
+  margin-left: 4rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar.minimized .custom-info-panel {
+  margin-left: 1rem;
+}

@@ -1,4 +1,3 @@
-// Sidebar.jsx
 import React from "react";
 import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
 
@@ -18,21 +17,27 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <h3 className={`text-white text-center mb-4 ${sidebarOpen ? "block" : "hidden"}`}>
           Sidebar
         </h3>
-        <button className={`text-gray-400 block py-2 px-4 hover:text-white ${sidebarOpen ? "block" : "hidden"}`}>
-          About
-        </button>
-        <button className={`text-gray-400 block py-2 px-4 hover:text-white ${sidebarOpen ? "block" : "hidden"}`}>
-          Services
-        </button>
-        <button className={`text-gray-400 block py-2 px-4 hover:text-white ${sidebarOpen ? "block" : "hidden"}`}>
-          Clients
-        </button>
-        <button className={`text-gray-400 block py-2 px-4 hover:text-white ${sidebarOpen ? "block" : "hidden"}`}>
-          Contact
-        </button>
+        <div
+          className={`absolute left-4 space-y-6 transition-transform duration-500 ${
+            sidebarOpen ? "opacity-100 transform-none" : "opacity-0 -translate-x-4"
+          }`}
+        >
+          <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
+            About
+          </button>
+          <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
+            Services
+          </button>
+          <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
+            Clients
+          </button>
+          <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
+            Contact
+          </button>
+        </div>
       </div>
 
-      <div className="fixed top-0 left-1 mt-2 mb-2 z-20">
+      <div className="fixed top-0 left-1.5 mt-2 mb-2 z-20">
         <button
           className="bg-black text-white py-2 px-4 flex items-center justify-center"
           onClick={toggleSidebar}

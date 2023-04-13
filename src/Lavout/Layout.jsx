@@ -4,8 +4,8 @@ import React, { useState, useContext } from "react";
 import Navbar from "./Navbar/Navbar";
 import SidePanel from "./SidePanel/SidePanel";
 import Content from "./Content/Content";
-import InfoPanel from "./InfoPanel/InfoPanel";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
+import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 
 const Layout = ({
@@ -87,25 +87,36 @@ const Layout = ({
   //   console.log("test2");
   //   console.log(allSelectedWells);
 
+  // Layout.jsx
+
   return (
-    <div className="relative h-full">
-      <div className="flex flex-col h-full">
+    <div className="relative flex flex-col min-h-screen">
+      <div className="flex flex-col h-[calc(100vh - 3.75rem - 2rem)]">
         <div className="grid grid-cols-12 gap-2 w-full flex-grow bg-gray-950">
           <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-          <Content
-            sidebarOpen={sidebarOpen}
-            currentAction={currentAction}
-            actionVolume={actionVolume}
-            actionVersion={actionVersion}
-            onActionComplete={onActionComplete}
-            allSelectedWells={allSelectedWells}
-            setAllSelectedWells={setAllSelectedWells}
-            onWellPlateUpdate={onWellPlateUpdate}
-            setCompletedWells={setCompletedWells}
-            setDispensingWell={setDispensingWell}
-          />
           <div className="col-span-3">
+            <InfoPanel
+              selectedWells={allSelectedWells}
+              dispensingWell={dispensingWell}
+              completedWells={completedWells}
+            />
+          </div>
+          <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
+            <Content
+              currentAction={currentAction}
+              actionVolume={actionVolume}
+              actionVersion={actionVersion}
+              onActionComplete={onActionComplete}
+              allSelectedWells={allSelectedWells}
+              setAllSelectedWells={setAllSelectedWells}
+              onWellPlateUpdate={onWellPlateUpdate}
+              setCompletedWells={setCompletedWells}
+              setDispensingWell={setDispensingWell}
+            />
+          </div>
+          <div className="col-span-3 flex flex-col h-[calc(100vh-3.75rem)]">
             <SidePanel
+              // Pass all required props
               onButtonClick={onButtonClick}
               onSendWells={onSendWells}
               savePreset={savePreset}
@@ -116,21 +127,17 @@ const Layout = ({
               startDispensingEnabled={startDispensingEnabled}
               setStartDispensingEnabled={setStartDispensingEnabled}
               sendSelectionEnabled={sendSelectionEnabled}
-              
-            />
-
-            <InfoPanel
-              selectedWells={allSelectedWells} 
+              selectedWells={allSelectedWells}
               dispensingWell={dispensingWell}
               completedWells={completedWells}
             />
           </div>
         </div>
       </div>
-      <StatusIndicator 
-        sidebarOpen={sidebarOpen}/>
+      <StatusIndicator sidebarOpen={sidebarOpen} />
     </div>
   );
-};
+  
+}
 
 export default Layout;

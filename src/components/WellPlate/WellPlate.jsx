@@ -204,12 +204,7 @@ const onMouseDown = (label) => {
       </div>
       <div>
       <div>
-  <p>
-    Selected wells:{" "}
-    {allSelectedWells
-      .map((well) => `${well.wellId} (${well.volume} μL)`)
-      .join(", ")}
-  </p>
+
 </div>
 
 

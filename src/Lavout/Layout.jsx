@@ -64,11 +64,15 @@ const Layout = ({
   };
 
   const loadPreset = (index) => {
-    const loadedPreset = presets[index];
-    setAllSelectedWells(loadedPreset);
-    console.log(loadedPreset);
-    onWellPlateUpdate(loadedPreset); // Add this line
+    onButtonClick("clearWellsButton", null).then(() => {
+      const loadedPreset = presets[index];
+      setAllSelectedWells(loadedPreset);
+      console.log(loadedPreset);
+      onWellPlateUpdate(loadedPreset);
+    });
   };
+  
+  
 
   const onWellPlateUpdate = (selectedWells) => {
     // Define the functionality that should be triggered when well plate updates

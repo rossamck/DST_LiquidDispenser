@@ -21,13 +21,18 @@ function App() {
     document.title = "Liquid Dispenser Client";
   }, []);
 
+  
   const handleButtonClick = useCallback((newAction, volume) => {
-    setAction(newAction);
-    setActionVolume(volume); // Add this line
-    setActionVersion((prevVersion) => prevVersion + 1);
-    console.log(`Button ${newAction} clicked`);
-    console.log(`actionVersion: ${actionVersion + 1}`);
+    return new Promise((resolve) => {
+      setAction(newAction);
+      setActionVolume(volume);
+      setActionVersion((prevVersion) => prevVersion + 1);
+      console.log(`Button ${newAction} clicked`);
+      console.log(`actionVersion: ${actionVersion + 1}`);
+      resolve();
+    });
   }, [actionVersion]);
+  
   
 
   const resetAction = useCallback(() => {

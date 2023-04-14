@@ -48,6 +48,7 @@ const ControlPanel = ({
       label: "Presets",
       content: (
         <Presets
+          onButtonClick={onButtonClick}
           presets={presets}
           savePreset={savePreset}
           overwritePreset={overwritePreset}

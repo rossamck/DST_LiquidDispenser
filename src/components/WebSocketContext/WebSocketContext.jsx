@@ -7,6 +7,7 @@ const WebSocketContext = createContext();
 const WebSocketProvider = ({ children, handleMessage }) => {
   const [socket, setSocket] = useState(null);
   const [status, setStatus] = useState('not_connected');
+  const [lastMessageTime, setLastMessageTime] = useState(null);
 
   const sendMessage = useCallback((message) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -49,7 +50,6 @@ const WebSocketProvider = ({ children, handleMessage }) => {
     connectWebSocket();
   }, [connectWebSocket]);
 
-  // Periodically send "ping" messages and check WebSocket connection status
   useEffect(() => {
     const pingInterval = setInterval(() => {
       if (socket && socket.readyState === WebSocket.OPEN) {
@@ -57,17 +57,22 @@ const WebSocketProvider = ({ children, handleMessage }) => {
       }
     }, 5000); // Send "ping" every 5 seconds
 
-    const statusCheck = (event) => {
-      if (event.data === 'pong') {
-        setStatus('connected');
-      } else {
+    const checkTimeout = () => {
+      if (lastMessageTime && Date.now() - lastMessageTime > 6000) { // 10 seconds timeout
         setStatus('not_connected');
+      } else {
+        setStatus('connected');
       }
+    };
+
+    const statusCheck = () => {
+      setLastMessageTime(Date.now());
+      checkTimeout();
     };
 
     if (socket) {
       socket.onmessage = (event) => {
-        statusCheck(event);
+        statusCheck();
         if (handleMessage) {
           handleMessage(event.data);
         }
@@ -79,7 +84,7 @@ const WebSocketProvider = ({ children, handleMessage }) => {
         socket.onmessage = null;
       }
     };
-  }, [socket, sendMessage, handleMessage]);
+  }, [socket, sendMessage, handleMessage, lastMessageTime]);
 
   return (
     <WebSocketContext.Provider value={{ socket, status, sendMessage, onMessage }}>

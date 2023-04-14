@@ -3,11 +3,11 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* body,
+body,
 html {
   height: 100%;
   overflow: hidden;
-} */
+}
 
 
 /* Add this to your index.css file */

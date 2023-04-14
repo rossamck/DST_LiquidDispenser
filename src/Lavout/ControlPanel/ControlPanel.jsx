@@ -92,6 +92,7 @@ const ControlPanel = ({
       </div>
       <div>{tabs[activeTab].content}</div>
     </aside>
+    
   );
 };
 

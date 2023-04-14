@@ -23,16 +23,16 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
           }`}
         >
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
-            About
+            Option 1
           </button>
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
-            Services
+            Option 2
           </button>
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
-            Clients
+            Option 3
           </button>
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
-            Contact
+            Developer Tools
           </button>
         </div>
       </div>

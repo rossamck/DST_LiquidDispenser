@@ -33,7 +33,7 @@ const ControlButtons = ({
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center justify-between h-full">
       <div className="number-input-select flex items-stretch">
         <div className="relative flex-grow flex-shrink-0">
           <NumberInput
@@ -73,6 +73,14 @@ const ControlButtons = ({
       >
         Start Dispensing
       </button>
+      <button
+  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
+  onClick={() => sendMessage("emergencyStop")}
+>
+  STOP
+</button>
+
+
     </div>
   );
 };

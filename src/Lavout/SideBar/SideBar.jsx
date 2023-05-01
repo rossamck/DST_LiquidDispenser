@@ -14,13 +14,15 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
           sidebarOpen ? "w-64" : "w-16"
         }`}
       >
-        <h3 className={`text-white text-center mb-4 ${sidebarOpen ? "block" : "hidden"}`}>
+        <h3 className={`text-white text-center transition-all duration-500 mb-4 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}>
           Sidebar
         </h3>
         <div
-          className={`absolute left-4 space-y-6 transition-transform duration-500 ${
-            sidebarOpen ? "opacity-100 transform-none" : "opacity-0 -translate-x-4"
-          }`}
+className={`absolute left-4 space-y-6 transition-all duration-500 ${
+  sidebarOpen ? "opacity-100 transform-none" : "opacity-0 -translate-x-4"
+}`}
+
+
         >
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
             Option 1
@@ -32,7 +34,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
             Option 3
           </button>
           <button className={`text-gray-400 block py-2 px-4 hover:text-white`}>
-            Developer Tools
+            Dev Tools
           </button>
         </div>
       </div>

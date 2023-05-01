@@ -91,9 +91,9 @@ const ControlPanel = ({
         ></span>
       </div>
       <div>{tabs[activeTab].content}</div>
+      
+
     </aside>
-    
   );
 };
-
 export default ControlPanel;

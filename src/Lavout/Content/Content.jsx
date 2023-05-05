@@ -1,7 +1,8 @@
 // Content.jsx
 
-import React from "react";
+import React, { useState } from 'react';
 import WellPlate from "../../components/WellPlate/WellPlate";
+import LiquidSource from "../../components/LiquidSource/LiquidSource";
 
 const Content = ({
   currentAction,
@@ -14,6 +15,35 @@ const Content = ({
   setCompletedWells,
   setDispensingWell,
 }) => {
+  const WELL_PLATE_WIDTH = '100%';
+  const colourIndexPairs = [
+    { color: "bg-pink-300", index: 1, highlightedColor: "bg-pink-100" },
+    { color: "bg-green-300", index: 2, highlightedColor: "bg-green-100" },
+    { color: "bg-blue-300", index: 3, highlightedColor: "bg-blue-100" },
+    { color: "bg-red-300", index: 4, highlightedColor: "bg-red-100" },
+    { color: "bg-teal-300", index: 5, highlightedColor: "bg-teal-100" },
+    { color: "bg-yellow-300", index: 6, highlightedColor: "bg-yellow-100" },
+    { color: "bg-purple-300", index: 7, highlightedColor: "bg-purple-100" },
+    { color: "bg-orange-300", index: 8, highlightedColor: "bg-orange-100" },
+  ];
+  
+  
+  
+  
+  const [selectedColorIndex, setSelectedColorIndex] = useState(null);
+
+  const handleLiquidSourceSelect = (index) => {
+    const selectedcolourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;
+    setSelectedColorIndex(selectedcolourIndexPair);
+    if (selectedcolourIndexPair !== null) {
+      console.log(`Selected color: ${selectedcolourIndexPair.color}`);
+      console.log(`Selected index: ${selectedcolourIndexPair.index}`);
+    }
+    // Implement the logic to update selected wells with the selected liquid source color
+  }
+
+  
+
   return (
     <div
       className="relative"
@@ -31,10 +61,19 @@ const Content = ({
         onWellPlateUpdate={onWellPlateUpdate}
         setCompletedWells={setCompletedWells}
         setDispensingWell={setDispensingWell}
+        selectedColorIndex={selectedColorIndex}
+        colourIndexPairs={colourIndexPairs}
       />
+      <div className="mt-4">
+        <LiquidSource
+          colourIndexPairs={colourIndexPairs}
+          wellPlateWidth={WELL_PLATE_WIDTH}
+          selectedColorIndex={selectedColorIndex}
+          onSelect={handleLiquidSourceSelect}
+        />
+      </div>
     </div>
   );
 };
-
 
 export default Content;

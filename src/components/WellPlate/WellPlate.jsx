@@ -2,13 +2,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter }) => {
+const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter, sourceIndex, colourIndexPairs }) => {
+  
   let backgroundColor = 'bg-white';
   if (selected) {
-    backgroundColor = 'bg-green-300';
+    const colorObj = colourIndexPairs.find(pair => pair.index === sourceIndex);
+    backgroundColor = colorObj ? `${colorObj.color}` : 'bg-green-300';
   } else if (highlighted) {
-    backgroundColor = 'bg-blue-200';
+    const colorObj = colourIndexPairs.find(pair => pair.index === sourceIndex);
+    backgroundColor = colorObj ? `${colorObj.highlightedColor}` : 'bg-blue-200';
   }
+  
 
   return (
     <div
@@ -22,6 +26,8 @@ const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter 
   );
 };
 
+
+
 const WellPlate = ({
   currentAction,
   actionVersion,
@@ -32,11 +38,14 @@ const WellPlate = ({
   onWellPlateUpdate,
   setCompletedWells,
   setDispensingWell,
+  selectedColorIndex,
+  colourIndexPairs
   
 }) => {
 
   const [highlightedWells, setHighlightedWells] = useState(new Set());
   const [isMouseDown, setIsMouseDown] = useState(false);
+  const [selectedSourceIndices, setSelectedSourceIndices] = useState({});
 
   const [selectedWells, setSelectedWells] = useState(new Set());
   // const [selectedWellLabels, setSelectedWellLabels] = useState([]);
@@ -50,7 +59,15 @@ const WellPlate = ({
   
     setSelectedWells((prev) => {
       const newSelected = new Set(prev);
-      highlightedWells.forEach((well) => newSelected.add(well));
+      highlightedWells.forEach((well) => {
+        newSelected.add(well);
+        if (!selectedSourceIndices[well]) {
+          selectedSourceIndices[well] = selectedColorIndex?.index;
+          setSelectedSourceIndices(selectedSourceIndices); // add this line
+
+        }
+      });
+      
       return newSelected;
     });
   
@@ -64,6 +81,7 @@ const WellPlate = ({
       const newSelectedWells = Array.from(highlightedWells).map((well) => ({
         wellId: well,
         volume: selectedVolumes[well] || actionVolume,
+        sourceIndex: selectedColorIndex?.index, // Add the sourceIndex property
       }));
     
       const mergedWells = [...prev, ...newSelectedWells];
@@ -90,7 +108,7 @@ const WellPlate = ({
     
   
     setHighlightedWells(new Set());
-  }, [actionVolume, highlightedWells, selectedVolumes, setAllSelectedWells]);
+  }, [actionVolume, highlightedWells, selectedVolumes, setAllSelectedWells, selectedColorIndex, selectedSourceIndices]);
   
 
 
@@ -174,6 +192,7 @@ const onMouseDown = (label) => {
 
   const rows = 'ABCDEFGH';
   const cols = 12;
+  
 
   return (
     <div
@@ -188,6 +207,8 @@ const onMouseDown = (label) => {
             const selected = selectedWells.has(label);
             const highlighted = highlightedWells.has(label);
             const volume = selectedVolumes[label];
+            const sourceIndex = selectedSourceIndices[label] || selectedColorIndex?.index;
+
             return (
               <Well
                 key={label}
@@ -197,8 +218,11 @@ const onMouseDown = (label) => {
                 volume={volume}
                 onMouseDown={() => onMouseDown(label)}
                 onMouseEnter={() => onMouseEnter(label)}
+                sourceIndex={sourceIndex}
+                colourIndexPairs={colourIndexPairs}
               />
             );
+            
           }),
         )}
       </div>

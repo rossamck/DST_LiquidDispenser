@@ -2,14 +2,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter, sourceIndex, colourIndexPairs }) => {
-  
+const Well = ({ selected, highlighted, label, volume, onMouseDown, onMouseEnter, colourIndexPairs, allSelectedWells,sourceIndexHighlight }) => {
   let backgroundColor = 'bg-white';
+
+  const wellObj = allSelectedWells.find(well => well.wellId === label);
+  const sourceIndex = wellObj ? wellObj.sourceIndex : null;
+
   if (selected) {
     const colorObj = colourIndexPairs.find(pair => pair.index === sourceIndex);
     backgroundColor = colorObj ? `${colorObj.color}` : 'bg-green-300';
   } else if (highlighted) {
-    const colorObj = colourIndexPairs.find(pair => pair.index === sourceIndex);
+    const colorObj = colourIndexPairs.find(pair => pair.index === sourceIndexHighlight);
     backgroundColor = colorObj ? `${colorObj.highlightedColor}` : 'bg-blue-200';
   }
   
@@ -62,10 +65,9 @@ const WellPlate = ({
       highlightedWells.forEach((well) => {
         newSelected.add(well);
         if (!selectedSourceIndices[well]) {
-          selectedSourceIndices[well] = selectedColorIndex?.index;
-          setSelectedSourceIndices(selectedSourceIndices); // add this line
-
+          setSelectedSourceIndices(prev => ({ ...prev, [well]: selectedColorIndex?.index }));
         }
+        
       });
       
       return newSelected;
@@ -115,12 +117,14 @@ const WellPlate = ({
   const clearWells = useCallback(() => {
     setSelectedWells(new Set());
     setAllSelectedWells([]);
-
+  
     setHighlightedWells(new Set());
     setSelectedVolumes({});
+    setSelectedSourceIndices({}); // Add this line to clear the selectedSourceIndices
     setCompletedWells([]);
     setDispensingWell(null);
   }, [setAllSelectedWells, setCompletedWells, setDispensingWell]);
+  
 
 
     // Add this useEffect block
@@ -207,20 +211,23 @@ const onMouseDown = (label) => {
             const selected = selectedWells.has(label);
             const highlighted = highlightedWells.has(label);
             const volume = selectedVolumes[label];
-            const sourceIndex = selectedSourceIndices[label] || selectedColorIndex?.index;
+            const sourceIndexHighlight = selectedSourceIndices[label] || selectedColorIndex?.index;
+
 
             return (
               <Well
-                key={label}
-                label={label}
-                selected={selected}
-                highlighted={highlighted}
-                volume={volume}
-                onMouseDown={() => onMouseDown(label)}
-                onMouseEnter={() => onMouseEnter(label)}
-                sourceIndex={sourceIndex}
-                colourIndexPairs={colourIndexPairs}
-              />
+              key={label}
+              label={label}
+              selected={selected}
+              highlighted={highlighted}
+              volume={volume}
+              onMouseDown={() => onMouseDown(label)}
+              onMouseEnter={() => onMouseEnter(label)}
+              colourIndexPairs={colourIndexPairs}
+              allSelectedWells={allSelectedWells}
+              sourceIndexHighlight={sourceIndexHighlight}
+            />
+            
             );
             
           }),

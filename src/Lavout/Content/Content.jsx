@@ -30,7 +30,7 @@ const Content = ({
   
   
   
-  const [selectedColorIndex, setSelectedColorIndex] = useState(null);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(colourIndexPairs[0]);
 
   const handleLiquidSourceSelect = (index) => {
     const selectedcolourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;

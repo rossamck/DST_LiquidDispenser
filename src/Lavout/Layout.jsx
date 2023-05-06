@@ -116,6 +116,7 @@ const Layout = ({
               onWellPlateUpdate={onWellPlateUpdate}
               setCompletedWells={setCompletedWells}
               setDispensingWell={setDispensingWell}
+              
             />
           </div>
           <div className="col-span-3 flex flex-col h-[calc(100vh-3.75rem)]">

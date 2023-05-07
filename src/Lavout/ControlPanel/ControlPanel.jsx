@@ -5,6 +5,7 @@ import ControlButtons from "../../components/ControlButtons/ControlButtons";
 import clsx from "clsx";
 import "./ControlPanel.css";
 import Presets from "../../components/Presets/Presets";
+import IPAddressForm from "../../components/IPAddressForm/IPAddressForm";
 
 const ControlPanel = ({
   className,
@@ -61,7 +62,11 @@ const ControlPanel = ({
     
     {
       label: "Options",
-      
+      content: (
+        <div className="mt-4">
+          <IPAddressForm />
+        </div>
+      ),
       margin: "mr-2", // 20px right margin
     },
   ];

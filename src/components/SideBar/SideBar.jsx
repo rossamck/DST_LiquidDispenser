@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
+import SidebarIcons from "./SideBarIcons";
 
 function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout }) {
   const toggleSidebar = (event) => {
@@ -80,6 +81,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout }) {
           </button>
         </div>
       </div>
+      
+      <SidebarIcons sidebarOpen={sidebarOpen} handleButtonClick={handleButtonClick} />
+
 
       <div className="fixed top-0 left-1.5 mt-2 mb-2 z-20">
         <button

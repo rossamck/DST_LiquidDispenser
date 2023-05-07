@@ -32,6 +32,37 @@ std::vector<Well>::iterator currentWell;
 
 Ticker dispenseTicker;
 
+void connectToWiFi() {
+  Serial.println("Connecting to WiFi...");
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void createAccessPoint() {
+  Serial.println("Creating access point...");
+  WiFi.mode(WIFI_AP);
+  IPAddress localIP(192, 168, 4, 1);
+  IPAddress gateway(192, 168, 4, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  WiFi.softAPConfig(localIP, gateway, subnet);
+  WiFi.softAP("ESP8266AP", "password");
+
+  Serial.println("");
+  Serial.println("Access Point created");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.softAPIP());
+}
+
 void handleDispensing();
 
 void updateClients() {
@@ -186,18 +217,9 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, HIGH);
 
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  // Call either connectToWiFi() or createAccessPoint() here based on your requirement
+  // connectToWiFi();
+  createAccessPoint();
 
   server.begin();
   server.on("/socket.io/", HTTP_OPTIONS, []() {

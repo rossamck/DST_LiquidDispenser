@@ -1,7 +1,5 @@
 // Navbar.jsx
-import Sidebar from '../SideBar/SideBar';
-
-const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
+const Navbar = ({ sidebarOpen, }) => {
   const navbarStyle = {
     marginLeft: sidebarOpen ? "16rem" : "4rem",
     width: sidebarOpen ? "calc(100% - 16rem)" : "calc(100% - 4rem)",
@@ -14,7 +12,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
       className="col-span-12 h-[3.75rem] bg-gray-700 px-4 flex items-center"
       style={navbarStyle}
     >
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <Title />
     </div>
   );

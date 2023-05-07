@@ -33,10 +33,11 @@ const WellStatusTable = ({ selectedWells, dispensingWell, completedWells }) => {
               key={well.wellId}
               ref={isDispensing(well) ? dispensingWellRef : null}
               className={`
-                ${index % 2 === 0 ? 'bg-gray-50' : ''}
-                ${isCompleted(well) ? 'bg-green-100' : ''}
-                ${isDispensing(well) && !isCompleted(well) ? 'border-red-500 border-2' : ''}
-              `}
+              ${index % 2 === 0 ? 'bg-gray-50' : ''}
+              ${isCompleted(well) ? 'bg-green-100' : ''}
+              ${isDispensing(well) && !isCompleted(well) ? 'bg-yellow-100' : ''}
+            `}
+            
             >
               <td className="py-2 px-2 border-b border-gray-200">{well.wellId}</td>
               <td className="py-2 px-2 border-b border-gray-200">{well.volume} μL</td>

@@ -5,7 +5,6 @@ import ControlButtons from "../../components/ControlButtons/ControlButtons";
 import clsx from "clsx";
 import "./ControlPanel.css";
 import Presets from "../../components/Presets/Presets";
-import MovementControl from "../../components/MovementControl/MovementControl";
 
 const ControlPanel = ({
   className,
@@ -62,18 +61,7 @@ const ControlPanel = ({
     
     {
       label: "Options",
-      content: (
-        <div className="flex justify-center items-center">
-          <MovementControl // Use the MovementControl component
-            onXUp={() => console.log("X up")}
-            onXDown={() => console.log("X down")}
-            onYUp={() => console.log("Y up")}
-            onYDown={() => console.log("Y down")}
-            onZUp={() => console.log("Z up")}
-            onZDown={() => console.log("Z down")}
-          />
-        </div>
-      ),
+      
       margin: "mr-2", // 20px right margin
     },
   ];

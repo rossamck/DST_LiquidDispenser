@@ -1,14 +1,14 @@
-// Layout.jsx
+// DevLayout.jsx
 
 import React, { useState, useContext } from "react";
 import Navbar from "./Navbar/Navbar";
-import SidePanel from "./SidePanel/SidePanel";
+import SidePanelDev from "./SidePanel/SidePanelDev";
 import Content from "./Content/Content";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
-import InfoPanel from "./InfoPanel/InfoPanel";
+import InfoPanelDev from "./InfoPanel/InfoPanelDev";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 
-const Layout = ({
+const DevLayout = ({
   onButtonClick,
   currentAction,
   actionVersion,
@@ -24,10 +24,16 @@ const Layout = ({
   setCompletedWells,
   sidebarOpen,
   setSidebarOpen,
+  onButtonPressCountsUpdate,
+  onAxesNetValuesUpdate
+
   
 }) => {
   const [allSelectedWells, setAllSelectedWells] = useState([]);
-  const { sendMessage } = useContext(WebSocketContext);
+  const [buttonPressCounts, setButtonPressCounts] = useState([]);
+  const [axesNetValues, setAxesNetValues] = useState([]);
+
+    const { sendMessage } = useContext(WebSocketContext);
 
   //preset stuff (move to own file)
   const [presets, setPresets] = useState(() => {
@@ -93,7 +99,7 @@ const Layout = ({
   //   console.log("test2");
   //   console.log(allSelectedWells);
 
-  // Layout.jsx
+  // DevLayout.jsx
 
   return (
     <div className="relative flex flex-col min-h-screen">
@@ -101,10 +107,10 @@ const Layout = ({
         <div className="grid grid-cols-12 gap-2 w-full flex-grow bg-gray-950">
           <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="col-span-3">
-            <InfoPanel
-              selectedWells={allSelectedWells}
-              dispensingWell={dispensingWell}
-              completedWells={completedWells}
+            <InfoPanelDev
+  buttonPressCounts={buttonPressCounts}
+  axesNetValues={axesNetValues}
+
             />
           </div>
           <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
@@ -122,7 +128,7 @@ const Layout = ({
             />
           </div>
           <div className="col-span-3 flex flex-col h-[calc(100vh-3.75rem)]">
-            <SidePanel
+            <SidePanelDev
               // Pass all required props
               onButtonClick={onButtonClick}
               onSendWells={onSendWells}
@@ -137,6 +143,9 @@ const Layout = ({
               selectedWells={allSelectedWells}
               dispensingWell={dispensingWell}
               completedWells={completedWells}
+              onButtonPressCountsUpdate={setButtonPressCounts}
+              onAxesNetValuesUpdate={setAxesNetValues}
+
             />
           </div>
         </div>
@@ -147,4 +156,4 @@ const Layout = ({
   
 }
 
-export default Layout;
+export default DevLayout;

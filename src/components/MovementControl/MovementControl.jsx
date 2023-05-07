@@ -1,4 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+// MovementContro.jsx
+
+import React, { useState, useEffect, useCallback, useContext } from "react";
+import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
+
 import {
   FiArrowUp,
   FiArrowDown,
@@ -13,8 +17,14 @@ const MovementControl = ({
   onYDown,
   onZUp,
   onZDown,
+  onButtonPressCountsUpdate,
+  onAxesNetValuesUpdate,
 }) => {
+
+  const { sendMessage } = useContext(WebSocketContext);
+
   const [activeButton, setActiveButton] = useState(null);
+  const [customValue, setCustomValue] = useState(1);
 
   // Inside MovementControl component, add these new state variables
   const [buttonPressCounts, setButtonPressCounts] = useState({
@@ -26,12 +36,41 @@ const MovementControl = ({
     pageDown: 0,
   });
 
+  const [axesNetValues, setAxesNetValues] = useState({
+    X: 0,
+    Y: 0,
+    Z: 0,
+  });
+
+  useEffect(() => {
+    onButtonPressCountsUpdate(buttonPressCounts);
+  }, [buttonPressCounts, onButtonPressCountsUpdate]);
+
+  useEffect(() => {
+    onAxesNetValuesUpdate(axesNetValues);
+  }, [axesNetValues, onAxesNetValuesUpdate]);
+
   const incrementButtonPressCount = (buttonName) => {
     setButtonPressCounts((prevCounts) => ({
       ...prevCounts,
       [buttonName]: prevCounts[buttonName] + 1,
     }));
   };
+
+  const updateAxesNetValues = useCallback(
+    (axis, delta) => {
+      setAxesNetValues((prevValues) => {
+        const newValue = prevValues[axis] + delta * customValue;
+        sendMessage(`manualMove:${axis},${newValue}`);
+        return {
+          ...prevValues,
+          [axis]: newValue,
+        };
+      });
+    },
+    [customValue, sendMessage]
+  );
+  
 
   const resetButtonPressCounts = () => {
     setButtonPressCounts({
@@ -44,35 +83,51 @@ const MovementControl = ({
     });
   };
 
+  const resetAxesNetValues = () => {
+    setAxesNetValues({
+      X: 0,
+      Y: 0,
+      Z: 0,
+    });
+  };
+
   const wrappedOnXUp = useCallback(() => {
     onXUp();
     incrementButtonPressCount("right");
-  }, [onXUp]);
+    updateAxesNetValues("X", 1);
+    
+
+  }, [onXUp, updateAxesNetValues,]);
 
   const wrappedOnXDown = useCallback(() => {
     onXDown();
     incrementButtonPressCount("left");
-  }, [onXDown]);
+    updateAxesNetValues("X", -1);
+  }, [onXDown, updateAxesNetValues]);
 
   const wrappedOnYUp = useCallback(() => {
     onYUp();
     incrementButtonPressCount("up");
-  }, [onYUp]);
+    updateAxesNetValues("Y", 1);
+  }, [onYUp, updateAxesNetValues]);
 
   const wrappedOnYDown = useCallback(() => {
     onYDown();
     incrementButtonPressCount("down");
-  }, [onYDown]);
+    updateAxesNetValues("Y", -1);
+  }, [onYDown, updateAxesNetValues]);
 
   const wrappedOnZUp = useCallback(() => {
     onZUp();
     incrementButtonPressCount("pageUp");
-  }, [onZUp]);
+    updateAxesNetValues("Z", 1);
+  }, [onZUp, updateAxesNetValues]);
 
   const wrappedOnZDown = useCallback(() => {
     onZDown();
     incrementButtonPressCount("pageDown");
-  }, [onZDown]);
+    updateAxesNetValues("Z", -1);
+  }, [onZDown, updateAxesNetValues]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -117,11 +172,18 @@ const MovementControl = ({
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
     };
-  }, [wrappedOnXUp, wrappedOnXDown, wrappedOnYUp, wrappedOnYDown, wrappedOnZUp, wrappedOnZDown]);
+  }, [
+    wrappedOnXUp,
+    wrappedOnXDown,
+    wrappedOnYUp,
+    wrappedOnYDown,
+    wrappedOnZUp,
+    wrappedOnZDown,
+  ]);
 
   const getButtonClassName = (name) => {
     const baseClassName =
-      "rounded-full p-2 bg-gray-300 hover:bg-gray-400 active:bg-gray-500 focus:outline-none";
+      "rounded-full p-2 bg-gray-300 hover:bg-gray-400 active:bg-gray-500 focus:outline-none flex justify-center items-center";
     if (name === activeButton) {
       return `${baseClassName} bg-gray-500 text-gray-100`;
     }
@@ -132,51 +194,78 @@ const MovementControl = ({
     <div className="flex flex-col items-center mt-4">
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
+          title="Y Increase"
           className={getButtonClassName("up") + " col-start-2 row-start-1"}
           onClick={wrappedOnYUp}
         >
           <FiArrowUp className="text-gray-800" size={24} />
         </button>
         <button
+          title="X Decrease"
           className={getButtonClassName("left") + " col-start-1 row-start-2"}
           onClick={wrappedOnXDown}
         >
           <FiArrowLeft className="text-gray-800" size={24} />
         </button>
         <button
+          title="Y Decrease"
           className={getButtonClassName("down") + " col-start-2 row-start-2"}
           onClick={wrappedOnYDown}
         >
           <FiArrowDown className="text-gray-800" size={24} />
         </button>
         <button
+          title="X Increase"
           className={getButtonClassName("right") + " col-start-3 row-start-2"}
           onClick={wrappedOnXUp}
         >
           <FiArrowRight className="text-gray-800" size={24} />
         </button>
-      </div>
-      <div className="flex justify-center items-center space-x-4 mb-4">
-        <button className={getButtonClassName("page-up")} onClick={wrappedOnZUp}>
+        <button
+          title="Move Up (Z-axis)"
+          className={getButtonClassName("page-up")}
+          onClick={wrappedOnZUp}
+        >
           Up
         </button>
-        <button className={getButtonClassName("page-down")} onClick={wrappedOnZDown}>
+        <button
+          title="Move Down (Z-axis)"
+          className={getButtonClassName("page-down")}
+          onClick={wrappedOnZDown}
+        >
           Down
         </button>
       </div>
       <div className="mt-4">
-        <h2 className="text-xl font-semibold mb-2">Button Press Counts:</h2>
-        <ul>
-          {Object.entries(buttonPressCounts).map(([key, count]) => (
-            <li key={key} className="list-disc ml-6">
-              {key.charAt(0).toUpperCase() + key.slice(1)}: {count}
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4">
+          <label htmlFor="customValue" className="mr-2 text-white">
+            Multiplier:
+          </label>
+          <input
+            type="number"
+            id="customValue"
+            value={customValue}
+            onChange={(e) => setCustomValue(parseInt(e.target.value) || 1)}
+            onKeyDown={(e) => {
+              if (
+                e.key === "ArrowUp" ||
+                e.key === "ArrowDown" ||
+                e.key === "ArrowLeft" ||
+                e.key === "ArrowRight"
+              ) {
+                e.preventDefault();
+              }
+            }}
+            className="border border-gray-300 p-1 rounded"
+          />
+        </div>
         <div className="flex justify-center">
           <button
             className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none reset-button"
-            onClick={resetButtonPressCounts}
+            onClick={() => {
+              resetButtonPressCounts();
+              resetAxesNetValues();
+            }}
           >
             Reset
           </button>

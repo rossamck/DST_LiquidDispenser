@@ -2,8 +2,11 @@
 
 import React, { useState, useCallback } from 'react';
 import Layout from './Lavout/Layout';
+import DevLayout from './Lavout/DevLayout';
+
 import { WebSocketProvider } from './components/WebSocketContext/WebSocketContext';
 import './components/scrollbar/scrollbar.css'
+import Sidebar from './components/SideBar/SideBar';
 
 function App() {
   const [action, setAction] = useState(null);
@@ -13,6 +16,9 @@ function App() {
   const [sendSelectionEnabled, setSendSelectionEnabled] = useState(true);
   const [dispensingWell, setDispensingWell] = useState(null);
   const [completedWells, setCompletedWells] = useState([]);
+  const [activeLayout, setActiveLayout] = useState("Layout1"); // Add this line to manage the active layout
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
 
 
 
@@ -79,26 +85,41 @@ const handleMessage = (message) => {
 return (
   <WebSocketProvider handleMessage={handleMessage}>
     <div className="App">
-      <Layout
-        onButtonClick={handleButtonClick}
-        currentAction={action}
-        actionVolume={actionVolume}
-        actionVersion={actionVersion}
-        onActionComplete={resetAction}
-        startDispensingEnabled={startDispensingEnabled}
-        setStartDispensingEnabled={setStartDispensingEnabled}
-        sendSelectionEnabled={sendSelectionEnabled}
-        setSendSelectionEnabled={setSendSelectionEnabled}
-        dispensingWell={dispensingWell}
-        setDispensingWell={setDispensingWell}
-        completedWells={completedWells}
-        setCompletedWells={setCompletedWells}
-        // allSelectedWells={allSelectedWells}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        setActiveLayout={setActiveLayout} // Pass the state setter function as a prop
       />
+      
+      {activeLayout === "Layout1" && (
+      
+        <Layout
+          onButtonClick={handleButtonClick}
+          currentAction={action}
+          actionVolume={actionVolume}
+          actionVersion={actionVersion}
+          onActionComplete={resetAction}
+          startDispensingEnabled={startDispensingEnabled}
+          setStartDispensingEnabled={setStartDispensingEnabled}
+          sendSelectionEnabled={sendSelectionEnabled}
+          setSendSelectionEnabled={setSendSelectionEnabled}
+          dispensingWell={dispensingWell}
+          setDispensingWell={setDispensingWell}
+          completedWells={completedWells}
+          setCompletedWells={setCompletedWells}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+      )}
+        {activeLayout === "DevLayout" && (
+          <DevLayout
+            // Pass all required props to DevLayout component
+          />
+        )}
+      {/* Add more layout components here with their respective conditions */}
     </div>
   </WebSocketProvider>
 );
-// ...
 }
 
 export default App;

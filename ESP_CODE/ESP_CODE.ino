@@ -10,8 +10,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-const char* ssid = "VM6701124_2G";
-const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "VM6701124_2G";
+// const char* password = "fnDdpj9q6qdt";
+const char* ssid = "iPhone (3)";
+const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -65,10 +67,7 @@ void createAccessPoint() {
 
 void handleDispensing();
 
-void updateClients() {
-  String stateStr = ledState ? "on" : "off";
-  webSocket.broadcastTXT("LED:" + stateStr);
-}
+
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length) {
   switch (type) {
@@ -218,8 +217,8 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 
   // Call either connectToWiFi() or createAccessPoint() here based on your requirement
-  connectToWiFi();
-  // createAccessPoint();
+ connectToWiFi();
+  //  createAccessPoint();
 
   server.begin();
   server.on("/socket.io/", HTTP_OPTIONS, []() {

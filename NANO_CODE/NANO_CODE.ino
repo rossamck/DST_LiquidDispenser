@@ -13,6 +13,7 @@ void setup() {
   Wire.onReceive(receiveEvent); /* register receive event */
   Wire.onRequest(requestEvent);  /* register request event */
   Serial.begin(9600);           /* start serial for debug */
+  Serial.println("Starting Nano");
 }
 
 void loop() {

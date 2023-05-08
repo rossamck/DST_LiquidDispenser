@@ -7,13 +7,15 @@
 #include <Ticker.h>
 #include <ArduinoJson.h>
 
+#define SDA_PIN 4  // D2 on ESP8266
+#define SCL_PIN 5  // D1 on ESP8266
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-// const char* ssid = "VM6701124_2G";
-// const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+const char* ssid = "VM6701124_2G";
+const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -136,24 +138,37 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         currentWell = selectedWells.begin();
         dispenseTicker.attach_ms(100, handleDispensing);
 
- } else if (message.startsWith("manualMove:")) {
-  int separatorIndex = message.indexOf(",");
-  String axis = message.substring(11, separatorIndex);
-  float value = message.substring(separatorIndex + 1).toFloat();
-  Serial.print("Received movement message: Axis=");
-  Serial.print(axis);
-  Serial.print(", Value=");
-  Serial.println(value);
+      } else if (message.startsWith("manualMove:")) {
+        int separatorIndex = message.indexOf(",");
+        String axis = message.substring(11, separatorIndex);
+        float value = message.substring(separatorIndex + 1).toFloat();
+        Serial.print("Received movement message: Axis=");
+        Serial.print(axis);
+        Serial.print(", Value=");
+        Serial.println(value);
 
-  // Add the following lines to send the manualMove information over i2c
-  String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
+        // Add the following lines to send the manualMove information over i2c
+        String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
+        Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
+        Wire.write(manualMoveMessage.c_str());
+        Wire.write('\0');  // Add a null character to indicate the end of the message
+        Wire.endTransmission();
+      }
+
+      else if (message.startsWith("moveToLimit:")) {
+  String axis = message.substring(12);
+  Serial.print("Received moveToLimit message: Axis=");
+  Serial.println(axis);
+
+  // Add the following lines to send the moveToLimit information over i2c
+  String moveToLimitMessage = "moveToLimit:" + axis;
   Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-  Wire.write(manualMoveMessage.c_str());
+  Wire.write(moveToLimitMessage.c_str());
   Wire.write('\0');  // Add a null character to indicate the end of the message
   Wire.endTransmission();
 }
 
- else if (message == "emergencyStop") {
+      else if (message == "emergencyStop") {
         Serial.println("Emergency Stop");
         dispensing = false;
         digitalWrite(LED_BUILTIN, LOW);
@@ -217,7 +232,7 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 
   // Call either connectToWiFi() or createAccessPoint() here based on your requirement
- connectToWiFi();
+  connectToWiFi();
   //  createAccessPoint();
 
   server.begin();
@@ -231,7 +246,7 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 
-  Wire.begin(D1, D2);
+  Wire.begin(SDA_PIN, SCL_PIN);
 }
 
 void loop() {

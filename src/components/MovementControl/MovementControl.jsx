@@ -20,7 +20,6 @@ const MovementControl = ({
   onButtonPressCountsUpdate,
   onAxesNetValuesUpdate,
 }) => {
-
   const { sendMessage } = useContext(WebSocketContext);
 
   const [activeButton, setActiveButton] = useState(null);
@@ -70,7 +69,6 @@ const MovementControl = ({
     },
     [customValue, sendMessage]
   );
-  
 
   const resetButtonPressCounts = () => {
     setButtonPressCounts({
@@ -91,13 +89,19 @@ const MovementControl = ({
     });
   };
 
+  const moveToLimit = (axis) => {
+    // Implement the moveToLimit functionality here
+    console.log("move to limit");
+    console.log(axis);
+    sendMessage(`moveToLimit:${axis}`);
+
+  };
+
   const wrappedOnXUp = useCallback(() => {
     onXUp();
     incrementButtonPressCount("right");
     updateAxesNetValues("X", 1);
-    
-
-  }, [onXUp, updateAxesNetValues,]);
+  }, [onXUp, updateAxesNetValues]);
 
   const wrappedOnXDown = useCallback(() => {
     onXDown();
@@ -269,6 +273,29 @@ const MovementControl = ({
           >
             Reset
           </button>
+        </div>
+        <div className="text-center mt-4">
+          <h2 className="text-white mb-2">Move to limit</h2>
+          <div className="flex justify-center space-x-4">
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("X")}
+            >
+              X
+            </button>
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("Y")}
+            >
+              Y
+            </button>
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("Z")}
+            >
+              Z
+            </button>
+          </div>
         </div>
       </div>
     </div>

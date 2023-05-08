@@ -10,8 +10,10 @@ const WebSocketProvider = ({ children, handleMessage }) => {
   const [socket, setSocket] = useState(null);
   const [status, setStatus] = useState('not_connected');
   const [lastMessageTime, setLastMessageTime] = useState(null);
-  const [userWebSocketIP, setUserWebSocketIP] = useState(null); // Add this line to manage the user-specified IP address
-
+  const [userWebSocketIP, setUserWebSocketIP] = useState(() => {
+    return localStorage.getItem('userWebSocketIP') || null;
+  });
+  
   
 
   useEffect(() => {
@@ -22,10 +24,12 @@ const WebSocketProvider = ({ children, handleMessage }) => {
   
   const updateWebSocketIP = useCallback(
     (newIP) => {
+      localStorage.setItem('userWebSocketIP', newIP);
       setUserWebSocketIP(newIP);
     },
     []
   );
+  
 
   const sendMessage = useCallback((message) => {
     if (socket && socket.readyState === WebSocket.OPEN) {

@@ -1,38 +1,146 @@
 #include <Wire.h>
-int count = 0;
-bool dataReceived = false;  // flag to indicate if data has been received
-bool sendResponse = false;  // flag to indicate if a response should be sent
-String receivedWellId;
-float receivedVolume;
-int receivedSourceIndex;
-bool manualMoveReceived = false;
+#include <AccelStepper.h>
+#include <MultiStepperMotor.h>
 
+// I2C-related definitions
+#define SDA_PIN A4
+#define SCL_PIN A5
+
+// Stepper motor pin definitions
+#define X_DIR_PIN 2
+#define X_STEP_PIN 3
+#define Y_DIR_PIN 4
+#define Y_STEP_PIN 5
+#define Z_DIR_PIN 7
+#define Z_STEP_PIN 6
+#define PIP_DIR_PIN 8
+#define PIP_STEP_PIN 9
+
+#define ENABLE 4  // unused
+
+// Microstepping pin definitions
+#define M0_PIN 11
+#define M1_PIN 12
+#define M2_PIN 13
+
+// Limit switch pin definitions
+#define LIMIT_1 A0
+#define LIMIT_2 A1
+#define LIMIT_3 A2
+#define LIMIT_3 A3
+
+// Stepper motor objects
+MultiStepperMotor stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1);
+MultiStepperMotor stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
+MultiStepperMotor stepper_Z(Z_STEP_PIN, Z_DIR_PIN);
+MultiStepperMotor stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN);
+MultiStepperXY multiStepper(stepper_X, stepper_Y);
+
+struct ReceivedData {
+  bool dataReceived = false;
+  bool sendResponse = false;
+  bool manualMoveReceived = false;
+  String wellId;
+  float volume;
+  int sourceIndex;
+
+  String axis;
+  float value;
+
+  bool moveToLimitReceived = false;
+  String moveToLimitAxis;
+} receivedData;
+
+float previousX = 0;
+float previousY = 0;
+float previousZ = 0;
+float previousPIP = 0;
+
+int microstep_amount = 8;
+int fullturn_400 = 400 * microstep_amount;
+int fullturn_200 = 200 * microstep_amount;
 
 void setup() {
-  Wire.begin(8);                /* join i2c bus with address 8 */
-  Wire.onReceive(receiveEvent); /* register receive event */
-  Wire.onRequest(requestEvent);  /* register request event */
-  Serial.begin(9600);           /* start serial for debug */
+  // I2C setup
+  Wire.begin(8);
+  Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
+  Serial.begin(9600);
   Serial.println("Starting Nano");
+
+  // Stepper motor setup
+  pinMode(M0_PIN, OUTPUT);
+  pinMode(M1_PIN, OUTPUT);
+  pinMode(M2_PIN, OUTPUT);
+  pinMode(ENABLE, OUTPUT);
+  digitalWrite(M0_PIN, HIGH);
+  digitalWrite(M1_PIN, HIGH);
+  digitalWrite(M2_PIN, LOW);
+  multiStepper.setMaxSpeed(10000);
+  multiStepper.setAcceleration(2000);
+
+  //Limit switch setup
+  pinMode(LIMIT_1, INPUT_PULLUP);
 }
 
 void loop() {
-  if (dataReceived) {
+  int switchState = digitalRead(LIMIT_1);
+
+  // Check if the switch is closed
+  if (switchState == LOW) {
+    Serial.println("Switch is closed");
+    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  }
+
+  if (receivedData.dataReceived) {
     Serial.print("Received well ID: ");
-    Serial.println(receivedWellId);
+    Serial.println(receivedData.wellId);
     Serial.print("Received volume: ");
-    Serial.println(receivedVolume);
-        Serial.print("Received source index: ");
-    Serial.println(receivedSourceIndex);
+    Serial.println(receivedData.volume);
+    Serial.print("Received source index: ");
+    Serial.println(receivedData.sourceIndex);
 
     delay(1000);
-    sendResponse = true;     // Set the flag to send the response
-    dataReceived = false;    // reset the flag
-  } else if(manualMoveReceived) {
-    Serial.println("MOVING");
-        manualMoveReceived = false; // Reset the flag
+    receivedData.sendResponse = true;
+    receivedData.dataReceived = false;
 
+  } else if (receivedData.manualMoveReceived) {
+    if (receivedData.axis == "X") {
+      float deltaX = receivedData.value - previousX;
+      stepper_X.move(deltaX * microstep_amount); // Move by deltaX number of microsteps
+      stepper_X.runToPosition();
+      previousX = receivedData.value;
+    } else if (receivedData.axis == "Y") {
+      float deltaY = receivedData.value - previousY;
+      stepper_Y.move(deltaY * microstep_amount); // Move by deltaY number of microsteps
+      stepper_Y.runToPosition();
+      previousY = receivedData.value;
+    } else if (receivedData.axis == "Z") {
+      float deltaZ = receivedData.value - previousZ;
+      stepper_Z.move(deltaZ * fullturn_200);
+      stepper_Z.runToPosition();
+      previousZ = receivedData.value;
+    } else if (receivedData.axis == "PIP") {
+      float deltaPIP = receivedData.value - previousPIP;
+      stepper_PIP.move(deltaPIP * fullturn_200);
+      stepper_PIP.runToPosition();
+      previousPIP = receivedData.value;
+    }
+    receivedData.manualMoveReceived = false;
+      Serial.print("X current position: ");
+Serial.println(stepper_X.currentPosition());
+Serial.print("Y current position: ");
+Serial.println(stepper_Y.currentPosition());
+
+  } else if (receivedData.moveToLimitReceived) {
+    if (receivedData.moveToLimitAxis == "X") {
+      stepper_X.runToLimit();
+    } else if (receivedData.moveToLimitAxis == "Y") {
+      stepper_Y.runToLimit();
+    }  // Add other axes here if needed
+    receivedData.moveToLimitReceived = false;
   }
+
   delay(100);
 }
 
@@ -40,41 +148,46 @@ void receiveEvent(int howMany) {
   String receivedMessage = "";
   while (0 < Wire.available()) {
     char c = Wire.read();
-    if (c == '\0') break; // Stop reading when a null character is encountered
+    if (c == '\0') break;
     receivedMessage += c;
   }
 
   if (receivedMessage.startsWith("manualMove:")) {
     String manualMoveData = receivedMessage.substring(11);
     int separatorIndex = manualMoveData.indexOf(',');
-    String axis = manualMoveData.substring(0, separatorIndex);
-    float value = manualMoveData.substring(separatorIndex + 1).toFloat();
-
+    receivedData.axis = manualMoveData.substring(0, separatorIndex);
+    receivedData.value = manualMoveData.substring(separatorIndex + 1).toFloat();
     // Set the flag and store the axis and value
-    manualMoveReceived = true;
+    receivedData.manualMoveReceived = true;
     Serial.print("Received manualMove: Axis=");
-    Serial.print(axis);
+    Serial.print(receivedData.axis);
     Serial.print(", Value=");
-    Serial.println(value);
-  } else {
+    Serial.println(receivedData.value);
+  }
+  else if (receivedMessage.startsWith("moveToLimit:")) {
+    receivedData.moveToLimitAxis = receivedMessage.substring(12);
+    receivedData.moveToLimitReceived = true;
+    Serial.print("Received moveToLimit: Axis=");
+    Serial.println(receivedData.moveToLimitAxis);
+  }
+
+
+  else {
     int firstDelimiterIndex = receivedMessage.indexOf(',');
     int secondDelimiterIndex = receivedMessage.indexOf(',', firstDelimiterIndex + 1);
-    receivedWellId = receivedMessage.substring(0, firstDelimiterIndex);
-    receivedVolume = receivedMessage.substring(firstDelimiterIndex + 1, secondDelimiterIndex).toFloat();
-    receivedSourceIndex = receivedMessage.substring(secondDelimiterIndex + 1).toInt();
-
-    dataReceived = true;
+    receivedData.wellId = receivedMessage.substring(0, firstDelimiterIndex);
+    receivedData.volume = receivedMessage.substring(firstDelimiterIndex + 1, secondDelimiterIndex).toFloat();
+    receivedData.sourceIndex = receivedMessage.substring(secondDelimiterIndex + 1).toInt();
+    receivedData.dataReceived = true;
   }
 }
 
-
-
 void requestEvent() {
-  if (sendResponse) {
+  if (receivedData.sendResponse) {
     String response = "finished";
     Serial.println("Sending response");
     Wire.write(response.c_str());
-    Wire.write('\0'); // Add a null character to indicate the end of the message
-    sendResponse = false; // Reset the flag
+    Wire.write('\0');                   // Add a null character to indicate the end of the message
+    receivedData.sendResponse = false;  // Reset the flag
   }
 }

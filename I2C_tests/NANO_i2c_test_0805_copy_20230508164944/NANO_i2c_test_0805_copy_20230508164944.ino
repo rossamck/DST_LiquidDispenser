@@ -17,10 +17,15 @@ void loop() {
 }
 
 void receiveEvent(int bytes) {
+  String received = "";
   while (Wire.available()) {
     char c = Wire.read();
+    received += c;
+  }
+
+  if (received.length() > 0) {
     Serial.print("Received: ");
-    Serial.println(c);
+    Serial.println(received);
   }
 }
 

@@ -1,5 +1,7 @@
 import React from 'react';
-import { MdHome, MdBuild, MdInsertEmoticon, MdStar } from 'react-icons/md';
+import { MdHome, MdBuild, MdStar } from 'react-icons/md';
+import { FaRegObjectUngroup } from "react-icons/fa";
+
 
 function SidebarIcons({ sidebarOpen, handleButtonClick }) {
   return (
@@ -21,7 +23,7 @@ function SidebarIcons({ sidebarOpen, handleButtonClick }) {
         onClick={() => handleButtonClick('Layout2')}
         title="Option 2"
       >
-        <MdInsertEmoticon className="inline" size={36} />
+        <FaRegObjectUngroup className="inline" size={36} />
       </button>
       <button
         className={`text-gray-400 block hover:text-white`}

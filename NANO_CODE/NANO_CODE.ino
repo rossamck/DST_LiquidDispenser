@@ -11,7 +11,7 @@ bool manualMoveReceived = false;
 void setup() {
   Wire.begin(8);                /* join i2c bus with address 8 */
   Wire.onReceive(receiveEvent); /* register receive event */
-  Wire.onRequest(requestEvent); /* register request event */
+  Wire.onRequest(requestEvent);  /* register request event */
   Serial.begin(9600);           /* start serial for debug */
 }
 

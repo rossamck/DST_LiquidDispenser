@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
+import clsx from "clsx"; // Make sure to import clsx
+import "./MovementControl.css"; // Import your CSS file here
+
 
 import {
   FiArrowUp,
@@ -96,6 +99,112 @@ const MovementControl = ({
     sendMessage(`moveToLimit:${axis}`);
 
   };
+
+  const [xCoordinate, setXCoordinate] = useState(0);
+  const [yCoordinate, setYCoordinate] = useState(0);
+  
+  // Implement the function to handle the submission of coordinates
+  const handleCoordinateSubmit = () => {
+    // Replace with your actual implementation
+    console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
+    sendMessage(`manualMove:X,${xCoordinate}`);
+    sendMessage(`manualMove:Y,${yCoordinate}`);
+  };
+
+  const [activeTab, setActiveTab] = useState(0);
+  const handleTabSelect = (index) => {
+    setActiveTab(index);
+  };
+
+  const tabs = [
+    {
+      label: "Limit",
+      content: (
+        <div className="text-center mt-4">
+          <h2 className="text-white mb-2">Move to limit</h2>
+          <div className="flex justify-center space-x-4">
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("X")}
+            >
+              X
+            </button>
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("Y")}
+            >
+              Y
+            </button>
+            <button
+              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={() => moveToLimit("Z")}
+            >
+              Z
+            </button>
+          </div>
+        </div>
+      ),
+      margin: "ml-2",
+    },
+    {
+      label: "Co-ords",
+      content: (
+        <div className="text-center mt-4">
+          <h2 className="text-white mb-2">Co-ordinate Entry</h2>
+
+        <div className="flex justify-center flex-col">
+          <div className="flex justify-center items-center mb-4">
+            <div className="flex items-center">
+              <label htmlFor="xCoordinate" className="mr-2 text-white">
+                X:
+              </label>
+              <input
+                type="number"
+                id="xCoordinate"
+                value={xCoordinate}
+                onChange={(e) => setXCoordinate(parseInt(e.target.value) || 0)}
+                className="border border-gray-300 p-1 rounded w-16"
+              />
+            </div>
+            <div className="flex items-center ml-4">
+              <label htmlFor="yCoordinate" className="mr-2 text-white">
+                Y:
+              </label>
+              <input
+                type="number"
+                id="yCoordinate"
+                value={yCoordinate}
+                onChange={(e) => setYCoordinate(parseInt(e.target.value) || 0)}
+                className="border border-gray-300 p-1 rounded w-16"
+              />
+            </div>
+          </div>
+          <div className="flex justify-center">
+            <button
+              className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+              onClick={handleCoordinateSubmit}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+        </div>
+      ),
+      margin: "mx-auto",
+    },
+    
+    {
+      label: "Tab 3",
+      content: (
+        <div>
+          Tab 3 content goes here
+        </div>
+      ),
+      margin: "mr-2",
+    },
+  ];
+
+
 
   const wrappedOnXUp = useCallback(() => {
     onXUp();
@@ -265,7 +374,7 @@ const MovementControl = ({
         </div>
         <div className="flex justify-center">
           <button
-            className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none reset-button"
+            className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 mb-5 focus:outline-none reset-button"
             onClick={() => {
               resetButtonPressCounts();
               resetAxesNetValues();
@@ -274,28 +383,40 @@ const MovementControl = ({
             Reset
           </button>
         </div>
-        <div className="text-center mt-4">
-          <h2 className="text-white mb-2">Move to limit</h2>
-          <div className="flex justify-center space-x-4">
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("X")}
+
+
+
+        {/* Add your tabs here */}
+        <div className="flex mx-2 mt-2 rounded-md bg-gray-800 relative tabs">
+  {tabs.map((tab, index) => (
+    <button
+      key={index}
+      onClick={() => handleTabSelect(index)}
+      className={clsx(
+        "tabs-item custom-tab-width relative z-10 flex items-center justify-center py-1 my-2 text-center rounded-md text-sm cursor-pointer select-none focus:outline-none text-white",
+        {
+          active: activeTab === index,
+          [tab.margin]: true,
+        }
+      )}
+    >
+      {tab.label}
+    </button>
+  ))}
+  <div className={clsx("tab-item-animate", { active: activeTab !== -1 })}></div>
+</div>
+
+        <div className="mt-2">
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              className={clsx("tab-content", {
+                hidden: activeTab !== index,
+              })}
             >
-              X
-            </button>
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("Y")}
-            >
-              Y
-            </button>
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("Z")}
-            >
-              Z
-            </button>
-          </div>
+              {tab.content}
+            </div>
+          ))}
         </div>
       </div>
     </div>

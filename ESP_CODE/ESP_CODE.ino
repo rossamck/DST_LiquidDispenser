@@ -155,6 +155,26 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         Wire.endTransmission();
       }
 
+  else if (message.startsWith("manualCoords:")) {
+    int separatorIndex = message.indexOf(',');
+    String coordX = message.substring(13, separatorIndex);
+    String coordY = message.substring(separatorIndex + 1);
+    Serial.print("Received coords: X=");
+    Serial.print(coordX);
+    Serial.print(", Y=");
+    Serial.println(coordY);
+
+    // Send the coordinates over i2c
+    String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY;
+    Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
+    Wire.write(manualCoordsMessage.c_str());
+    Wire.write('\0');  // Add a null character to indicate the end of the message
+    Wire.endTransmission();
+  }
+
+
+
+
       else if (message.startsWith("moveToLimit:")) {
   String axis = message.substring(12);
   Serial.print("Received moveToLimit message: Axis=");

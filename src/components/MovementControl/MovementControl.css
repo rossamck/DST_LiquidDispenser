@@ -1,0 +1,62 @@
+/* Controlpanel.css */
+
+.tab-item-animate {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: calc(100% - 12px);
+    height: 32px;
+    transform-origin: 0 0;
+    transition: transform 0.25s;
+    /* Remove the z-index property from here */
+  }
+  
+  .tabs {
+    position: relative;
+    z-index: 0; /* Add this line to ensure that the parent element does not hide the animation box */
+  }
+  
+  .tabs .tabs-item:first-child.active ~ .tab-item-animate {
+    transform: translateX(0) scaleX(0.333);
+  }
+  
+  .tabs .tabs-item:nth-child(2).active ~ .tab-item-animate {
+    transform: translateX(33.333%) scaleX(0.333);
+  }
+  
+  .tabs .tabs-item:nth-child(3).active ~ .tab-item-animate {
+    transform: translateX(calc(33.333% * 2)) scaleX(0.333);
+  }
+  
+  .tabs-item.active {
+    opacity: 1;
+  }
+  
+  .tab-item-animate {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .custom-tab-width {
+    width: 33.333%;
+  }
+  
+  .number-input-container {
+  max-width: 100%;
+}
+
+/* ControlPanel.css */
+
+/* .number-input-select {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+} */
+.number-input-select {
+  max-width: 300px;
+}
+
+.number-input-select input[type="number"] {
+  width: 100%;
+  box-sizing: border-box;
+}

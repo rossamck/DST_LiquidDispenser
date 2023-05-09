@@ -49,6 +49,10 @@ struct ReceivedData {
 
   bool moveToLimitReceived = false;
   String moveToLimitAxis;
+
+  bool manualCoordsReceived = false;
+  String coordX;
+  String coordY;
 } receivedData;
 
 float previousX = 0;
@@ -67,6 +71,9 @@ void setup() {
   Wire.onRequest(requestEvent);
   Serial.begin(9600);
   Serial.println("Starting Nano");
+
+  //   pinMode(SDA_PIN, INPUT_PULLUP);
+  // pinMode(SCL_PIN, INPUT_PULLUP);
 
   // Stepper motor setup
   pinMode(M0_PIN, OUTPUT);
@@ -107,12 +114,12 @@ void loop() {
   } else if (receivedData.manualMoveReceived) {
     if (receivedData.axis == "X") {
       float deltaX = receivedData.value - previousX;
-      stepper_X.move(deltaX * microstep_amount); // Move by deltaX number of microsteps
+      stepper_X.move(deltaX * microstep_amount);  // Move by deltaX number of microsteps
       stepper_X.runToPosition();
       previousX = receivedData.value;
     } else if (receivedData.axis == "Y") {
       float deltaY = receivedData.value - previousY;
-      stepper_Y.move(deltaY * microstep_amount); // Move by deltaY number of microsteps
+      stepper_Y.move(deltaY * microstep_amount);  // Move by deltaY number of microsteps
       stepper_Y.runToPosition();
       previousY = receivedData.value;
     } else if (receivedData.axis == "Z") {
@@ -127,10 +134,10 @@ void loop() {
       previousPIP = receivedData.value;
     }
     receivedData.manualMoveReceived = false;
-      Serial.print("X current position: ");
-Serial.println(stepper_X.currentPosition());
-Serial.print("Y current position: ");
-Serial.println(stepper_Y.currentPosition());
+    Serial.print("X current position: ");
+    Serial.println(stepper_X.currentPosition());
+    Serial.print("Y current position: ");
+    Serial.println(stepper_Y.currentPosition());
 
   } else if (receivedData.moveToLimitReceived) {
     if (receivedData.moveToLimitAxis == "X") {
@@ -139,7 +146,36 @@ Serial.println(stepper_Y.currentPosition());
       stepper_Y.runToLimit();
     }  // Add other axes here if needed
     receivedData.moveToLimitReceived = false;
-  }
+  } else if (receivedData.manualCoordsReceived) {
+  // Convert the received coordinates to steps
+  float currentX = receivedData.coordX.toFloat();
+  float currentY = receivedData.coordY.toFloat();
+  
+  float deltaX = currentX - previousX;
+  float deltaY = currentY - previousY;
+
+  // Convert deltas to steps
+  long stepsX = deltaX * microstep_amount;
+  long stepsY = deltaY * microstep_amount;
+
+  
+  Serial.print("deltaX=");
+  Serial.print(deltaX);
+  Serial.print(", deltaY=");
+  Serial.println(deltaY);
+  
+
+  // Move the X and Y motors by the calculated number of steps
+  multiStepper.move(stepsX, stepsY);
+  multiStepper.runToPosition();
+
+  previousX = currentX;
+  previousY = currentY;
+
+  receivedData.manualCoordsReceived = false;
+}
+
+
 
   delay(100);
 }
@@ -163,12 +199,29 @@ void receiveEvent(int howMany) {
     Serial.print(receivedData.axis);
     Serial.print(", Value=");
     Serial.println(receivedData.value);
-  }
-  else if (receivedMessage.startsWith("moveToLimit:")) {
+  } else if (receivedMessage.startsWith("moveToLimit:")) {
     receivedData.moveToLimitAxis = receivedMessage.substring(12);
     receivedData.moveToLimitReceived = true;
     Serial.print("Received moveToLimit: Axis=");
     Serial.println(receivedData.moveToLimitAxis);
+  }
+
+  else if (receivedMessage.startsWith("manualCoords:")) {
+    String manualCoordsData = receivedMessage.substring(13);
+    int separatorIndex = manualCoordsData.indexOf(',');
+String xCoord = manualCoordsData.substring(0, separatorIndex);
+String yCoord = manualCoordsData.substring(separatorIndex + 1);
+
+// Extract the numerical part of the coordinates
+receivedData.coordX = xCoord.substring(xCoord.indexOf('=') + 1);
+receivedData.coordY = yCoord.substring(yCoord.indexOf('=') + 1);
+
+    // Set the flag and store the coordinates
+    receivedData.manualCoordsReceived = true;
+    Serial.print("Received manualCoords: X=");
+    Serial.print(receivedData.coordX);
+    Serial.print(", Y=");
+    Serial.println(receivedData.coordY);
   }
 
 

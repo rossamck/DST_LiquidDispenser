@@ -105,11 +105,10 @@ const MovementControl = ({
   
   // Implement the function to handle the submission of coordinates
   const handleCoordinateSubmit = () => {
-    // Replace with your actual implementation
     console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
-    sendMessage(`manualMove:X,${xCoordinate}`);
-    sendMessage(`manualMove:Y,${yCoordinate}`);
+    sendMessage(`manualCoords:${xCoordinate},${yCoordinate}`);
   };
+  
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {

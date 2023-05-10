@@ -44,6 +44,7 @@ struct ReceivedData {
   float volume;
   int sourceIndex;
 
+  bool sendCoords = false;
   String axis;
   float value;
 
@@ -65,6 +66,28 @@ float previousPIP = 0;
 int microstep_amount = 8;
 int fullturn_400 = 400 * microstep_amount;
 int fullturn_200 = 200 * microstep_amount;
+
+void sendCurrentPositions() {
+  long xCurrentPosition = stepper_X.currentPosition();
+  long yCurrentPosition = stepper_Y.currentPosition();
+  long zCurrentPosition = stepper_Z.currentPosition();
+  long pipCurrentPosition = stepper_PIP.currentPosition();
+
+  Wire.write("pos:");
+  Wire.write("X=");
+  Wire.write(String(xCurrentPosition).c_str());
+  Wire.write(",");
+  Wire.write("Y=");
+  Wire.write(String(yCurrentPosition).c_str());
+  Wire.write(",");
+  Wire.write("Z=");
+  Wire.write(String(zCurrentPosition).c_str());
+  Wire.write(",");
+  Wire.write("PIP=");
+  Wire.write(String(pipCurrentPosition).c_str());
+  Wire.write('\0');  // Add a null character to indicate the end of the message
+}
+
 
 void setup() {
   // I2C setup
@@ -117,6 +140,8 @@ void loop() {
     Serial.println(receivedData.sourceIndex);
 
     delay(1000);
+    Serial.print("Send well response for: ");
+    Serial.println(receivedData.wellId);
     receivedData.sendResponse = true;
     receivedData.dataReceived = false;
 
@@ -165,6 +190,8 @@ void loop() {
     Serial.println(zCurrentPosition);
     Serial.print("PIP current position: ");
     Serial.println(pipCurrentPosition);
+        sendCurrentPositions();
+    receivedData.sendCoords = true;
     receivedData.manualMoveReceived = false;
 
 
@@ -219,7 +246,8 @@ void loop() {
     receivedData.setHomeReceived = false;
   }
 
-
+// Serial.print("send status = ");
+// Serial.println(receivedData.sendResponse);
   delay(100);
 }
 
@@ -289,10 +317,20 @@ void receiveEvent(int howMany) {
 
 void requestEvent() {
   if (receivedData.sendResponse) {
-    String response = "finished";
-    Serial.println("Sending response");
+    String response = "finished " + receivedData.wellId;
+    Serial.print("Sending response for: ");
+    Serial.println(receivedData.wellId);
     Wire.write(response.c_str());
-    Wire.write('\0');                   // Add a null character to indicate the end of the message
     receivedData.sendResponse = false;  // Reset the flag
+  } else if (receivedData.sendCoords) {
+    Serial.println("Sending current positions");
+    sendCurrentPositions();
+    receivedData.sendCoords = false;  // Reset the flag
+  } else {
+    Wire.write('\0');  // No data to send, just send a null character
   }
 }
+
+  
+
+

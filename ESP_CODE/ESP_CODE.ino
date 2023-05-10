@@ -12,10 +12,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-// const char* ssid = "VM6701124_2G";
-// const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+const char* ssid = "VM6701124_2G";
+const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -34,7 +34,38 @@ struct Well {
 std::vector<Well> selectedWells;
 std::vector<Well>::iterator currentWell;
 
-Ticker dispenseTicker;
+String requestDataFromNano() {
+  while (true) {
+    Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32);  // Request up to 32 characters
+    String response = "";
+    while (Wire.available()) {
+      char c = Wire.read();
+      if (c == '\0') break;  // Stop reading when a null character is encountered
+      response += c;
+    }
+
+    // Check if the response indicates that a well is finished
+    if (response.startsWith("finished")) {
+      Serial.print("Received finished message:");
+      Serial.println(response);
+      return response;
+    }
+
+    else if (response.startsWith("pos:")) {
+      Serial.print("Received position message:");
+      Serial.println(response);
+      return response;
+    }
+
+    if (response != "") {
+      break;  // Break out of the loop if a non-empty message is received
+    }
+
+    delay(100);  // Wait for 100ms before checking again
+  }
+}
+
+
 
 void connectToWiFi() {
   Serial.println("Connecting to WiFi...");
@@ -143,8 +174,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         Serial.println("Starting dispensing");
         dispensing = true;
         currentWell = selectedWells.begin();
-        dispenseTicker.attach_ms(100, handleDispensing);
-
+        handleDispensing();
       } 
       
       else if (message.startsWith("manualMove:")) {
@@ -159,6 +189,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         // Add the following lines to send the manualMove information over i2c
         String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
         sendI2CMessage(manualMoveMessage);
+        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
+
+        webSocket.broadcastTXT(receivedCoordsMessage);
+
 
       }
 
@@ -203,7 +237,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         dispensing = false;
         digitalWrite(LED_BUILTIN, LOW);
         webSocket.broadcastTXT("stopped");
-        dispenseTicker.detach();
       }
 
       break;
@@ -211,47 +244,46 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 }
 
 void handleDispensing() {
-  if (!dispensing || currentWell == selectedWells.end()) {
-    dispenseTicker.detach();
-    return;
-  }
+  while (currentWell != selectedWells.end()) {
+    String wellIdAndVolume = currentWell->wellId + "," + String(currentWell->volume, 2) + "," + String(currentWell->sourceIndex);
+    Serial.print("String wellIdAndVolume = ");
+    Serial.println(wellIdAndVolume);
 
-  String wellIdAndVolume = currentWell->wellId + "," + String(currentWell->volume, 2) + "," + String(currentWell->sourceIndex);
-  Serial.print("String wellIdAndVolume = ");
-  Serial.println(wellIdAndVolume);
+    String message = "dispensingWell:" + currentWell->wellId;
+    webSocket.broadcastTXT(message);
 
-  String message = "dispensingWell:" + currentWell->wellId;
-  webSocket.broadcastTXT(message);
+    Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
+    Serial.print("Sending i2c message: ");
+    Serial.println(wellIdAndVolume);
+    sendI2CMessage(wellIdAndVolume);
 
-  Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-        sendI2CMessage(wellIdAndVolume);
+    // Wait for well to finish
+    String wellFinishedResponse;
+    wellFinishedResponse = requestDataFromNano();
 
+    // Process the well finished message
+    String receivedWellId = wellFinishedResponse.substring(9);
+    Serial.print("Received well ID: ");
+    Serial.println(receivedWellId);
 
-  Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32);  // Request up to 32 characters (adjust as needed)
-  String response = "";
-  while (Wire.available()) {
-    char c = Wire.read();
-    if (c == '\0') break;  // Stop reading when a null character is encountered
-    response += c;
-  }
-  Serial.println(response);
-
-  if (response == "finished") {
     String completedWellMessage = "completedWell:" + currentWell->wellId;
     webSocket.broadcastTXT(completedWellMessage);
 
+    // Reset the flag
+
     // Move on to the next well
     ++currentWell;
+  }
 
-    if (currentWell == selectedWells.end()) {
-      // All wells have been dispensed
-      Serial.println("Dispensing finished");
-      dispensing = false;
-      webSocket.broadcastTXT("dispensefinished");
-      dispenseTicker.detach();
-    }
+  if (currentWell == selectedWells.end()) {
+    // All wells have been dispensed
+    Serial.println("Dispensing finished");
+    dispensing = false;
+    webSocket.broadcastTXT("dispensefinished");
   }
 }
+
+
 
 void setup() {
   Serial.begin(115200);
@@ -276,6 +308,7 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 
   Wire.begin(SDA_PIN, SCL_PIN);
+
 }
 
 void loop() {

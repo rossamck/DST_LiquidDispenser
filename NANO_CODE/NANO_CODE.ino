@@ -88,9 +88,25 @@ void setup() {
 
   //Limit switch setup
   pinMode(LIMIT_1, INPUT_PULLUP);
+  pinMode(LIMIT_2, INPUT_PULLUP);
 }
 
 void loop() {
+  // Check current motor positions:
+  long xCurrentPosition = stepper_X.currentPosition();
+  long yCurrentPosition = stepper_Y.currentPosition();
+  long zCurrentPosition = stepper_Z.currentPosition();
+  long pipCurrentPosition = stepper_PIP.currentPosition();
+  Serial.print("X current position: ");
+  Serial.println(xCurrentPosition);
+  Serial.print("Y current position: ");
+  Serial.println(yCurrentPosition);
+  Serial.print("Z current position: ");
+  Serial.println(zCurrentPosition);
+  Serial.print("PIP current position: ");
+  Serial.println(pipCurrentPosition);
+
+
   int switchState = digitalRead(LIMIT_1);
 
   // Check if the switch is closed
@@ -111,7 +127,13 @@ void loop() {
     receivedData.sendResponse = true;
     receivedData.dataReceived = false;
 
-  } else if (receivedData.manualMoveReceived) {
+  } else if (receivedData.manualMoveReceived) { 
+    Serial.print("Received Data: ");
+    Serial.print("Axis = ");
+    Serial.print(receivedData.axis);
+    Serial.print(", Value = ");
+    Serial.println(receivedData.value);
+
     if (receivedData.axis == "X") {
       float deltaX = receivedData.value - previousX;
       stepper_X.move(deltaX * microstep_amount);  // Move by deltaX number of microsteps
@@ -124,20 +146,18 @@ void loop() {
       previousY = receivedData.value;
     } else if (receivedData.axis == "Z") {
       float deltaZ = receivedData.value - previousZ;
-      stepper_Z.move(deltaZ * fullturn_200);
+      stepper_Z.move(deltaZ * microstep_amount);  // Move by deltaZ number of microsteps
       stepper_Z.runToPosition();
       previousZ = receivedData.value;
     } else if (receivedData.axis == "PIP") {
       float deltaPIP = receivedData.value - previousPIP;
-      stepper_PIP.move(deltaPIP * fullturn_200);
+      stepper_PIP.move(deltaPIP * microstep_amount);  // Move by deltaPIP number of microsteps
       stepper_PIP.runToPosition();
       previousPIP = receivedData.value;
     }
     receivedData.manualMoveReceived = false;
-    Serial.print("X current position: ");
-    Serial.println(stepper_X.currentPosition());
-    Serial.print("Y current position: ");
-    Serial.println(stepper_Y.currentPosition());
+
+
 
   } else if (receivedData.moveToLimitReceived) {
     if (receivedData.moveToLimitAxis == "X") {
@@ -193,6 +213,9 @@ void receiveEvent(int howMany) {
     int separatorIndex = manualMoveData.indexOf(',');
     receivedData.axis = manualMoveData.substring(0, separatorIndex);
     receivedData.value = manualMoveData.substring(separatorIndex + 1).toFloat();
+
+    // Serial.print("RECEIVED TEST: ");
+    // Serial.println(receivedMessage);
     // Set the flag and store the axis and value
     receivedData.manualMoveReceived = true;
     Serial.print("Received manualMove: Axis=");

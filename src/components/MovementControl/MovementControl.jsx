@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
-import clsx from "clsx"; // Make sure to import clsx
 import "./MovementControl.css"; // Import your CSS file here
+import Tabs from "./Tabs";
+import LimitTab from './LimitTab';
+
 
 
 import {
@@ -20,6 +22,8 @@ const MovementControl = ({
   onYDown,
   onZUp,
   onZDown,
+  onPipUp,
+  onPipDown,
   onButtonPressCountsUpdate,
   onAxesNetValuesUpdate,
 }) => {
@@ -30,18 +34,21 @@ const MovementControl = ({
 
   // Inside MovementControl component, add these new state variables
   const [buttonPressCounts, setButtonPressCounts] = useState({
-    up: 0,
-    down: 0,
-    left: 0,
-    right: 0,
-    pageUp: 0,
-    pageDown: 0,
+    up: 0, // y up
+    down: 0, // y down
+    left: 0, // x down
+    right: 0, //x up
+    pageUp: 0, //z down
+    pageDown: 0, //z up
+    pipUp: 0,
+    pipDown: 0,
   });
 
   const [axesNetValues, setAxesNetValues] = useState({
     X: 0,
     Y: 0,
     Z: 0,
+    PIP: 0,
   });
 
   useEffect(() => {
@@ -81,6 +88,8 @@ const MovementControl = ({
       right: 0,
       pageUp: 0,
       pageDown: 0,
+      pipUp: 0,
+      pipDown: 0,
     });
   };
 
@@ -89,6 +98,8 @@ const MovementControl = ({
       X: 0,
       Y: 0,
       Z: 0,
+      PIP: 0, // Add this line
+
     });
   };
 
@@ -118,31 +129,7 @@ const MovementControl = ({
   const tabs = [
     {
       label: "Limit",
-      content: (
-        <div className="text-center mt-4">
-          <h2 className="text-white mb-2">Move to limit</h2>
-          <div className="flex justify-center space-x-4">
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("X")}
-            >
-              X
-            </button>
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("Y")}
-            >
-              Y
-            </button>
-            <button
-              className="p-2 w-12 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={() => moveToLimit("Z")}
-            >
-              Z
-            </button>
-          </div>
-        </div>
-      ),
+      content: <LimitTab moveToLimit={moveToLimit} />,
       margin: "ml-2",
     },
     {
@@ -241,6 +228,19 @@ const MovementControl = ({
     updateAxesNetValues("Z", -1);
   }, [onZDown, updateAxesNetValues]);
 
+  const wrappedOnPIPUp = useCallback(() => {
+    onPipUp();
+    incrementButtonPressCount("pipUp");
+    updateAxesNetValues("PIP", 1);
+  }, [onPipUp, updateAxesNetValues]);
+  
+  const wrappedOnPIPDown = useCallback(() => {
+    onPipDown();
+    incrementButtonPressCount("pipDown");
+    updateAxesNetValues("PIP", -1);
+  }, [onPipDown, updateAxesNetValues]);
+  
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       switch (event.key) {
@@ -268,6 +268,14 @@ const MovementControl = ({
           wrappedOnZDown();
           setActiveButton("page-down");
           break;
+        case "w":
+          wrappedOnPIPUp();
+          setActiveButton("pip-up");
+          break;
+        case "s":
+          wrappedOnPIPDown();
+          setActiveButton("pip-down");
+          break;
         default:
           break;
       }
@@ -291,6 +299,8 @@ const MovementControl = ({
     wrappedOnYDown,
     wrappedOnZUp,
     wrappedOnZDown,
+    wrappedOnPIPUp,
+    wrappedOnPIPDown,
   ]);
 
   const getButtonClassName = (name) => {
@@ -304,6 +314,7 @@ const MovementControl = ({
 
   return (
     <div className="flex flex-col items-center mt-4">
+
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
           title="Y Increase"
@@ -347,6 +358,21 @@ const MovementControl = ({
         >
           Down
         </button>
+        <button
+  title="PIP Increase"
+  className={getButtonClassName("pip-up")}
+  onClick={wrappedOnPIPUp}
+>
+  PIP Up
+</button>
+<button
+  title="PIP Decrease"
+  className={getButtonClassName("pip-down")}
+  onClick={wrappedOnPIPDown}
+>
+  PIP Down
+</button>
+
       </div>
       <div className="mt-4">
         <div className="mb-4">
@@ -383,40 +409,9 @@ const MovementControl = ({
           </button>
         </div>
 
+        <Tabs tabs={tabs} activeTab={activeTab} handleTabSelect={handleTabSelect} />
 
-
-        {/* Add your tabs here */}
-        <div className="flex mx-2 mt-2 rounded-md bg-gray-800 relative tabs">
-  {tabs.map((tab, index) => (
-    <button
-      key={index}
-      onClick={() => handleTabSelect(index)}
-      className={clsx(
-        "tabs-item custom-tab-width relative z-10 flex items-center justify-center py-1 my-2 text-center rounded-md text-sm cursor-pointer select-none focus:outline-none text-white",
-        {
-          active: activeTab === index,
-          [tab.margin]: true,
-        }
-      )}
-    >
-      {tab.label}
-    </button>
-  ))}
-  <div className={clsx("tab-item-animate", { active: activeTab !== -1 })}></div>
-</div>
-
-        <div className="mt-2">
-          {tabs.map((tab, index) => (
-            <div
-              key={index}
-              className={clsx("tab-content", {
-                hidden: activeTab !== index,
-              })}
-            >
-              {tab.content}
-            </div>
-          ))}
-        </div>
+     
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ const MovementInfo = ({ buttonPressCounts }) => {
     right: "X+",
     pageUp: "Z+",
     pageDown: "Z-",
+    pipUp: "Pip+",
+    pipDown: "Pip-",
   };
 
   return (

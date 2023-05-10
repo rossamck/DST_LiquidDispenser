@@ -20,6 +20,8 @@ const ControlPanelDev = ({ onButtonPressCountsUpdate, onAxesNetValuesUpdate}) =>
             onYDown={() => console.log("Y down")}
             onZUp={() => console.log("Z up")}
             onZDown={() => console.log("Z down")}
+            onPipUp={() => console.log("PIP up")}
+            onPipDown={() => console.log("PIP Down")}
             onButtonPressCountsUpdate={onButtonPressCountsUpdate}
             onAxesNetValuesUpdate={onAxesNetValuesUpdate}
 

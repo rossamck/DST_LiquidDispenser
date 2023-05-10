@@ -120,7 +120,15 @@ const MovementControl = ({
   const handleCoordinateSubmit = () => {
     console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
     sendMessage(`manualCoords:${xCoordinate},${yCoordinate}`);
+
+    // Set the axes net values directly to the submitted coordinates
+    setAxesNetValues(prevValues => ({
+      ...prevValues,
+      X: xCoordinate,
+      Y: yCoordinate,
+    }));
   };
+
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {
@@ -150,8 +158,9 @@ const MovementControl = ({
                   id="xCoordinate"
                   value={xCoordinate}
                   onChange={(e) =>
-                    setXCoordinate(parseInt(e.target.value) || 0)
+                    setXCoordinate(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
                   }
+                  
                   className="border border-gray-300 p-1 rounded w-16"
                 />
               </div>
@@ -164,8 +173,9 @@ const MovementControl = ({
                   id="yCoordinate"
                   value={yCoordinate}
                   onChange={(e) =>
-                    setYCoordinate(parseInt(e.target.value) || 0)
+                    setYCoordinate(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
                   }
+                  
                   className="border border-gray-300 p-1 rounded w-16"
                 />
               </div>
@@ -379,7 +389,7 @@ const MovementControl = ({
             type="number"
             id="customValue"
             value={customValue}
-            onChange={(e) => setCustomValue(parseInt(e.target.value) || 1)}
+            onChange={(e) => setCustomValue(e.target.value === "" ? "" : parseInt(e.target.value) || 1)}
             onKeyDown={(e) => {
               if (
                 e.key === "ArrowUp" ||

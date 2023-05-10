@@ -4,10 +4,7 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 import "./MovementControl.css"; // Import your CSS file here
 import Tabs from "./Tabs";
-import LimitTab from './LimitTab';
-
-
-
+import LimitTab from "./LimitTab";
 
 import {
   FiArrowUp,
@@ -99,9 +96,14 @@ const MovementControl = ({
       X: 0,
       Y: 0,
       Z: 0,
-      PIP: 0, // Add this line
-
+      PIP: 0,
     });
+  };
+
+  const resetCounters = () => {
+    resetButtonPressCounts();
+    resetAxesNetValues();
+    sendMessage("resetCounter");
   };
 
   const moveToLimit = (axis) => {
@@ -109,18 +111,16 @@ const MovementControl = ({
     console.log("move to limit");
     console.log(axis);
     sendMessage(`moveToLimit:${axis}`);
-
   };
 
   const [xCoordinate, setXCoordinate] = useState(0);
   const [yCoordinate, setYCoordinate] = useState(0);
-  
+
   // Implement the function to handle the submission of coordinates
   const handleCoordinateSubmit = () => {
     console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
     sendMessage(`manualCoords:${xCoordinate},${yCoordinate}`);
   };
-  
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {
@@ -139,59 +139,57 @@ const MovementControl = ({
         <div className="text-center mt-4">
           <h2 className="text-white mb-2">Co-ordinate Entry</h2>
 
-        <div className="flex justify-center flex-col">
-          <div className="flex justify-center items-center mb-4">
-            <div className="flex items-center">
-              <label htmlFor="xCoordinate" className="mr-2 text-white">
-                X:
-              </label>
-              <input
-                type="number"
-                id="xCoordinate"
-                value={xCoordinate}
-                onChange={(e) => setXCoordinate(parseInt(e.target.value) || 0)}
-                className="border border-gray-300 p-1 rounded w-16"
-              />
+          <div className="flex justify-center flex-col">
+            <div className="flex justify-center items-center mb-4">
+              <div className="flex items-center">
+                <label htmlFor="xCoordinate" className="mr-2 text-white">
+                  X:
+                </label>
+                <input
+                  type="number"
+                  id="xCoordinate"
+                  value={xCoordinate}
+                  onChange={(e) =>
+                    setXCoordinate(parseInt(e.target.value) || 0)
+                  }
+                  className="border border-gray-300 p-1 rounded w-16"
+                />
+              </div>
+              <div className="flex items-center ml-4">
+                <label htmlFor="yCoordinate" className="mr-2 text-white">
+                  Y:
+                </label>
+                <input
+                  type="number"
+                  id="yCoordinate"
+                  value={yCoordinate}
+                  onChange={(e) =>
+                    setYCoordinate(parseInt(e.target.value) || 0)
+                  }
+                  className="border border-gray-300 p-1 rounded w-16"
+                />
+              </div>
             </div>
-            <div className="flex items-center ml-4">
-              <label htmlFor="yCoordinate" className="mr-2 text-white">
-                Y:
-              </label>
-              <input
-                type="number"
-                id="yCoordinate"
-                value={yCoordinate}
-                onChange={(e) => setYCoordinate(parseInt(e.target.value) || 0)}
-                className="border border-gray-300 p-1 rounded w-16"
-              />
+            <div className="flex justify-center">
+              <button
+                className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+                onClick={handleCoordinateSubmit}
+              >
+                Submit
+              </button>
             </div>
           </div>
-          <div className="flex justify-center">
-            <button
-              className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
-              onClick={handleCoordinateSubmit}
-            >
-              Submit
-            </button>
-          </div>
-        </div>
         </div>
       ),
       margin: "mx-auto",
     },
-    
+
     {
       label: "Tab 3",
-      content: (
-        <div>
-          Tab 3 content goes here
-        </div>
-      ),
+      content: <div>Tab 3 content goes here</div>,
       margin: "mr-2",
     },
   ];
-
-
 
   const wrappedOnXUp = useCallback(() => {
     onXUp();
@@ -234,13 +232,12 @@ const MovementControl = ({
     incrementButtonPressCount("pipUp");
     updateAxesNetValues("PIP", 1);
   }, [onPipUp, updateAxesNetValues]);
-  
+
   const wrappedOnPIPDown = useCallback(() => {
     onPipDown();
     incrementButtonPressCount("pipDown");
     updateAxesNetValues("PIP", -1);
   }, [onPipDown, updateAxesNetValues]);
-  
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -315,7 +312,6 @@ const MovementControl = ({
 
   return (
     <div className="flex flex-col items-center mt-4">
-
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
           title="Y Increase"
@@ -360,20 +356,19 @@ const MovementControl = ({
           Down
         </button>
         <button
-  title="PIP Increase"
-  className={getButtonClassName("pip-up")}
-  onClick={wrappedOnPIPUp}
->
-  PIP Up
-</button>
-<button
-  title="PIP Decrease"
-  className={getButtonClassName("pip-down")}
-  onClick={wrappedOnPIPDown}
->
-  PIP Down
-</button>
-
+          title="PIP Increase"
+          className={getButtonClassName("pip-up")}
+          onClick={wrappedOnPIPUp}
+        >
+          PIP Up
+        </button>
+        <button
+          title="PIP Decrease"
+          className={getButtonClassName("pip-down")}
+          onClick={wrappedOnPIPDown}
+        >
+          PIP Down
+        </button>
       </div>
       <div className="mt-4">
         <div className="mb-4">
@@ -399,20 +394,30 @@ const MovementControl = ({
           />
         </div>
         <div className="flex justify-center">
-          <button
-            className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 mb-5 focus:outline-none reset-button"
-            onClick={() => {
-              resetButtonPressCounts();
-              resetAxesNetValues();
-            }}
-          >
-            Reset
-          </button>
+        <button
+  className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 mr-2 mb-5 focus:outline-none reset-button"
+  onClick={() => {
+    resetCounters();
+  }}
+>
+  Reset
+</button>
+<button
+  className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 ml-2 mb-5 focus:outline-none"
+  onClick={() => {
+    sendMessage("setHome");
+  }}
+>
+  Set Home
+</button>
+
         </div>
 
-        <Tabs tabs={tabs} activeTab={activeTab} handleTabSelect={handleTabSelect} />
-
-     
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          handleTabSelect={handleTabSelect}
+        />
       </div>
     </div>
   );

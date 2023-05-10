@@ -1,7 +1,11 @@
 #include "MultiStepperMotor.h"
 
-MultiStepperMotor::MultiStepperMotor(uint8_t step_pin, uint8_t dir_pin)
-  : _stepper(AccelStepper::DRIVER, step_pin, dir_pin) {}
+MultiStepperMotor::MultiStepperMotor(uint8_t step_pin, uint8_t dir_pin, int8_t limit_switch_pin)
+  : _stepper(AccelStepper::DRIVER, step_pin, dir_pin), _limit_switch_pin(limit_switch_pin) {
+    if (_limit_switch_pin >= 0) {
+        pinMode(_limit_switch_pin, INPUT_PULLUP);
+    }
+}
 
 void MultiStepperMotor::setMaxSpeed(float speed) {
   _stepper.setMaxSpeed(speed);
@@ -17,6 +21,28 @@ void MultiStepperMotor::move(long relative_steps) {
 
 void MultiStepperMotor::runToPosition() {
   _stepper.runToPosition();
+}
+
+long MultiStepperMotor::currentPosition() {
+  return _stepper.currentPosition();
+}
+
+void MultiStepperMotor::setCurrentPosition(long position) {
+  _stepper.setCurrentPosition(position);
+}
+
+
+void MultiStepperMotor::runToLimit() {
+  if (_limit_switch_pin < 0) {
+    // No limit switch connected, return immediately
+    return;
+  }
+  
+  while (digitalRead(_limit_switch_pin)) {
+    _stepper.run();
+  }
+   Serial.println("STOP");
+  _stepper.stop();
 }
 
 MultiStepperXY::MultiStepperXY(MultiStepperMotor &stepper_x, MultiStepperMotor &stepper_y)

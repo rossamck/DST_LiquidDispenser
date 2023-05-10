@@ -67,9 +67,16 @@ void createAccessPoint() {
   Serial.println(WiFi.softAPIP());
 }
 
+
+//proto
 void handleDispensing();
 
-
+void sendI2CMessage(String message) {
+  Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
+  Wire.write(message.c_str());
+  Wire.write('\0');  // Add a null character to indicate the end of the message
+  Wire.endTransmission();
+}
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length) {
   switch (type) {
@@ -138,7 +145,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         currentWell = selectedWells.begin();
         dispenseTicker.attach_ms(100, handleDispensing);
 
-      } else if (message.startsWith("manualMove:")) {
+      } 
+      
+      else if (message.startsWith("manualMove:")) {
         int separatorIndex = message.indexOf(",");
         String axis = message.substring(11, separatorIndex);
         float value = message.substring(separatorIndex + 1).toFloat();
@@ -149,44 +158,45 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
         // Add the following lines to send the manualMove information over i2c
         String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
-        Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-        Wire.write(manualMoveMessage.c_str());
-        Wire.write('\0');  // Add a null character to indicate the end of the message
-        Wire.endTransmission();
+        sendI2CMessage(manualMoveMessage);
+
       }
 
-  else if (message.startsWith("manualCoords:")) {
-    int separatorIndex = message.indexOf(',');
-    String coordX = message.substring(13, separatorIndex);
-    String coordY = message.substring(separatorIndex + 1);
-    Serial.print("Received coords: X=");
-    Serial.print(coordX);
-    Serial.print(", Y=");
-    Serial.println(coordY);
+      else if (message.startsWith("manualCoords:")) {
+        int separatorIndex = message.indexOf(',');
+        String coordX = message.substring(13, separatorIndex);
+        String coordY = message.substring(separatorIndex + 1);
+        Serial.print("Received coords: X=");
+        Serial.print(coordX);
+        Serial.print(", Y=");
+        Serial.println(coordY);
 
-    // Send the coordinates over i2c
-    String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY;
-    Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-    Wire.write(manualCoordsMessage.c_str());
-    Wire.write('\0');  // Add a null character to indicate the end of the message
-    Wire.endTransmission();
-  }
+        // Send the coordinates over i2c
+        String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY;
+        sendI2CMessage(manualCoordsMessage);
 
-
-
+      }
 
       else if (message.startsWith("moveToLimit:")) {
-  String axis = message.substring(12);
-  Serial.print("Received moveToLimit message: Axis=");
-  Serial.println(axis);
+        String axis = message.substring(12);
+        Serial.print("Received moveToLimit message: Axis=");
+        Serial.println(axis);
 
-  // Add the following lines to send the moveToLimit information over i2c
-  String moveToLimitMessage = "moveToLimit:" + axis;
-  Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-  Wire.write(moveToLimitMessage.c_str());
-  Wire.write('\0');  // Add a null character to indicate the end of the message
-  Wire.endTransmission();
-}
+        // Add the following lines to send the moveToLimit information over i2c
+        String moveToLimitMessage = "moveToLimit:" + axis;
+        sendI2CMessage(moveToLimitMessage);
+
+      }
+
+      else if (message == "resetCounter") {
+        String resetCounterMessage = "resetCounter";
+        sendI2CMessage(resetCounterMessage);
+      }
+
+      else if (message == "setHome") {
+        String setHomeMessage = "setHome";
+        sendI2CMessage(setHomeMessage);
+      }
 
       else if (message == "emergencyStop") {
         Serial.println("Emergency Stop");
@@ -214,9 +224,8 @@ void handleDispensing() {
   webSocket.broadcastTXT(message);
 
   Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
-  Wire.write(wellIdAndVolume.c_str());
-  Wire.write('\0');  // Add a null character to indicate the end of the message
-  Wire.endTransmission();
+        sendI2CMessage(wellIdAndVolume);
+
 
   Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32);  // Request up to 32 characters (adjust as needed)
   String response = "";

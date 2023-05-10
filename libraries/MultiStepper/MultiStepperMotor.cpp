@@ -35,15 +35,18 @@ void MultiStepperMotor::setCurrentPosition(long position) {
 void MultiStepperMotor::runToLimit() {
   if (_limit_switch_pin < 0) {
     // No limit switch connected, return immediately
+    Serial.println("ERROR: No limit switch!");
     return;
   }
   
+  _stepper.move(INT32_MAX);  // Move indefinitely in one direction
   while (digitalRead(_limit_switch_pin)) {
     _stepper.run();
   }
-   Serial.println("STOP");
+  Serial.println("STOP");
   _stepper.stop();
 }
+
 
 MultiStepperXY::MultiStepperXY(MultiStepperMotor &stepper_x, MultiStepperMotor &stepper_y)
   : _stepper_x(stepper_x), _stepper_y(stepper_y) {}

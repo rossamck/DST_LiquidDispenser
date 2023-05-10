@@ -25,7 +25,8 @@ const DevLayout = ({
   sidebarOpen,
   setSidebarOpen,
   onButtonPressCountsUpdate,
-  onAxesNetValuesUpdate
+  onAxesNetValuesUpdate,
+  receivedCoords,
 
   
 }) => {
@@ -150,7 +151,10 @@ const DevLayout = ({
           </div>
         </div>
       </div>
-      <StatusIndicator sidebarOpen={sidebarOpen} />
+      <StatusIndicator
+      sidebarOpen={sidebarOpen}
+      receivedCoords={receivedCoords}
+      />
     </div>
   );
   

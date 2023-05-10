@@ -19,6 +19,7 @@ function App() {
   const [activeLayout, setActiveLayout] = useState("Layout1"); // Add this line to manage the active layout
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [receivedCoords, setReceivedCoords] = useState(null);
 
 
 
@@ -72,11 +73,28 @@ const handleMessage = (message) => {
       const wellId = message.split(':')[1];
       console.log('Completed well:', wellId);
       setCompletedWells((prevCompletedWells) => [...prevCompletedWells, wellId]);
+    } else if (message.startsWith('receivedCoordspos:')) {
+      console.log("Coords");
+      const posStr = message.split(':')[1];
+      const posValues = posStr.split(',');
+      const xPos = parseFloat(posValues[0].split('=')[1]);
+      const yPos = parseFloat(posValues[1].split('=')[1]);
+      const zPos = parseFloat(posValues[2].split('=')[1]);
+      const pipVal = parseInt(posValues[3].split('=')[1]);
+      console.log("Received Coords:", {xPos, yPos, zPos, pipVal});
+
+      console.log(`Received positional data: X=${xPos}, Y=${yPos}, Z=${zPos}, PIP=${pipVal}`);
+      setReceivedCoords({xPos, yPos, zPos, pipVal});
+      console.log("Received Coords props:", receivedCoords);
+
+
+      // You can now use the positional data as needed in your application
     } else {
       // Handle the default case (if the message doesn't match any of the cases)
     }
   }
 };
+
 
   
   
@@ -109,11 +127,15 @@ return (
           setCompletedWells={setCompletedWells}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          receivedCoords={receivedCoords}
+
         />
       )}
         {activeLayout === "DevLayout" && (
           <DevLayout
             // Pass all required props to DevLayout component
+            receivedCoords={receivedCoords}
+
           />
         )}
       {/* Add more layout components here with their respective conditions */}

@@ -2,11 +2,13 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineExclamationCircle } from 'react-icons/ai';
 import { WebSocketContext } from '../../components/WebSocketContext/WebSocketContext';
 
-const StatusIndicator = ({ sidebarOpen }) => {
+const StatusIndicator = ({ sidebarOpen, receivedCoords }) => {
   const { status } = useContext(WebSocketContext);
   const [ipAddress, setIpAddress] = useState(() => {
     return localStorage.getItem('userWebSocketIP') || null;
   });
+  console.log("Received Coords status:", receivedCoords);
+
 
   useEffect(() => {
     const onStorageChange = (event) => {
@@ -65,6 +67,12 @@ const StatusIndicator = ({ sidebarOpen }) => {
           IP Address: {ipAddress}
         </div>
       )}
+      {receivedCoords && (
+  <div className="flex items-center text-white">
+    {`X=${receivedCoords.xPos.toFixed(2)}, Y=${receivedCoords.yPos.toFixed(2)}, Z=${receivedCoords.zPos.toFixed(2)}, PIP=${receivedCoords.pipVal}`}
+  </div>
+)}
+
     </div>
   );
 };

@@ -24,6 +24,8 @@ const Layout = ({
   setCompletedWells,
   sidebarOpen,
   setSidebarOpen,
+  receivedCoords,
+
   
 }) => {
   const [allSelectedWells, setAllSelectedWells] = useState([]);
@@ -141,7 +143,10 @@ const Layout = ({
           </div>
         </div>
       </div>
-      <StatusIndicator sidebarOpen={sidebarOpen} />
+      <StatusIndicator
+      sidebarOpen={sidebarOpen}
+      receivedCoords={receivedCoords}
+        />
     </div>
   );
   

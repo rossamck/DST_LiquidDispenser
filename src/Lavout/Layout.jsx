@@ -25,6 +25,7 @@ const Layout = ({
   sidebarOpen,
   setSidebarOpen,
   receivedCoords,
+  
 
   
 }) => {
@@ -76,8 +77,14 @@ const Layout = ({
     });
   };
   
+  const { status } = useContext(WebSocketContext);
+  const isStatusConnected = status === 'connected';
   
-
+  if (isStatusConnected && receivedCoords === null) {
+    console.log("Status is connected and receivedCoords is null");
+    sendMessage("getCurrentCoords");
+  }
+  
   const onWellPlateUpdate = (selectedWells) => {
     // Define the functionality that should be triggered when well plate updates
     // For example, you can add a console.log statement to see the updated wells

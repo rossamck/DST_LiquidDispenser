@@ -68,10 +68,10 @@ int fullturn_400 = 400 * microstep_amount;
 int fullturn_200 = 200 * microstep_amount;
 
 void sendCurrentPositions() {
-  long xCurrentPosition = stepper_X.currentPosition();
-  long yCurrentPosition = stepper_Y.currentPosition();
-  long zCurrentPosition = stepper_Z.currentPosition();
-  long pipCurrentPosition = stepper_PIP.currentPosition();
+  long xCurrentPosition = stepper_X.currentPosition() / microstep_amount;
+  long yCurrentPosition = stepper_Y.currentPosition() / microstep_amount;
+  long zCurrentPosition = stepper_Z.currentPosition() / microstep_amount;
+  long pipCurrentPosition = stepper_PIP.currentPosition() / microstep_amount;
 
   Wire.write("pos:");
   Wire.write("X=");
@@ -233,6 +233,8 @@ void loop() {
     previousX = currentX;
     previousY = currentY;
 
+    receivedData.sendCoords = true;
+
     receivedData.manualCoordsReceived = false;
   }
 
@@ -295,6 +297,11 @@ void receiveEvent(int howMany) {
     Serial.print(receivedData.coordX);
     Serial.print(", Y=");
     Serial.println(receivedData.coordY);
+  }
+
+  else if (receivedMessage.startsWith("getCurrentCoords")) {
+    receivedData.sendCoords = true;
+
   }
 
   else if (receivedMessage.startsWith("setHome")) {

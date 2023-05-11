@@ -7,7 +7,6 @@ const StatusIndicator = ({ sidebarOpen, receivedCoords }) => {
   const [ipAddress, setIpAddress] = useState(() => {
     return localStorage.getItem('userWebSocketIP') || null;
   });
-  console.log("Received Coords status:", receivedCoords);
 
 
   useEffect(() => {

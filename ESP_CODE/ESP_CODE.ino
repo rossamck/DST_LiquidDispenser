@@ -36,15 +36,14 @@ std::vector<Well>::iterator currentWell;
 
 String requestDataFromNano() {
   while (true) {
-    Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32);  // Request up to 32 characters
+    Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32); 
     String response = "";
     while (Wire.available()) {
       char c = Wire.read();
-      if (c == '\0') break;  // Stop reading when a null character is encountered
+      if (c == '\0') break;  
       response += c;
     }
 
-    // Check if the response indicates that a well is finished
     if (response.startsWith("finished")) {
       Serial.print("Received finished message:");
       Serial.println(response);
@@ -208,6 +207,9 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         // Send the coordinates over i2c
         String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY;
         sendI2CMessage(manualCoordsMessage);
+        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
+
+        webSocket.broadcastTXT(receivedCoordsMessage);
 
       }
 
@@ -225,6 +227,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
       else if (message == "resetCounter") {
         String resetCounterMessage = "resetCounter";
         sendI2CMessage(resetCounterMessage);
+      }
+
+      else if (message == "getCurrentCoords") {
+        String getCoordsMessage = "getCurrentCoords";
+        sendI2CMessage(getCoordsMessage);
+        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
+
+        webSocket.broadcastTXT(receivedCoordsMessage);
       }
 
       else if (message == "setHome") {

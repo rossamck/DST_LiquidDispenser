@@ -52,8 +52,8 @@ const WebSocketProvider = ({ children, handleMessage }) => {
 
     const newSocket = new WebSocket(`ws://${ip}:81`);
     newSocket.onopen = () => {
-      setStatus('connected');
       newSocket.send('ping');
+      
     };
     newSocket.onclose = () => {
       setStatus('not_connected');
@@ -112,6 +112,8 @@ const WebSocketProvider = ({ children, handleMessage }) => {
     };
   }, [socket, sendMessage, handleMessage, lastMessageTime]);
 
+
+  
   return (
     <WebSocketContext.Provider value={{ socket, status, sendMessage, onMessage, updateWebSocketIP  }}>
       {children}

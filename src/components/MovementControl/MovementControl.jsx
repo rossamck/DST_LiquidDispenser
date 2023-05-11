@@ -5,6 +5,7 @@ import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 import "./MovementControl.css"; // Import your CSS file here
 import Tabs from "./Tabs";
 import LimitTab from "./LimitTab";
+import AxisContext from "../../AxisContext";
 
 import {
   FiArrowUp,
@@ -24,11 +25,21 @@ const MovementControl = ({
   onPipDown,
   onButtonPressCountsUpdate,
   onAxesNetValuesUpdate,
+  receivedCoords,
 }) => {
   const { sendMessage } = useContext(WebSocketContext);
+  const axisLimits = useContext(AxisContext);
+  const [warningMessage, setWarningMessage] = useState(null);
+
+
 
   const [activeButton, setActiveButton] = useState(null);
   const [customValue, setCustomValue] = useState(1);
+  const [isMoving, setIsMoving] = useState(false);
+  const [initialCoordsReceived, setInitialCoordsReceived] = useState(false);
+
+
+
 
   // Inside MovementControl component, add these new state variables
   const [buttonPressCounts, setButtonPressCounts] = useState({
@@ -57,6 +68,32 @@ const MovementControl = ({
     onAxesNetValuesUpdate(axesNetValues);
   }, [axesNetValues, onAxesNetValuesUpdate]);
 
+
+  useEffect(() => {
+    if (!initialCoordsReceived && receivedCoords) {
+      setAxesNetValues({
+        X: receivedCoords.xPos,
+        Y: receivedCoords.yPos,
+        Z: receivedCoords.zPos,
+        PIP: receivedCoords.pipVal,
+      });
+      setInitialCoordsReceived(true);
+    }
+  }, [initialCoordsReceived, receivedCoords]);
+
+  useEffect(() => {
+    if (
+      initialCoordsReceived &&
+      receivedCoords &&
+      receivedCoords.xPos === axesNetValues.X &&
+      receivedCoords.yPos === axesNetValues.Y &&
+      receivedCoords.zPos === axesNetValues.Z &&
+      receivedCoords.pipVal === axesNetValues.PIP
+    ) {
+      setIsMoving(false);
+    }
+  }, [receivedCoords, axesNetValues, initialCoordsReceived]);
+
   const incrementButtonPressCount = (buttonName) => {
     setButtonPressCounts((prevCounts) => ({
       ...prevCounts,
@@ -68,15 +105,26 @@ const MovementControl = ({
     (axis, delta) => {
       setAxesNetValues((prevValues) => {
         const newValue = prevValues[axis] + delta * customValue;
+        const axisLimit = axisLimits[axis.toLowerCase()];
+
+        if (newValue > axisLimit.max || newValue < axisLimit.min) {
+          setWarningMessage(`The new value exceeds the ${axis} axis limits.`);
+          return prevValues;
+        }
+
+        setWarningMessage(null); // Clear the warning message if the value is within limits
+
         sendMessage(`manualMove:${axis},${newValue}`);
+        setIsMoving(true);
         return {
           ...prevValues,
           [axis]: newValue,
         };
       });
     },
-    [customValue, sendMessage]
+    [customValue, sendMessage, axisLimits]
   );
+
 
   const resetButtonPressCounts = () => {
     setButtonPressCounts({
@@ -91,20 +139,18 @@ const MovementControl = ({
     });
   };
 
-  const resetAxesNetValues = () => {
-    setAxesNetValues({
-      X: 0,
-      Y: 0,
-      Z: 0,
-      PIP: 0,
-    });
-  };
-
   const resetCounters = () => {
     resetButtonPressCounts();
-    resetAxesNetValues();
+    sendMessage(`manualCoords:0,0`);  // Moves X and Y to 0
+    setIsMoving(true);
+    setAxesNetValues(prevValues => ({
+      ...prevValues,
+      X: 0,
+      Y: 0,
+    }));
     sendMessage("resetCounter");
   };
+  
 
   const moveToLimit = (axis) => {
     // Implement the moveToLimit functionality here
@@ -120,15 +166,14 @@ const MovementControl = ({
   const handleCoordinateSubmit = () => {
     console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
     sendMessage(`manualCoords:${xCoordinate},${yCoordinate}`);
-
+    setIsMoving(true);
     // Set the axes net values directly to the submitted coordinates
-    setAxesNetValues(prevValues => ({
+    setAxesNetValues((prevValues) => ({
       ...prevValues,
       X: xCoordinate,
       Y: yCoordinate,
     }));
   };
-
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {
@@ -138,7 +183,7 @@ const MovementControl = ({
   const tabs = [
     {
       label: "Limit",
-      content: <LimitTab moveToLimit={moveToLimit} />,
+      content: <LimitTab moveToLimit={moveToLimit} isMoving={isMoving} />,
       margin: "ml-2",
     },
     {
@@ -158,9 +203,11 @@ const MovementControl = ({
                   id="xCoordinate"
                   value={xCoordinate}
                   onChange={(e) =>
-                    setXCoordinate(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
+                    setXCoordinate(
+                      e.target.value === "" ? "" : parseInt(e.target.value) || 0
+                    )
                   }
-                  
+                  disabled={isMoving}
                   className="border border-gray-300 p-1 rounded w-16"
                 />
               </div>
@@ -173,9 +220,11 @@ const MovementControl = ({
                   id="yCoordinate"
                   value={yCoordinate}
                   onChange={(e) =>
-                    setYCoordinate(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
+                    setYCoordinate(
+                      e.target.value === "" ? "" : parseInt(e.target.value) || 0
+                    )
                   }
-                  
+                  disabled={isMoving}
                   className="border border-gray-300 p-1 rounded w-16"
                 />
               </div>
@@ -184,6 +233,7 @@ const MovementControl = ({
               <button
                 className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
                 onClick={handleCoordinateSubmit}
+                disabled={isMoving}
               >
                 Submit
               </button>
@@ -251,6 +301,8 @@ const MovementControl = ({
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (isMoving) return; // Add this line
+  
       switch (event.key) {
         case "ArrowUp":
           wrappedOnYUp();
@@ -288,14 +340,14 @@ const MovementControl = ({
           break;
       }
     };
-
+  
     const handleKeyUp = () => {
       setActiveButton(null);
     };
-
+  
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
-
+  
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
@@ -309,7 +361,9 @@ const MovementControl = ({
     wrappedOnZDown,
     wrappedOnPIPUp,
     wrappedOnPIPDown,
+    isMoving,
   ]);
+  
 
   const getButtonClassName = (name) => {
     const baseClassName =
@@ -322,11 +376,13 @@ const MovementControl = ({
 
   return (
     <div className="flex flex-col items-center mt-4">
+          
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
           title="Y Increase"
           className={getButtonClassName("up") + " col-start-2 row-start-1"}
           onClick={wrappedOnYUp}
+          disabled={isMoving}
         >
           <FiArrowUp className="text-gray-800" size={24} />
         </button>
@@ -334,6 +390,7 @@ const MovementControl = ({
           title="X Decrease"
           className={getButtonClassName("left") + " col-start-1 row-start-2"}
           onClick={wrappedOnXDown}
+          disabled={isMoving}
         >
           <FiArrowLeft className="text-gray-800" size={24} />
         </button>
@@ -341,6 +398,7 @@ const MovementControl = ({
           title="Y Decrease"
           className={getButtonClassName("down") + " col-start-2 row-start-2"}
           onClick={wrappedOnYDown}
+          disabled={isMoving}
         >
           <FiArrowDown className="text-gray-800" size={24} />
         </button>
@@ -348,6 +406,7 @@ const MovementControl = ({
           title="X Increase"
           className={getButtonClassName("right") + " col-start-3 row-start-2"}
           onClick={wrappedOnXUp}
+          disabled={isMoving}
         >
           <FiArrowRight className="text-gray-800" size={24} />
         </button>
@@ -355,6 +414,7 @@ const MovementControl = ({
           title="Move Up (Z-axis)"
           className={getButtonClassName("page-up")}
           onClick={wrappedOnZUp}
+          disabled={isMoving}
         >
           Up
         </button>
@@ -362,6 +422,7 @@ const MovementControl = ({
           title="Move Down (Z-axis)"
           className={getButtonClassName("page-down")}
           onClick={wrappedOnZDown}
+          disabled={isMoving}
         >
           Down
         </button>
@@ -369,6 +430,7 @@ const MovementControl = ({
           title="PIP Increase"
           className={getButtonClassName("pip-up")}
           onClick={wrappedOnPIPUp}
+          disabled={isMoving}
         >
           PIP Up
         </button>
@@ -376,10 +438,14 @@ const MovementControl = ({
           title="PIP Decrease"
           className={getButtonClassName("pip-down")}
           onClick={wrappedOnPIPDown}
+          disabled={isMoving}
         >
           PIP Down
         </button>
       </div>
+      {warningMessage && (
+        <div className="text-red-500">{warningMessage}</div>
+      )}
       <div className="mt-4">
         <div className="mb-4">
           <label htmlFor="customValue" className="mr-2 text-white">
@@ -389,7 +455,11 @@ const MovementControl = ({
             type="number"
             id="customValue"
             value={customValue}
-            onChange={(e) => setCustomValue(e.target.value === "" ? "" : parseInt(e.target.value) || 1)}
+            onChange={(e) =>
+              setCustomValue(
+                e.target.value === "" ? "" : parseInt(e.target.value) || 1
+              )
+            }
             onKeyDown={(e) => {
               if (
                 e.key === "ArrowUp" ||
@@ -400,27 +470,29 @@ const MovementControl = ({
                 e.preventDefault();
               }
             }}
+            disabled={isMoving}
             className="border border-gray-300 p-1 rounded"
           />
         </div>
         <div className="flex justify-center">
-        <button
-  className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 mr-2 mb-5 focus:outline-none reset-button"
-  onClick={() => {
-    resetCounters();
-  }}
->
-  Reset
-</button>
-<button
-  className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 ml-2 mb-5 focus:outline-none"
-  onClick={() => {
-    sendMessage("setHome");
-  }}
->
-  Set Home
-</button>
-
+          <button
+            className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 mr-2 mb-5 focus:outline-none reset-button"
+            onClick={() => {
+              resetCounters();
+            }}
+            disabled={isMoving}
+          >
+            Reset
+          </button>
+          <button
+            className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 ml-2 mb-5 focus:outline-none"
+            onClick={() => {
+              sendMessage("setHome");
+            }}
+            disabled={isMoving}
+          >
+            Set Home
+          </button>
         </div>
 
         <Tabs

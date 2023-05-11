@@ -2,7 +2,8 @@ import React from "react";
 import MovementControl from "../../components/MovementControl/MovementControl";
 
 
-const ControlPanelDev = ({ onButtonPressCountsUpdate, onAxesNetValuesUpdate}) => {
+const ControlPanelDev = ({ onButtonPressCountsUpdate, onAxesNetValuesUpdate, receivedCoords
+}) => {
 
 
   return (
@@ -24,6 +25,8 @@ const ControlPanelDev = ({ onButtonPressCountsUpdate, onAxesNetValuesUpdate}) =>
             onPipDown={() => console.log("PIP Down")}
             onButtonPressCountsUpdate={onButtonPressCountsUpdate}
             onAxesNetValuesUpdate={onAxesNetValuesUpdate}
+            receivedCoords={receivedCoords}
+
 
           />
         </div>

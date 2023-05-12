@@ -7,7 +7,7 @@ const InfoPanel = ({ className, selectedWells, dispensingWell, completedWells })
   
   return (
     <aside className={`p-4 bg-white overflow-y-hidden ${className} custom-info-panel`} style={{ height: "100%" }}>
-    <h2 className="text-xl font-semibold mb-4">Well Information</h2>
+    <h2 className="text-xl font-semibold underline underline-offset-8 mb-4 ">Well Information</h2>
     <div className="w-full h-[calc(100vh-10.75rem)] flex-col pb-8"> 
              <WellStatusTable
           selectedWells={selectedWells}

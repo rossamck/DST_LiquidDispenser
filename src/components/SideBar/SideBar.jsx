@@ -63,7 +63,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout }) {
           </button>
           <button
             className={`text-gray-400 block py-2 px-4 hover:text-white`}
-            onClick={() => handleButtonClick("Layout2")}
+            onClick={() => handleButtonClick("PositionalLayout")}
           >
             Option 2
           </button>

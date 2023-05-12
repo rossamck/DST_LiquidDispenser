@@ -266,13 +266,13 @@ const MovementControl = ({
   const wrappedOnYUp = useCallback(() => {
     onYUp();
     incrementButtonPressCount("up");
-    updateAxesNetValues("Y", 1);
+    updateAxesNetValues("Y", -1);
   }, [onYUp, updateAxesNetValues]);
 
   const wrappedOnYDown = useCallback(() => {
     onYDown();
     incrementButtonPressCount("down");
-    updateAxesNetValues("Y", -1);
+    updateAxesNetValues("Y", 1);
   }, [onYDown, updateAxesNetValues]);
 
   const wrappedOnZUp = useCallback(() => {

@@ -20,7 +20,7 @@ function SidebarIcons({ sidebarOpen, handleButtonClick }) {
       </button>
       <button
         className={`text-gray-400 block hover:text-white`}
-        onClick={() => handleButtonClick('Layout2')}
+        onClick={() => handleButtonClick('PositionalLayout')}
         title="Option 2"
       >
         <FaRegObjectUngroup className="inline" size={36} />

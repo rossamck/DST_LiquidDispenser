@@ -3,7 +3,11 @@
 import React, { useState, useCallback } from "react";
 import Layout from "./Lavout/Layout";
 import DevLayout from "./Lavout/DevLayout";
+import PositionalLayout from "./Lavout/PositionalLayout";
 import AxisContext from "./AxisContext";
+
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 import { WebSocketProvider } from "./components/WebSocketContext/WebSocketContext";
 import "./components/scrollbar/scrollbar.css";
@@ -142,6 +146,16 @@ function App() {
               // Pass all required props to DevLayout component
               receivedCoords={receivedCoords}
             />
+          )}
+          {activeLayout === "PositionalLayout" && (
+                <DndProvider backend={HTML5Backend}>
+
+            <PositionalLayout
+              // Pass all required props to DevLayout component
+              receivedCoords={receivedCoords}
+            />
+                </DndProvider>
+
           )}
           {/* Add more layout components here with their respective conditions */}
         </div>

@@ -2,8 +2,18 @@
 import React, { useRef } from "react";
 import ModuleContainer from "../../components/PositionModules/ModuleContainer";
 
-const ContentDev = ({ resetPositions, setResetPositions }) => {
+const ContentDev = ({
+  resetPositions,
+  setResetPositions,
+  savePositions,
+  setSavePositions,
+  
+
+}) => {
+  
   const contentRef = useRef();
+
+  
 
   return (
     <div
@@ -15,6 +25,8 @@ const ContentDev = ({ resetPositions, setResetPositions }) => {
         <ModuleContainer 
         resetPositions={resetPositions}
         setResetPositions={setResetPositions}
+        savePositions={savePositions}
+        setSavePositions={setSavePositions}
         />
       </div>
     </div>

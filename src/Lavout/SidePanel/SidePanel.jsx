@@ -12,11 +12,9 @@ const SidePanel = ({
   startDispensingEnabled,
   setStartDispensingEnabled,
   sendSelectionEnabled,
+  selectedPlateId,
+  setSelectedPlateId,
 }) => {
-
-
-    
-    
   return (
     <div className="col-span-3 flex flex-col h-full">
       <ControlPanel
@@ -31,8 +29,9 @@ const SidePanel = ({
         startDispensingEnabled={startDispensingEnabled}
         setStartDispensingEnabled={setStartDispensingEnabled}
         sendSelectionEnabled={sendSelectionEnabled}
+        selectedPlateId={selectedPlateId}
+        setSelectedPlateId={setSelectedPlateId}
       />
-
     </div>
   );
 };

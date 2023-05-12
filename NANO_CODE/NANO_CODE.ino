@@ -89,6 +89,24 @@ void sendCurrentPositions() {
 }
 
 
+void moveMotors(float currentX, float currentY) {
+    float deltaX = currentX - previousX;
+    float deltaY = currentY - previousY;
+
+    long stepsX = deltaX * microstep_amount;
+    long stepsY = deltaY * microstep_amount;
+
+    Serial.print("deltaX=");
+    Serial.print(deltaX);
+    Serial.print(", deltaY=");
+    Serial.println(deltaY);
+
+    multiStepper.move(stepsX, stepsY);
+    multiStepper.runToPosition();
+
+    previousX = currentX;
+    previousY = currentY;
+}
 void setup() {
   // I2C setup
   Wire.begin(8);
@@ -138,10 +156,21 @@ void loop() {
     Serial.println(receivedData.volume);
     Serial.print("Received source index: ");
     Serial.println(receivedData.sourceIndex);
+    Serial.print("Received x: ");
+    Serial.println(receivedData.coordX);
+    Serial.print("Received y: ");
+    Serial.println(receivedData.coordY);
 
-    delay(1000);
+    float currentX = receivedData.coordX.toFloat();
+    float currentY = receivedData.coordY.toFloat();
+
+    moveMotors(currentX, currentY);
+
+        delay(1000); //replace this with function to dispense
     Serial.print("Send well response for: ");
-    Serial.println(receivedData.wellId);
+        Serial.println(receivedData.wellId);
+
+
     receivedData.sendResponse = true;
     receivedData.dataReceived = false;
 
@@ -208,33 +237,12 @@ void loop() {
   } 
   
   else if (receivedData.manualCoordsReceived) {
-    // Convert the received coordinates to steps
     float currentX = receivedData.coordX.toFloat();
     float currentY = receivedData.coordY.toFloat();
-  
-    float deltaX = currentX - previousX;
-    float deltaY = currentY - previousY;
 
-    // Convert deltas to steps
-    long stepsX = deltaX * microstep_amount;
-    long stepsY = deltaY * microstep_amount;
-
-  
-    Serial.print("deltaX=");
-    Serial.print(deltaX);
-    Serial.print(", deltaY=");
-    Serial.println(deltaY);
-  
-
-    // Move the X and Y motors by the calculated number of steps
-    multiStepper.move(stepsX, stepsY);
-    multiStepper.runToPosition();
-
-    previousX = currentX;
-    previousY = currentY;
+    moveMotors(currentX, currentY); // And also here
 
     receivedData.sendCoords = true;
-
     receivedData.manualCoordsReceived = false;
   }
 
@@ -312,14 +320,21 @@ void receiveEvent(int howMany) {
     Serial.println("RESET");
   }
 
-  else {
-    int firstDelimiterIndex = receivedMessage.indexOf(',');
-    int secondDelimiterIndex = receivedMessage.indexOf(',', firstDelimiterIndex + 1);
-    receivedData.wellId = receivedMessage.substring(0, firstDelimiterIndex);
-    receivedData.volume = receivedMessage.substring(firstDelimiterIndex + 1, secondDelimiterIndex).toFloat();
-    receivedData.sourceIndex = receivedMessage.substring(secondDelimiterIndex + 1).toInt();
-    receivedData.dataReceived = true;
-  }
+else {
+  int firstDelimiterIndex = receivedMessage.indexOf(',');
+  int secondDelimiterIndex = receivedMessage.indexOf(',', firstDelimiterIndex + 1);
+  int thirdDelimiterIndex = receivedMessage.indexOf(',', secondDelimiterIndex + 1);
+  int fourthDelimiterIndex = receivedMessage.indexOf(',', thirdDelimiterIndex + 1);
+
+  receivedData.wellId = receivedMessage.substring(0, firstDelimiterIndex);
+  receivedData.volume = receivedMessage.substring(firstDelimiterIndex + 1, secondDelimiterIndex).toFloat();
+  receivedData.sourceIndex = receivedMessage.substring(secondDelimiterIndex + 1, thirdDelimiterIndex).toInt();
+  receivedData.coordX = receivedMessage.substring(thirdDelimiterIndex + 1, fourthDelimiterIndex).toFloat();
+  receivedData.coordY = receivedMessage.substring(fourthDelimiterIndex + 1).toFloat();
+
+  receivedData.dataReceived = true;
+}
+
 }
 
 void requestEvent() {

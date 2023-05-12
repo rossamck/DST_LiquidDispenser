@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FiCheck } from "react-icons/fi";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 
@@ -9,9 +9,20 @@ const ControlButtons = ({
   startDispensingEnabled,
   setStartDispensingEnabled,
   sendSelectionEnabled,
+  selectedPlateId,
+  setSelectedPlateId,
 }) => {
   const [volume, setVolume] = useState("");
   const { sendMessage } = useContext(WebSocketContext);
+  const [savedPositions, setSavedPositions] = useState([]);
+
+  useEffect(() => {
+    const savedPositionsData = localStorage.getItem("savedPositions");
+    if (savedPositionsData) {
+      const parsedPositions = JSON.parse(savedPositionsData);
+      setSavedPositions(parsedPositions);
+    }
+  }, []);
 
   const onStartDispensingClick = () => {
     // Start dispensing process
@@ -31,6 +42,21 @@ const ControlButtons = ({
   const onSendWellsClick = () => {
     onSendWells();
   };
+
+  const onWellPlateButtonClick = (slotId, moduleId) => {
+    console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}`);
+    setSelectedPlateId(slotId); // Update selected well plate
+  };
+
+  const filteredPositions = savedPositions.filter(
+    (position) => position.moduleId === 1
+  );
+
+  useEffect(() => {
+    if (filteredPositions.length > 0) {
+      // setSelectedPlateId(filteredPositions[0].slotId); // Default to first well plate
+    }
+  }, [filteredPositions]);
 
   return (
     <div className="flex flex-col items-center justify-between h-full">
@@ -74,13 +100,42 @@ const ControlButtons = ({
         Start Dispensing
       </button>
       <button
-  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-  onClick={() => sendMessage("emergencyStop")}
->
-  STOP
-</button>
+        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
+        onClick={() => sendMessage("emergencyStop")}
+      >
+        STOP
+      </button>
+      <hr className="border-gray-300 mt-4 w-full" />
+      <div className="flex flex-col items-center justify-center">
+        {filteredPositions.length > 0 ? (
+          <>
+            <h3 className="text-white font-bold mt-3 mb-3">
+              Available Well Plates:
+            </h3>
 
-
+            <ul>
+              {filteredPositions.map((position, index) => (
+                <li key={position.slotId}>
+                  <button
+                    className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 ${
+                      position.slotId === selectedPlateId ? "opacity-50" : ""
+                    }`}
+                    onClick={() =>
+                      onWellPlateButtonClick(position.slotId, position.moduleId)
+                    }
+                  >
+                    Wellplate ({position.slotId + 1})
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <h3 className="text-white font-bold mt-3 mb-3">
+          Please select a well plate position
+          </h3>
+        )}
+      </div>
     </div>
   );
 };
@@ -104,7 +159,3 @@ const NumberInput = ({ value, onChange }) => {
     </div>
   );
 };
-
-
-
-

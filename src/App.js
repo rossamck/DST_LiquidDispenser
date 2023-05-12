@@ -5,9 +5,10 @@ import Layout from "./Lavout/Layout";
 import DevLayout from "./Lavout/DevLayout";
 import PositionalLayout from "./Lavout/PositionalLayout";
 import AxisContext from "./AxisContext";
+import PositionsContext from "./context/PositionsContext";
 
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import { WebSocketProvider } from "./components/WebSocketContext/WebSocketContext";
 import "./components/scrollbar/scrollbar.css";
@@ -25,6 +26,9 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [receivedCoords, setReceivedCoords] = useState(null);
+  const [savedPositions, setSavedPositions] = useState([]);
+  const [selectedPlateId, setSelectedPlateId] = useState(0);
+
 
   const axisLimits = {
     x: { min: 0, max: 2100 },
@@ -33,10 +37,6 @@ function App() {
     pip: { min: 0, max: 500 },
   };
 
-
-
-
-  
   React.useEffect(() => {
     document.title = "Liquid Dispenser Client";
   }, []);
@@ -112,8 +112,11 @@ function App() {
 
   // ...
   return (
-  <AxisContext.Provider value={axisLimits}>
+    <AxisContext.Provider value={axisLimits}>
       <WebSocketProvider handleMessage={handleMessage}>
+      <PositionsContext.Provider
+          value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the PositionsContext
+        >
         <div className="App">
           <Sidebar
             sidebarOpen={sidebarOpen}
@@ -139,6 +142,9 @@ function App() {
               sidebarOpen={sidebarOpen}
               setSidebarOpen={setSidebarOpen}
               receivedCoords={receivedCoords}
+              savedPositions={savedPositions}
+              selectedPlateId={selectedPlateId}
+              setSelectedPlateId={setSelectedPlateId}
             />
           )}
           {activeLayout === "DevLayout" && (
@@ -148,17 +154,19 @@ function App() {
             />
           )}
           {activeLayout === "PositionalLayout" && (
-                <DndProvider backend={HTML5Backend}>
-
-            <PositionalLayout
-              // Pass all required props to DevLayout component
-              receivedCoords={receivedCoords}
-            />
-                </DndProvider>
-
+            <DndProvider backend={HTML5Backend}>
+              <PositionalLayout
+                // Pass all required props to DevLayout component
+                receivedCoords={receivedCoords}
+                savedPositions={savedPositions}
+                setSavedPositions={setSavedPositions}
+              />
+            </DndProvider>
           )}
           {/* Add more layout components here with their respective conditions */}
         </div>
+        </PositionsContext.Provider>
+
       </WebSocketProvider>
     </AxisContext.Provider>
   );

@@ -18,6 +18,17 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
 
   const isVertical = id === 0 || id === 1;
 
+  const numberStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: 'darkgrey',
+  };
+  
+
   return (
     <div
       ref={drop}
@@ -31,11 +42,16 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
         border: isFilled ? 'none' : '1px dashed gray',
         backgroundColor: isFilled ? 'lightblue' : (isOver ? 'lightgrey' : 'white'),
         borderRadius: '8px',
+        position: 'relative', // Added position relative for number positioning
       }}
     >
+      {!isFilled && (
+        <div style={numberStyle}>{id + 1}</div>
+      )}
       {children}
     </div>
   );
 };
+
 
 export default DroppableSlot;

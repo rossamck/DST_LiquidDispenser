@@ -9,13 +9,22 @@ const PositionalLayout = ({
   sidebarOpen,
   setSidebarOpen,
   receivedCoords,
+  savedPositions,
+  setSavedPositions
+  
 }) => {
   const [resetPositions, setResetPositions] = useState(false);
+  const [savePositions, setSavePositions] = useState(false);
+
+
 
   const handleResetPositions = () => {
-    // Perform any necessary logic for resetting positions here
-    // Set the `resetPositions` state to trigger an update in ContentPos component
     setResetPositions(true);
+  };
+
+  
+  const handleSavePositions = () => {
+    setSavePositions(true);
   };
 
   return (
@@ -24,18 +33,26 @@ const PositionalLayout = ({
         <div className="grid grid-cols-12 gap-2 w-full flex-grow bg-gray-950">
           <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="col-span-3">
-            <InfoPanelPos />
+            <InfoPanelPos 
+            savedPositions={savedPositions}
+            />
           </div>
           <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
             <ContentPos
               receivedCoords={receivedCoords}
               resetPositions={resetPositions}
               setResetPositions={setResetPositions}
+              savePositions={savePositions}
+              setSavePositions={setSavePositions}
+              savedPositions={savedPositions}
+              setSavedPositions={setSavedPositions}
+              
             />
           </div>
           <div className="col-span-3 flex flex-col h-[calc(100vh-3.75rem)]">
             <SidePanelPos
               handleResetPositions={handleResetPositions}
+              handleSavePositions={handleSavePositions}
             />
           </div>
         </div>

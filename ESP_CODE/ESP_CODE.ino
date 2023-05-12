@@ -28,7 +28,10 @@ struct Well {
   String wellId;
   float volume;
   int sourceIndex;
+  int x;
+  int y;
 };
+
 
 
 std::vector<Well> selectedWells;
@@ -36,11 +39,11 @@ std::vector<Well>::iterator currentWell;
 
 String requestDataFromNano() {
   while (true) {
-    Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32); 
+    Wire.requestFrom(ARDUINO_NANO_I2C_ADDR, 32);
     String response = "";
     while (Wire.available()) {
       char c = Wire.read();
-      if (c == '\0') break;  
+      if (c == '\0') break;
       response += c;
     }
 
@@ -153,12 +156,19 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
           int idIndex = wellData.indexOf("wellId:");
           int volIndex = wellData.indexOf("volume:");
           int srcIndex = wellData.indexOf("sourceIndex:");
+          int xIndex = wellData.indexOf("xCoord:");  // New line
+          int yIndex = wellData.indexOf("yCoord:");  // New line
+          
 
           String wellId = wellData.substring(idIndex + 7, volIndex - 1);
           float volume = wellData.substring(volIndex + 7, srcIndex - 1).toFloat();
-          int sourceIndex = wellData.substring(srcIndex + 12).toInt();
+          int sourceIndex = wellData.substring(srcIndex + 12, xIndex - 1).toInt();  // Updated line
+  int x = wellData.substring(xIndex + 7, yIndex).toInt();
+int y = wellData.substring(yIndex + 7).toInt();                        // New line
 
-          selectedWells.push_back({ wellId, volume, sourceIndex });
+
+
+          selectedWells.push_back({ wellId, volume, sourceIndex, x, y });  // Updated line
 
           startIndex = nextSeparator + 1;
         }
@@ -174,8 +184,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         dispensing = true;
         currentWell = selectedWells.begin();
         handleDispensing();
-      } 
-      
+      }
+
       else if (message.startsWith("manualMove:")) {
         int separatorIndex = message.indexOf(",");
         String axis = message.substring(11, separatorIndex);
@@ -255,17 +265,29 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
 void handleDispensing() {
   while (currentWell != selectedWells.end()) {
-    String wellIdAndVolume = currentWell->wellId + "," + String(currentWell->volume, 2) + "," + String(currentWell->sourceIndex);
-    Serial.print("String wellIdAndVolume = ");
-    Serial.println(wellIdAndVolume);
+    Serial.println("Current Well Data:");
+    Serial.print("wellId: ");
+    Serial.println(currentWell->wellId);
+    Serial.print("volume: ");
+    Serial.println(currentWell->volume, 2);
+    Serial.print("sourceIndex: ");
+    Serial.println(currentWell->sourceIndex);
+    Serial.print("x: ");
+    Serial.println(currentWell->x);
+    Serial.print("y: ");
+    Serial.println(currentWell->y);
+
+    String wellDataToSend = currentWell->wellId + "," + String(currentWell->volume, 2) + "," + String(currentWell->sourceIndex) + "," + String(currentWell->x) + "," + String(currentWell->y);
+    Serial.print("String wellDataToSend = ");
+    Serial.println(wellDataToSend);
 
     String message = "dispensingWell:" + currentWell->wellId;
     webSocket.broadcastTXT(message);
 
     Wire.beginTransmission(ARDUINO_NANO_I2C_ADDR);
     Serial.print("Sending i2c message: ");
-    Serial.println(wellIdAndVolume);
-    sendI2CMessage(wellIdAndVolume);
+    Serial.println(wellDataToSend);
+    sendI2CMessage(wellDataToSend);
 
     // Wait for well to finish
     String wellFinishedResponse;
@@ -318,7 +340,6 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 
   Wire.begin(SDA_PIN, SCL_PIN);
-
 }
 
 void loop() {

@@ -25,10 +25,11 @@ const Layout = ({
   sidebarOpen,
   setSidebarOpen,
   receivedCoords,
-  
-
+  selectedPlateId,
+  setSelectedPlateId,
   
 }) => {
+  
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
 
@@ -92,17 +93,21 @@ const Layout = ({
   };
 
   const onSendWells = () => {
-    // You can send the selectedWells data as a JSON string
+    // send the selectedWells data as a JSON string
+  
+    // edit this to add to job queue
+    
     setSendSelectionEnabled(false);
+    
+    console.log("All selected wells:", allSelectedWells);
+    
     const wellsData = JSON.stringify(allSelectedWells);
     sendMessage(`selectWells:${wellsData}`);
     console.log("Sending data...");
     console.log(wellsData);
   };
-  //   console.log("test2");
-  //   console.log(allSelectedWells);
+  
 
-  // Layout.jsx
 
   return (
     <div className="relative flex flex-col min-h-screen">
@@ -114,7 +119,8 @@ const Layout = ({
               selectedWells={allSelectedWells}
               dispensingWell={dispensingWell}
               completedWells={completedWells}
-            />
+              selectedPlateId={selectedPlateId} 
+              />
           </div>
           <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
             <Content
@@ -127,6 +133,7 @@ const Layout = ({
               onWellPlateUpdate={onWellPlateUpdate}
               setCompletedWells={setCompletedWells}
               setDispensingWell={setDispensingWell}
+              selectedPlateId={selectedPlateId}
               
             />
           </div>
@@ -146,6 +153,8 @@ const Layout = ({
               selectedWells={allSelectedWells}
               dispensingWell={dispensingWell}
               completedWells={completedWells}
+              selectedPlateId={selectedPlateId}
+              setSelectedPlateId={setSelectedPlateId}
             />
           </div>
         </div>

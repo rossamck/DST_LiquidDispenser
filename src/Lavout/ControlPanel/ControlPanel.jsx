@@ -19,6 +19,8 @@ const ControlPanel = ({
   startDispensingEnabled,
   setStartDispensingEnabled,
   sendSelectionEnabled,
+  selectedPlateId,
+  setSelectedPlateId,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -40,6 +42,8 @@ const ControlPanel = ({
             startDispensingEnabled={startDispensingEnabled}
             setStartDispensingEnabled={setStartDispensingEnabled}
             sendSelectionEnabled={sendSelectionEnabled}
+            selectedPlateId={selectedPlateId}
+            setSelectedPlateId={setSelectedPlateId}
           />
         </div>
       ),

@@ -1,6 +1,4 @@
-// Content.jsx
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WellPlate from "../../components/WellPlate/WellPlate";
 import LiquidSource from "../../components/LiquidSource/LiquidSource";
 
@@ -14,6 +12,7 @@ const Content = ({
   onWellPlateUpdate,
   setCompletedWells,
   setDispensingWell,
+  selectedPlateId,
 }) => {
   const WELL_PLATE_WIDTH = '100%';
   const colourIndexPairs = [
@@ -26,23 +25,24 @@ const Content = ({
     { color: "bg-purple-300", index: 7, highlightedColor: "bg-purple-100" },
     { color: "bg-orange-300", index: 8, highlightedColor: "bg-orange-100" },
   ];
-  
-  
-  
-  
+
   const [selectedColorIndex, setSelectedColorIndex] = useState(colourIndexPairs[0]);
 
+  
+
   const handleLiquidSourceSelect = (index) => {
-    const selectedcolourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;
-    setSelectedColorIndex(selectedcolourIndexPair);
-    if (selectedcolourIndexPair !== null) {
-      console.log(`Selected color: ${selectedcolourIndexPair.color}`);
-      console.log(`Selected index: ${selectedcolourIndexPair.index}`);
+    const selectedColourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;
+    setSelectedColorIndex(selectedColourIndexPair);
+    if (selectedColourIndexPair !== null) {
+      console.log(`Selected color: ${selectedColourIndexPair.color}`);
+      console.log(`Selected index: ${selectedColourIndexPair.index}`);
     }
     // Implement the logic to update selected wells with the selected liquid source color
   }
 
-  
+  useEffect(() => {
+    console.log(`Plate ID updated: ${selectedPlateId}`);
+  }, [selectedPlateId]);
 
   return (
     <div
@@ -63,6 +63,7 @@ const Content = ({
         setDispensingWell={setDispensingWell}
         selectedColorIndex={selectedColorIndex}
         colourIndexPairs={colourIndexPairs}
+        selectedPlateId={selectedPlateId}
       />
       <div className="mt-4">
         <LiquidSource

@@ -10,8 +10,8 @@ const PositionalLayout = ({
   setSidebarOpen,
   receivedCoords,
   savedPositions,
-  setSavedPositions
-  
+  setSavedPositions,
+  setSelectedPlateId,
 }) => {
   const [resetPositions, setResetPositions] = useState(false);
   const [savePositions, setSavePositions] = useState(false);
@@ -20,6 +20,7 @@ const PositionalLayout = ({
 
   const handleResetPositions = () => {
     setResetPositions(true);
+    setSelectedPlateId(null);
   };
 
   

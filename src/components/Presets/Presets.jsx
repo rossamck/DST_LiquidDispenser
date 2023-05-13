@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const Presets = ({ onButtonClick, presets, savePreset, overwritePreset, clearAllPresets, loadPreset }) => {
+const Presets = ({ presets, savePreset, overwritePreset, clearAllPresets, loadPreset, setIsVolumeSelected }) => {
   const [addingPreset, setAddingPreset] = useState(false);
 
   const handlePresetClick = (index, preset) => {
@@ -12,6 +12,7 @@ const Presets = ({ onButtonClick, presets, savePreset, overwritePreset, clearAll
     } else if (!preset) {
       alert('Preset empty, please select another or click Add Preset to save your current selection to this preset.');
     } else {
+      setIsVolumeSelected(true);
       loadPreset(index);
     }
   };

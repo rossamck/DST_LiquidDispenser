@@ -4,8 +4,11 @@ import React, { useState, useCallback } from "react";
 import Layout from "./Lavout/Layout";
 import DevLayout from "./Lavout/DevLayout";
 import PositionalLayout from "./Lavout/PositionalLayout";
+import JobLayout from "./Lavout/JobLayout";
 import AxisContext from "./AxisContext";
 import PositionsContext from "./context/PositionsContext";
+import JobQueue from "./components/JobQueue/JobQueue";
+
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -22,12 +25,14 @@ function App() {
   const [sendSelectionEnabled, setSendSelectionEnabled] = useState(true);
   const [dispensingWell, setDispensingWell] = useState(null);
   const [completedWells, setCompletedWells] = useState([]);
-  const [activeLayout, setActiveLayout] = useState("Layout1"); // Add this line to manage the active layout
+  const [activeLayout, setActiveLayout] = useState("Home"); // Add this line to manage the active layout
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [receivedCoords, setReceivedCoords] = useState(null);
   const [savedPositions, setSavedPositions] = useState([]);
-  const [selectedPlateId, setSelectedPlateId] = useState(0);
+  const [selectedPlateId, setSelectedPlateId] = useState(null);
+
+  const jobQueue = React.useRef(new JobQueue()).current;
 
 
   const axisLimits = {
@@ -77,9 +82,14 @@ function App() {
         // Update start dispensing button
         console.log("Update dispensing button");
         setStartDispensingEnabled(true);
-      } else if (message === "dispensefinished") {
+      } else if (message.startsWith("dispensefinished:")) {
         // Perform another action based on the message content
-        // setSendSelectionEnabled(true);
+        const jobId = message.split(":")[1];
+        // console.log("Job finished: ", jobId);
+        jobQueue.jobCompleted(jobId);
+
+
+
       } else if (message.startsWith("dispensingWell:")) {
         console.log("YEET");
         console.log("wellid = ");
@@ -109,6 +119,8 @@ function App() {
 
         // You can now use the positional data as needed in your application
       } else {
+        console.log("Received default message:", message);
+
         // Handle the default case (if the message doesn't match any of the cases)
       }
     }
@@ -116,7 +128,7 @@ function App() {
 
   return (
     <AxisContext.Provider value={axisLimits}>
-      <WebSocketProvider handleMessage={handleMessage}>
+      <WebSocketProvider handleMessage={handleMessage} jobQueue={jobQueue}>
       <PositionsContext.Provider
           value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the PositionsContext
         >
@@ -125,10 +137,11 @@ function App() {
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
             setActiveLayout={setActiveLayout}
+            activeLayout={activeLayout}
             reloadPage={reloadPage}
           />
 
-          {activeLayout === "Layout1" && (
+          {activeLayout === "Home" && (
             <Layout
               onButtonClick={handleButtonClick}
               currentAction={action}
@@ -149,6 +162,7 @@ function App() {
               savedPositions={savedPositions}
               selectedPlateId={selectedPlateId}
               setSelectedPlateId={setSelectedPlateId}
+              setActiveLayout={setActiveLayout}
             />
           )}
           {activeLayout === "DevLayout" && (
@@ -164,11 +178,19 @@ function App() {
                 receivedCoords={receivedCoords}
                 savedPositions={savedPositions}
                 setSavedPositions={setSavedPositions}
+                setSelectedPlateId={setSelectedPlateId}
               />
             </DndProvider>
           )}
           {/* Add more layout components here with their respective conditions */}
+          {activeLayout === "JobLayout" && (
+            <JobLayout
+              // Pass all required props to DevLayout component
+              receivedCoords={receivedCoords}
+            />
+          )}
         </div>
+
         </PositionsContext.Provider>
 
       </WebSocketProvider>

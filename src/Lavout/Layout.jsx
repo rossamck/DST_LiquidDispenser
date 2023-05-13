@@ -27,9 +27,11 @@ const Layout = ({
   receivedCoords,
   selectedPlateId,
   setSelectedPlateId,
+  setActiveLayout,
   
 }) => {
-  
+
+
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
 
@@ -102,7 +104,7 @@ const Layout = ({
     console.log("All selected wells:", allSelectedWells);
     
     const wellsData = JSON.stringify(allSelectedWells);
-    sendMessage(`selectWells:${wellsData}`);
+    sendMessage(`selectWells:${wellsData}`, true);
     console.log("Sending data...");
     console.log(wellsData);
   };
@@ -134,6 +136,7 @@ const Layout = ({
               setCompletedWells={setCompletedWells}
               setDispensingWell={setDispensingWell}
               selectedPlateId={selectedPlateId}
+              setActiveLayout={setActiveLayout}
               
             />
           </div>

@@ -5,7 +5,6 @@
 #include <vector>
 #include <Wire.h>
 #include <Ticker.h>
-#include <ArduinoJson.h>
 
 #define SDA_PIN 4  // D2 on ESP8266
 #define SCL_PIN 5  // D1 on ESP8266
@@ -36,6 +35,8 @@ struct Well {
 
 std::vector<Well> selectedWells;
 std::vector<Well>::iterator currentWell;
+int currentJobId = -1;  // Initialize to -1 or another value that indicates no jobId has been set
+
 
 String requestDataFromNano() {
   while (true) {
@@ -65,6 +66,7 @@ String requestDataFromNano() {
 
     delay(100);  // Wait for 100ms before checking again
   }
+  return "";
 }
 
 
@@ -123,6 +125,27 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
     case WStype_TEXT:
       String message = String((char*)payload);
+            // Parse and remove jobId from the message
+      if (message.startsWith("jobId:")) {
+        int jobIdEndIndex = message.indexOf(' ');
+        String jobIdStr = message.substring(6, jobIdEndIndex);
+        int jobId = jobIdStr.toInt();
+        Serial.print("Received JobId: ");
+        Serial.println(jobId);
+
+        // Update global jobId if jobId is not -1
+        if (jobId != -1) {
+          currentJobId = jobId;
+        }
+
+        // Remove jobId from the message
+        message = message.substring(jobIdEndIndex + 1);
+      }
+
+      // Serial.print("Job ID: ");
+      // Serial.println(currentJobId);
+      // Serial.print("Parsed message: ");
+      // Serial.println(message);
       if (message == "ping") {
         webSocket.sendTXT(num, "pong");
         break;
@@ -177,6 +200,10 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         Serial.print("Number of selected wells: ");
         Serial.println(selectedWells.size());
         webSocket.broadcastTXT("ready");
+                Serial.println("Starting dispensing");
+        dispensing = true;
+        currentWell = selectedWells.begin();
+        handleDispensing();
       }
 
       else if (message == "startDispensing") {
@@ -322,7 +349,9 @@ String wellCoordsMessage = "receivedCoords" + String("pos:X=") + String(currentW
     // All wells have been dispensed
     Serial.println("Dispensing finished");
     dispensing = false;
-    webSocket.broadcastTXT("dispensefinished");
+      String dispenseFinishedMessage = "dispensefinished:" + String(currentJobId);
+              webSocket.broadcastTXT(dispenseFinishedMessage);
+
   }
 }
 

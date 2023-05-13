@@ -23,6 +23,7 @@ const ControlPanel = ({
   setSelectedPlateId,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [isVolumeSelected, setIsVolumeSelected] = useState(false); 
 
   const handleTabSelect = (index) => {
     setActiveTab(index);
@@ -44,6 +45,8 @@ const ControlPanel = ({
             sendSelectionEnabled={sendSelectionEnabled}
             selectedPlateId={selectedPlateId}
             setSelectedPlateId={setSelectedPlateId}
+            isVolumeSelected={isVolumeSelected}
+            setIsVolumeSelected={setIsVolumeSelected}
           />
         </div>
       ),
@@ -53,12 +56,12 @@ const ControlPanel = ({
       label: "Presets",
       content: (
         <Presets
-          onButtonClick={onButtonClick}
           presets={presets}
           savePreset={savePreset}
           overwritePreset={overwritePreset}
           clearAllPresets={clearAllPresets}
           loadPreset={loadPreset}
+          setIsVolumeSelected={setIsVolumeSelected}
         />
       ),
       margin: "mx-auto", // Centered horizontally

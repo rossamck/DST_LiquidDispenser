@@ -17,6 +17,8 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
   }));
 
   const isVertical = id === 0 || id === 1;
+  const isTopRight = id < 2;
+  const dotPosition = isTopRight ? 'right' : 'left';
 
   const numberStyle = {
     position: 'absolute',
@@ -27,7 +29,17 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
     fontWeight: 'bold',
     color: 'darkgrey',
   };
-  
+
+  const dotStyle = {
+    position: 'absolute',
+    top: '5px', // Adjust as needed
+    [dotPosition]: '5px', // Adjust as needed
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    backgroundColor: 'grey',
+    zIndex: 2, // To ensure dot is visible when module is dropped
+  };
 
   return (
     <div
@@ -48,6 +60,7 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
       {!isFilled && (
         <div style={numberStyle}>{id + 1}</div>
       )}
+      <div style={dotStyle} /> {/* Added dot */}
       {children}
     </div>
   );

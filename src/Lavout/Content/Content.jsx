@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import WellPlate from "../../components/WellPlate/WellPlate";
 import LiquidSource from "../../components/LiquidSource/LiquidSource";
 
@@ -13,6 +13,7 @@ const Content = ({
   setCompletedWells,
   setDispensingWell,
   selectedPlateId,
+  setActiveLayout,
 }) => {
   const WELL_PLATE_WIDTH = '100%';
   const colourIndexPairs = [
@@ -28,7 +29,16 @@ const Content = ({
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(colourIndexPairs[0]);
 
-  
+  const handlePositionClick = useCallback(() => {
+    setActiveLayout("PositionalLayout");
+  }, [setActiveLayout]);
+
+  useEffect(() => {
+    if (selectedPlateId === null) {
+      console.log("NULL!!22");
+    }
+    console.log("Selected Plate ID:", selectedPlateId);
+  }, [selectedPlateId]);
 
   const handleLiquidSourceSelect = (index) => {
     const selectedColourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;
@@ -51,30 +61,44 @@ const Content = ({
         paddingBottom: "2rem",
       }}
     >
-      <WellPlate
-        currentAction={currentAction}
-        actionVolume={actionVolume}
-        actionVersion={actionVersion}
-        onActionComplete={onActionComplete}
-        allSelectedWells={allSelectedWells}
-        setAllSelectedWells={setAllSelectedWells}
-        onWellPlateUpdate={onWellPlateUpdate}
-        setCompletedWells={setCompletedWells}
-        setDispensingWell={setDispensingWell}
-        selectedColorIndex={selectedColorIndex}
-        colourIndexPairs={colourIndexPairs}
-        selectedPlateId={selectedPlateId}
-      />
-      <div className="mt-4">
-        <LiquidSource
-          colourIndexPairs={colourIndexPairs}
-          wellPlateWidth={WELL_PLATE_WIDTH}
-          selectedColorIndex={selectedColorIndex}
-          onSelect={handleLiquidSourceSelect}
-        />
-      </div>
+      {selectedPlateId !== null ? (
+        <>
+          <WellPlate
+            currentAction={currentAction}
+            actionVolume={actionVolume}
+            actionVersion={actionVersion}
+            onActionComplete={onActionComplete}
+            allSelectedWells={allSelectedWells}
+            setAllSelectedWells={setAllSelectedWells}
+            onWellPlateUpdate={onWellPlateUpdate}
+            setCompletedWells={setCompletedWells}
+            setDispensingWell={setDispensingWell}
+            selectedColorIndex={selectedColorIndex}
+            colourIndexPairs={colourIndexPairs}
+            selectedPlateId={selectedPlateId}
+          />
+          <div className="mt-4">
+            <LiquidSource
+              colourIndexPairs={colourIndexPairs}
+              wellPlateWidth={WELL_PLATE_WIDTH}
+              selectedColorIndex={selectedColorIndex}
+              onSelect={handleLiquidSourceSelect}
+            />
+          </div>
+        </>
+      ) : (
+<div
+  style={{ height: '80vh' }}
+  className="flex justify-center items-center text-center text-gray-400 font-bold text-3xl underline cursor-pointer"
+  onClick={handlePositionClick}
+>
+  Please select a well plate position
+</div>      )}
     </div>
   );
+  
 };
 
 export default Content;
+
+

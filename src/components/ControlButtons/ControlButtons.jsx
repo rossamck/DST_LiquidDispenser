@@ -11,9 +11,10 @@ const ControlButtons = ({
   sendSelectionEnabled,
   selectedPlateId,
   setSelectedPlateId,
+  isVolumeSelected,
+  setIsVolumeSelected,
 }) => {
   const [volume, setVolume] = useState("");
-  const [isVolumeSelected, setIsVolumeSelected] = useState(false); 
   const { sendMessage } = useContext(WebSocketContext);
   const [savedPositions, setSavedPositions] = useState([]);
 
@@ -28,7 +29,7 @@ const ControlButtons = ({
   const onStartDispensingClick = () => {
     // Start dispensing process
     setStartDispensingEnabled(false);
-    sendMessage("startDispensing");
+    sendMessage("startDispensing", true);
     console.log("Start dispensing");
   };
 
@@ -79,8 +80,11 @@ const ControlButtons = ({
       </div>
       <button
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-        onClick={() => onButtonClick("clearWellsButton")}
-      >
+        onClick={() => {
+          onButtonClick("clearWellsButton");
+          setIsVolumeSelected(false);
+        }}
+              >
         Clear All Wells
       </button>
 

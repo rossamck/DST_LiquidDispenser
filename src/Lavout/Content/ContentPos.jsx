@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import ModuleContainer from "../../components/PositionModules/ModuleContainer";
 
-const ContentDev = ({
+const ContentPos = ({
   resetPositions,
   setResetPositions,
   savePositions,
@@ -33,4 +33,4 @@ const ContentDev = ({
   );
 };
 
-export default ContentDev;
+export default ContentPos;

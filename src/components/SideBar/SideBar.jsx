@@ -2,21 +2,26 @@ import React, { useEffect, useRef } from "react";
 import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
 import SidebarIcons from "./SideBarIcons";
 
-function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout, reloadPage }) {
+function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+  setActiveLayout,
+  activeLayout,
+  reloadPage,
+}) {
   const toggleSidebar = (event) => {
     event.stopPropagation(); // stop the event propagation
     setSidebarOpen(!sidebarOpen);
   };
 
   const handleButtonClick = (layout) => {
-    if (layout === 'reset') {
+    if (layout === "reset") {
       reloadPage();
     } else {
       console.log("Setting layout");
       setActiveLayout(layout);
     }
   };
-  
 
   // Use useRef to create a reference to the sidebar element
   const sidebarRef = useRef(null);
@@ -62,7 +67,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout, reloadPage }) {
         >
           <button
             className={`text-gray-400 block py-2 px-4 hover:text-white`}
-            onClick={() => handleButtonClick("Layout1")}
+            onClick={() => handleButtonClick("Home")}
           >
             Home
           </button>
@@ -70,13 +75,13 @@ function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout, reloadPage }) {
             className={`text-gray-400 block py-2 px-4 hover:text-white`}
             onClick={() => handleButtonClick("PositionalLayout")}
           >
-            Option 2
+            Layout
           </button>
           <button
             className={`text-gray-400 block py-2 px-4 hover:text-white`}
-            onClick={() => handleButtonClick("Layout3")}
+            onClick={() => handleButtonClick("JobLayout")}
           >
-            Option 3
+            Job Queue
           </button>
           <button
             className={`text-gray-400 block py-2 px-4 hover:text-white`}
@@ -86,9 +91,12 @@ function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout, reloadPage }) {
           </button>
         </div>
       </div>
-      
-      <SidebarIcons sidebarOpen={sidebarOpen} handleButtonClick={handleButtonClick} />
 
+      <SidebarIcons
+        sidebarOpen={sidebarOpen}
+        handleButtonClick={handleButtonClick}
+        activeLayout={activeLayout}
+      />
 
       <div className="fixed top-0 left-1.5 mt-2 mb-2 z-20">
         <button

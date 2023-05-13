@@ -1,10 +1,10 @@
 // WebSocketContext.jsx
 
-import { createContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useEffect, useState, useCallback, } from 'react';
 
 const WebSocketContext = createContext();
 
-const WebSocketProvider = ({ children, handleMessage }) => {
+const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
   const [config, setConfig] = useState(null); // Add this line to manage the fetched configuration
 
   const [socket, setSocket] = useState(null);
@@ -30,12 +30,26 @@ const WebSocketProvider = ({ children, handleMessage }) => {
     []
   );
   
-
-  const sendMessage = useCallback((message) => {
+  const sendMessage = useCallback((message, addToQueue = false) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(message);
+      if (addToQueue) {
+        jobQueue.addJob({
+          action: () => {
+            // Create a new message that includes the job ID as a prefix
+            const jobMessage = `jobId:${jobQueue.jobId} ${message}`;
+            console.log("Jobmessage = ",  jobMessage);
+            socket.send(jobMessage);
+          },
+        });
+      } else {
+        socket.send(message);
+      }
     }
-  }, [socket]);
+  }, [socket, jobQueue]);
+  
+  
+  
+
 
   const onMessage = useCallback((callback) => {
     if (socket) {

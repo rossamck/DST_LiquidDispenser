@@ -299,7 +299,11 @@ void handleDispensing() {
     Serial.println(receivedWellId);
 
     String completedWellMessage = "completedWell:" + currentWell->wellId;
+String wellCoordsMessage = "receivedCoords" + String("pos:X=") + String(currentWell->x) + ",Y=" + String(currentWell->y) + ",Z=0,PIP=0";
+// update this to include z and pip
     webSocket.broadcastTXT(completedWellMessage);
+        webSocket.broadcastTXT(wellCoordsMessage);
+
 
     // Reset the flag
 

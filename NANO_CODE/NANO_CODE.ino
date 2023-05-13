@@ -67,12 +67,14 @@ int microstep_amount = 8;
 int fullturn_400 = 400 * microstep_amount;
 int fullturn_200 = 200 * microstep_amount;
 
-void sendCurrentPositions() {
-  long xCurrentPosition = stepper_X.currentPosition() / microstep_amount;
-  long yCurrentPosition = stepper_Y.currentPosition() / microstep_amount;
-  long zCurrentPosition = stepper_Z.currentPosition() / microstep_amount;
-  long pipCurrentPosition = stepper_PIP.currentPosition() / microstep_amount;
+void getCurrentPositions(long& xCurrentPosition, long& yCurrentPosition, long& zCurrentPosition, long& pipCurrentPosition) {
+  xCurrentPosition = stepper_X.currentPosition() / microstep_amount;
+  yCurrentPosition = stepper_Y.currentPosition() / microstep_amount;
+  zCurrentPosition = stepper_Z.currentPosition() / microstep_amount;
+  pipCurrentPosition = stepper_PIP.currentPosition() / microstep_amount;
+}
 
+void sendPositions(const long xCurrentPosition, const long yCurrentPosition, const long zCurrentPosition, const long pipCurrentPosition) {
   Wire.write("pos:");
   Wire.write("X=");
   Wire.write(String(xCurrentPosition).c_str());
@@ -86,6 +88,12 @@ void sendCurrentPositions() {
   Wire.write("PIP=");
   Wire.write(String(pipCurrentPosition).c_str());
   Wire.write('\0');  // Add a null character to indicate the end of the message
+}
+
+void sendCurrentPositions() {
+  long xCurrentPosition, yCurrentPosition, zCurrentPosition, pipCurrentPosition;
+  getCurrentPositions(xCurrentPosition, yCurrentPosition, zCurrentPosition, pipCurrentPosition);
+  sendPositions(xCurrentPosition, yCurrentPosition, zCurrentPosition, pipCurrentPosition);
 }
 
 

@@ -100,7 +100,7 @@ const WellPlate = ({
         let relX = parseInt(well.slice(1)) - 1; // Converting 1, 2, 3, etc. to 0, 1, 2, etc.
   
         // Apply the step size
-        const stepSize = 50;
+        const stepSize = 89;
         relX *= stepSize;
         relY *= stepSize;
   

@@ -1,13 +1,18 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "dst-liquid-dispenser",
+  "version": "0.0.1",
   "private": true,
+  "author": "github.com/rossamck",
+  "description": "User interface for Liquid Dispenser",
+  "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@tailwindcss/forms": "^0.5.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "clsx": "^1.2.1",
+    "express": "^4.18.2",
     "polished": "^4.2.2",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
@@ -24,7 +29,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start-electron": "electron .",
+    "package": "electron-packager . --asar",
+    "dist": "electron-builder"
+
   },
   "eslintConfig": {
     "extends": [
@@ -45,9 +54,37 @@
     ]
   },
   "devDependencies": {
+    "asar": "^3.2.0",
     "autoprefixer": "^10.4.14",
+    "electron": "^24.3.0",
+    "electron-builder": "^23.6.0",
+    "electron-packager": "^17.1.1",
     "postcss": "^8.4.21",
     "react-scripts": "^5.0.1",
     "tailwindcss": "^3.3.1"
+  },
+  "build": {
+    "appId": "com.example.yourapp",
+    "productName": "LiquidDispenser",
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "public/electon.js"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
+  
 }

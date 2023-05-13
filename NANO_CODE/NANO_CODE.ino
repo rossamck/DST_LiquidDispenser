@@ -30,11 +30,11 @@
 #define LIMIT_3 A3
 
 // Stepper motor objects
-MultiStepperMotor stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1);
-MultiStepperMotor stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
-MultiStepperMotor stepper_Z(Z_STEP_PIN, Z_DIR_PIN);
-MultiStepperMotor stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN);
-MultiStepperXY multiStepper(stepper_X, stepper_Y);
+SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1);
+SingleStepper stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
+SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN);
+SingleStepper stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN);
+MultiStepper multiStepper(stepper_X, stepper_Y, stepper_Z);
 
 struct ReceivedData {
   bool dataReceived = false;
@@ -54,6 +54,7 @@ struct ReceivedData {
   bool manualCoordsReceived = false;
   String coordX;
   String coordY;
+  String coordZ;
 
   bool setHomeReceived = false;
 } receivedData;
@@ -97,24 +98,29 @@ void sendCurrentPositions() {
 }
 
 
-void moveMotors(float currentX, float currentY) {
+void moveMotors(float currentX, float currentY, float currentZ) {
     float deltaX = currentX - previousX;
     float deltaY = currentY - previousY;
+    float deltaZ = currentZ - previousZ;
 
     long stepsX = deltaX * microstep_amount;
     long stepsY = deltaY * microstep_amount;
+    long stepsZ = deltaZ * microstep_amount;
 
     Serial.print("deltaX=");
     Serial.print(deltaX);
     Serial.print(", deltaY=");
-    Serial.println(deltaY);
-
-    multiStepper.move(stepsX, stepsY);
+    Serial.print(deltaY);
+    Serial.print(", deltaZ=");
+    Serial.print(deltaZ);
+    
+    multiStepper.move(stepsX, stepsY, stepsZ);
     multiStepper.runToPosition();
 
     previousX = currentX;
     previousY = currentY;
 }
+
 void setup() {
   // I2C setup
   Wire.begin(8);
@@ -134,8 +140,8 @@ void setup() {
   digitalWrite(M0_PIN, HIGH);
   digitalWrite(M1_PIN, HIGH);
   digitalWrite(M2_PIN, LOW);
-  multiStepper.setMaxSpeed(10000);
-  multiStepper.setAcceleration(2000);
+  multiStepper.setMaxSpeed(10000, 10000, 10000);
+  multiStepper.setAcceleration(2000, 2000, 2000);
   stepper_Z.setMaxSpeed(10000);
   stepper_Z.setAcceleration(2000);
   stepper_PIP.setMaxSpeed(10000);
@@ -171,8 +177,10 @@ void loop() {
 
     float currentX = receivedData.coordX.toFloat();
     float currentY = receivedData.coordY.toFloat();
+        float currentZ = receivedData.coordZ.toFloat();
 
-    moveMotors(currentX, currentY);
+
+    moveMotors(currentX, currentY, currentZ);
 
         delay(1000); //replace this with function to dispense
     Serial.print("Send well response for: ");
@@ -247,8 +255,10 @@ void loop() {
   else if (receivedData.manualCoordsReceived) {
     float currentX = receivedData.coordX.toFloat();
     float currentY = receivedData.coordY.toFloat();
+    float currentZ = receivedData.coordZ.toFloat();
 
-    moveMotors(currentX, currentY); // And also here
+    moveMotors(currentX, currentY, currentZ); // And also here
+
 
     receivedData.sendCoords = true;
     receivedData.manualCoordsReceived = false;
@@ -299,20 +309,28 @@ void receiveEvent(int howMany) {
 
   else if (receivedMessage.startsWith("manualCoords:")) {
     String manualCoordsData = receivedMessage.substring(13);
-    int separatorIndex = manualCoordsData.indexOf(',');
-    String xCoord = manualCoordsData.substring(0, separatorIndex);
-    String yCoord = manualCoordsData.substring(separatorIndex + 1);
+int separatorIndex1 = manualCoordsData.indexOf(',');
+int separatorIndex2 = manualCoordsData.indexOf(',', separatorIndex1 + 1);
+String xCoord = manualCoordsData.substring(0, separatorIndex1);
+String yCoord = manualCoordsData.substring(separatorIndex1 + 1, separatorIndex2);
+String zCoord = manualCoordsData.substring(separatorIndex2 + 1);
+
 
     // Extract the numerical part of the coordinates
-    receivedData.coordX = xCoord.substring(xCoord.indexOf('=') + 1);
-    receivedData.coordY = yCoord.substring(yCoord.indexOf('=') + 1);
+receivedData.coordX = xCoord.substring(xCoord.indexOf('=') + 1);
+receivedData.coordY = yCoord.substring(yCoord.indexOf('=') + 1);
+receivedData.coordZ = zCoord.substring(zCoord.indexOf('=') + 1);
+
 
     // Set the flag and store the coordinates
-    receivedData.manualCoordsReceived = true;
-    Serial.print("Received manualCoords: X=");
-    Serial.print(receivedData.coordX);
-    Serial.print(", Y=");
-    Serial.println(receivedData.coordY);
+receivedData.manualCoordsReceived = true;
+Serial.print("Received manualCoords: X=");
+Serial.print(receivedData.coordX);
+Serial.print(", Y=");
+Serial.print(receivedData.coordY);
+Serial.print(", Z=");
+Serial.println(receivedData.coordZ);
+
   }
 
   else if (receivedMessage.startsWith("getCurrentCoords")) {

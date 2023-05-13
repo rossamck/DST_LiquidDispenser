@@ -206,16 +206,23 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
       }
 
       else if (message.startsWith("manualCoords:")) {
-        int separatorIndex = message.indexOf(',');
-        String coordX = message.substring(13, separatorIndex);
-        String coordY = message.substring(separatorIndex + 1);
+        int separatorIndex1 = message.indexOf(',');
+        int separatorIndex2 = message.indexOf(',', separatorIndex1 + 1);
+
+        String coordX = message.substring(13, separatorIndex1);
+        String coordY = message.substring(separatorIndex1 + 1, separatorIndex2);
+                String coordZ = message.substring(separatorIndex2 + 1);
+
         Serial.print("Received coords: X=");
         Serial.print(coordX);
         Serial.print(", Y=");
-        Serial.println(coordY);
+        Serial.print(coordY);
+        Serial.print(", Z=");
+        Serial.println(coordZ);
+
 
         // Send the coordinates over i2c
-        String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY;
+        String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY + "," + coordZ;
         sendI2CMessage(manualCoordsMessage);
         String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
 

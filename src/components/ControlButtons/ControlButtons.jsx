@@ -13,6 +13,7 @@ const ControlButtons = ({
   setSelectedPlateId,
 }) => {
   const [volume, setVolume] = useState("");
+  const [isVolumeSelected, setIsVolumeSelected] = useState(false); 
   const { sendMessage } = useContext(WebSocketContext);
   const [savedPositions, setSavedPositions] = useState([]);
 
@@ -37,9 +38,11 @@ const ControlButtons = ({
       return;
     }
     onSelectWells(volume);
+    setIsVolumeSelected(true);  // Set isVolumeSelected to true when volume is selected
   };
 
   const onSendWellsClick = () => {
+    setIsVolumeSelected(false);
     onSendWells();
   };
 
@@ -83,10 +86,10 @@ const ControlButtons = ({
 
       <button
         className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 ${
-          sendSelectionEnabled ? "" : "opacity-50 cursor-not-allowed"
+          isVolumeSelected ? "" : "opacity-50 cursor-not-allowed"
         }`}
-        onClick={sendSelectionEnabled ? onSendWellsClick : undefined}
-        disabled={!sendSelectionEnabled}
+        onClick={isVolumeSelected ? onSendWellsClick : undefined}
+        disabled={!isVolumeSelected}
       >
         Send Selection
       </button>

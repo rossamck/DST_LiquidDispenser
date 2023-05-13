@@ -12,7 +12,8 @@ const MotorPositionXYVisual = ({ receivedCoords, size = 500 }) => {
   const yRatio = size / (axisLimits.y.max - axisLimits.y.min);
 
   const xPos = (receivedCoords.xPos - axisLimits.x.min) * xRatio + radius;
-  const yPos = (receivedCoords.yPos - axisLimits.y.min) * yRatio + radius;
+  // flip the y-axis
+  const yPos = svgSize - (receivedCoords.yPos - axisLimits.y.min) * yRatio - radius;
 
   return (
     <svg width={svgSize} height={svgSize}>

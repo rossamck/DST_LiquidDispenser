@@ -41,6 +41,11 @@ function App() {
     document.title = "Liquid Dispenser Client";
   }, []);
 
+  const reloadPage = () => {
+    window.location.reload();
+}
+
+
   const handleButtonClick = useCallback(
     (newAction, volume) => {
       return new Promise((resolve) => {
@@ -60,7 +65,6 @@ function App() {
   }, []);
 
   // Handle messages received from ESP8266
-  // Handle messages received from ESP8266
   const handleMessage = (message) => {
     if (message === "pong") {
       // Do nothing for 'pong' messages (useful for debugging)
@@ -75,7 +79,7 @@ function App() {
         setStartDispensingEnabled(true);
       } else if (message === "dispensefinished") {
         // Perform another action based on the message content
-        setSendSelectionEnabled(true);
+        // setSendSelectionEnabled(true);
       } else if (message.startsWith("dispensingWell:")) {
         console.log("YEET");
         console.log("wellid = ");
@@ -110,7 +114,6 @@ function App() {
     }
   };
 
-  // ...
   return (
     <AxisContext.Provider value={axisLimits}>
       <WebSocketProvider handleMessage={handleMessage}>
@@ -121,7 +124,8 @@ function App() {
           <Sidebar
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
-            setActiveLayout={setActiveLayout} // Pass the state setter function as a prop
+            setActiveLayout={setActiveLayout}
+            reloadPage={reloadPage}
           />
 
           {activeLayout === "Layout1" && (

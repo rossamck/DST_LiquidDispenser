@@ -2,16 +2,21 @@ import React, { useEffect, useRef } from "react";
 import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
 import SidebarIcons from "./SideBarIcons";
 
-function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout }) {
+function Sidebar({ sidebarOpen, setSidebarOpen, setActiveLayout, reloadPage }) {
   const toggleSidebar = (event) => {
     event.stopPropagation(); // stop the event propagation
     setSidebarOpen(!sidebarOpen);
   };
 
   const handleButtonClick = (layout) => {
-    console.log("Setting layout");
-    setActiveLayout(layout);
+    if (layout === 'reset') {
+      reloadPage();
+    } else {
+      console.log("Setting layout");
+      setActiveLayout(layout);
+    }
   };
+  
 
   // Use useRef to create a reference to the sidebar element
   const sidebarRef = useRef(null);

@@ -43,14 +43,14 @@ const MovementControl = ({
 
   // Inside MovementControl component, add these new state variables
   const [buttonPressCounts, setButtonPressCounts] = useState({
-    up: 0, // y up
-    down: 0, // y down
-    left: 0, // x down
-    right: 0, //x up
-    pageUp: 0, //z down
-    pageDown: 0, //z up
-    pipUp: 0,
-    pipDown: 0,
+    y_inc: 0, // y up
+    y_dec: 0, // y down
+    x_inc: 0, //x up
+    x_dec: 0, // x down
+    z_inc: 0, //z down
+    z_dec: 0, //z up
+    pip_inc: 0,
+    pip_dec: 0,
   });
 
   const [axesNetValues, setAxesNetValues] = useState({
@@ -128,14 +128,14 @@ const MovementControl = ({
 
   const resetButtonPressCounts = () => {
     setButtonPressCounts({
-      up: 0,
-      down: 0,
-      left: 0,
-      right: 0,
-      pageUp: 0,
-      pageDown: 0,
-      pipUp: 0,
-      pipDown: 0,
+      y_inc: 0,
+      y_dec: 0,
+      x_dec: 0,
+      x_inc: 0,
+      z_inc: 0,
+      z_dec: 0,
+      pip_inc: 0,
+      pip_dec: 0,
     });
   };
 
@@ -161,19 +161,24 @@ const MovementControl = ({
 
   const [xCoordinate, setXCoordinate] = useState(0);
   const [yCoordinate, setYCoordinate] = useState(0);
+  const [zCoordinate, setZCoordinate] = useState(0);
 
   // Implement the function to handle the submission of coordinates
   const handleCoordinateSubmit = () => {
-    console.log(`Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}`);
-    sendMessage(`manualCoords:${xCoordinate},${yCoordinate}`);
+    console.log(
+      `Moving to coordinates X: ${xCoordinate}, Y: ${yCoordinate}, Z: ${zCoordinate}`
+    );
+    sendMessage(`manualCoords:${xCoordinate},${yCoordinate},${zCoordinate}`);
     setIsMoving(true);
     // Set the axes net values directly to the submitted coordinates
     setAxesNetValues((prevValues) => ({
       ...prevValues,
       X: xCoordinate,
       Y: yCoordinate,
+      Z: zCoordinate,
     }));
   };
+  
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {
@@ -191,7 +196,7 @@ const MovementControl = ({
       content: (
         <div className="text-center mt-4">
           <h2 className="text-white mb-2">Co-ordinate Entry</h2>
-
+      
           <div className="flex justify-center flex-col">
             <div className="flex justify-center items-center mb-4">
               <div className="flex items-center">
@@ -228,6 +233,23 @@ const MovementControl = ({
                   className="border border-gray-300 p-1 rounded w-16"
                 />
               </div>
+              <div className="flex items-center ml-4">
+                <label htmlFor="zCoordinate" className="mr-2 text-white">
+                  Z:
+                </label>
+                <input
+                  type="number"
+                  id="zCoordinate"
+                  value={zCoordinate}
+                  onChange={(e) =>
+                    setZCoordinate(
+                      e.target.value === "" ? "" : parseInt(e.target.value) || 0
+                    )
+                  }
+                  disabled={isMoving}
+                  className="border border-gray-300 p-1 rounded w-16"
+                />
+              </div>
             </div>
             <div className="flex justify-center">
               <button
@@ -241,6 +263,7 @@ const MovementControl = ({
           </div>
         </div>
       ),
+      
       margin: "mx-auto",
     },
 
@@ -253,49 +276,49 @@ const MovementControl = ({
 
   const wrappedOnXUp = useCallback(() => {
     onXUp();
-    incrementButtonPressCount("right");
+    incrementButtonPressCount("x_inc");
     updateAxesNetValues("X", 1);
   }, [onXUp, updateAxesNetValues]);
 
   const wrappedOnXDown = useCallback(() => {
     onXDown();
-    incrementButtonPressCount("left");
+    incrementButtonPressCount("x_dec");
     updateAxesNetValues("X", -1);
   }, [onXDown, updateAxesNetValues]);
 
   const wrappedOnYUp = useCallback(() => {
     onYUp();
-    incrementButtonPressCount("up");
-    updateAxesNetValues("Y", -1);
+    incrementButtonPressCount("y_inc");
+    updateAxesNetValues("Y", 1);
   }, [onYUp, updateAxesNetValues]);
 
   const wrappedOnYDown = useCallback(() => {
     onYDown();
-    incrementButtonPressCount("down");
-    updateAxesNetValues("Y", 1);
+    incrementButtonPressCount("y_dec");
+    updateAxesNetValues("Y", -1);
   }, [onYDown, updateAxesNetValues]);
 
   const wrappedOnZUp = useCallback(() => {
     onZUp();
-    incrementButtonPressCount("pageUp");
+    incrementButtonPressCount("z_inc");
     updateAxesNetValues("Z", 1);
   }, [onZUp, updateAxesNetValues]);
 
   const wrappedOnZDown = useCallback(() => {
     onZDown();
-    incrementButtonPressCount("pageDown");
+    incrementButtonPressCount("z_dec");
     updateAxesNetValues("Z", -1);
   }, [onZDown, updateAxesNetValues]);
 
   const wrappedOnPIPUp = useCallback(() => {
     onPipUp();
-    incrementButtonPressCount("pipUp");
+    incrementButtonPressCount("pip_inc");
     updateAxesNetValues("PIP", 1);
   }, [onPipUp, updateAxesNetValues]);
 
   const wrappedOnPIPDown = useCallback(() => {
     onPipDown();
-    incrementButtonPressCount("pipDown");
+    incrementButtonPressCount("pip_dec");
     updateAxesNetValues("PIP", -1);
   }, [onPipDown, updateAxesNetValues]);
 
@@ -306,35 +329,36 @@ const MovementControl = ({
       switch (event.key) {
         case "ArrowUp":
           wrappedOnYUp();
-          setActiveButton("up");
+          setActiveButton("y-inc");
           break;
         case "ArrowDown":
           wrappedOnYDown();
-          setActiveButton("down");
+          setActiveButton("y-dec");
           break;
         case "ArrowLeft":
           wrappedOnXDown();
-          setActiveButton("left");
+          setActiveButton("x-dec");
           break;
         case "ArrowRight":
           wrappedOnXUp();
-          setActiveButton("right");
+          setActiveButton("x-inc");
+          break;
+          // Z case reversed so 0 is top
+        case "PageDown":
+          wrappedOnZUp();
+          setActiveButton("z-inc");
           break;
         case "PageUp":
-          wrappedOnZUp();
-          setActiveButton("page-up");
-          break;
-        case "PageDown":
           wrappedOnZDown();
-          setActiveButton("page-down");
+          setActiveButton("z-dec");
           break;
         case "w":
           wrappedOnPIPUp();
-          setActiveButton("pip-up");
+          setActiveButton("pip-inc");
           break;
         case "s":
           wrappedOnPIPDown();
-          setActiveButton("pip-down");
+          setActiveButton("pip-dec");
           break;
         default:
           break;
@@ -380,7 +404,7 @@ const MovementControl = ({
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
           title="Y Increase"
-          className={getButtonClassName("up") + " col-start-2 row-start-1"}
+          className={getButtonClassName("y-inc") + " col-start-2 row-start-1"}
           onClick={wrappedOnYUp}
           disabled={isMoving}
         >
@@ -388,7 +412,7 @@ const MovementControl = ({
         </button>
         <button
           title="X Decrease"
-          className={getButtonClassName("left") + " col-start-1 row-start-2"}
+          className={getButtonClassName("x-dec") + " col-start-1 row-start-2"}
           onClick={wrappedOnXDown}
           disabled={isMoving}
         >
@@ -396,7 +420,7 @@ const MovementControl = ({
         </button>
         <button
           title="Y Decrease"
-          className={getButtonClassName("down") + " col-start-2 row-start-2"}
+          className={getButtonClassName("y-dec") + " col-start-2 row-start-2"}
           onClick={wrappedOnYDown}
           disabled={isMoving}
         >
@@ -404,31 +428,32 @@ const MovementControl = ({
         </button>
         <button
           title="X Increase"
-          className={getButtonClassName("right") + " col-start-3 row-start-2"}
+          className={getButtonClassName("x-inc") + " col-start-3 row-start-2"}
           onClick={wrappedOnXUp}
           disabled={isMoving}
         >
           <FiArrowRight className="text-gray-800" size={24} />
         </button>
         <button
-          title="Move Up (Z-axis)"
-          className={getButtonClassName("page-up")}
+          title="Move Down (Z-axis)"
+          className={getButtonClassName("z-inc")}
           onClick={wrappedOnZUp}
+          disabled={isMoving}
+        >
+          Down
+          {/* for Z axis buttons are reversed; 0 is top and 500 is bottom */}
+        </button>
+        <button
+          title="Move Up (Z-axis)"
+          className={getButtonClassName("z-dec")}
+          onClick={wrappedOnZDown}
           disabled={isMoving}
         >
           Up
         </button>
         <button
-          title="Move Down (Z-axis)"
-          className={getButtonClassName("page-down")}
-          onClick={wrappedOnZDown}
-          disabled={isMoving}
-        >
-          Down
-        </button>
-        <button
           title="PIP Increase"
-          className={getButtonClassName("pip-up")}
+          className={getButtonClassName("pip-inc")}
           onClick={wrappedOnPIPUp}
           disabled={isMoving}
         >
@@ -436,7 +461,7 @@ const MovementControl = ({
         </button>
         <button
           title="PIP Decrease"
-          className={getButtonClassName("pip-down")}
+          className={getButtonClassName("pip-dec")}
           onClick={wrappedOnPIPDown}
           disabled={isMoving}
         >

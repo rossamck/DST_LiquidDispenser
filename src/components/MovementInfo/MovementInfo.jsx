@@ -2,14 +2,14 @@ import React from "react";
 
 const MovementInfo = ({ buttonPressCounts }) => {
   const axisMapping = {
-    up: "Y+",
-    down: "Y-",
-    left: "X-",
-    right: "X+",
-    pageUp: "Z+",
-    pageDown: "Z-",
-    pipUp: "Pip+",
-    pipDown: "Pip-",
+    y_inc: "Y+",
+    y_dec: "Y-",
+    x_inc: "X+",
+    x_dec: "X-",
+    z_inc: "Z+",
+    z_dec: "Z-",
+    pip_inc: "Pip+",
+    pip_dec: "Pip-",
   };
 
   return (

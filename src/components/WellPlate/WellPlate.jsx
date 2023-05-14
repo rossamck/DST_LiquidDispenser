@@ -134,17 +134,36 @@ const WellPlate = ({
       );
   
       // Sort the deduplicatedWells array alphanumerically
-      const sortedWells = deduplicatedWells.sort((a, b) => {
+      const groupBySourceIndex = (array) => {
+        return array.reduce((acc, well) => {
+          if (!acc[well.sourceIndex]) {
+            acc[well.sourceIndex] = [];
+          }
+          acc[well.sourceIndex].push(well);
+          return acc;
+        }, {});
+      };
+      
+      const sortAlphanumerically = (a, b) => {
         const rowA = a.wellId.charAt(0);
         const rowB = b.wellId.charAt(0);
         const colA = parseInt(a.wellId.slice(1), 10);
         const colB = parseInt(b.wellId.slice(1), 10);
-  
+      
         if (rowA === rowB) {
           return colA - colB;
         }
         return rowA.localeCompare(rowB);
+      };
+      
+      const groupedWells = groupBySourceIndex(deduplicatedWells);
+      const sortedWells = [];
+      
+      Object.values(groupedWells).forEach((group) => {
+        const sortedGroup = group.sort(sortAlphanumerically);
+        sortedWells.push(...sortedGroup);
       });
+      
   
       return sortedWells;
     });

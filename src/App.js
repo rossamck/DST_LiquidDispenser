@@ -8,7 +8,7 @@ import JobLayout from "./Lavout/JobLayout";
 import AxisContext from "./AxisContext";
 import PositionsContext from "./context/PositionsContext";
 import JobQueue from "./components/JobQueue/JobQueue";
-
+import JobQueueContext from "./context/JobQueueContext";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -16,6 +16,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { WebSocketProvider } from "./components/WebSocketContext/WebSocketContext";
 import "./components/scrollbar/scrollbar.css";
 import Sidebar from "./components/SideBar/SideBar";
+
 
 function App() {
   const [action, setAction] = useState(null);
@@ -34,7 +35,6 @@ function App() {
 
   const jobQueue = React.useRef(new JobQueue()).current;
 
-
   const axisLimits = {
     x: { min: 0, max: 2100 },
     y: { min: 0, max: 2400 },
@@ -48,8 +48,7 @@ function App() {
 
   const reloadPage = () => {
     window.location.reload();
-}
-
+  };
 
   const handleButtonClick = useCallback(
     (newAction, volume) => {
@@ -87,24 +86,17 @@ function App() {
         const jobId = message.split(":")[1];
         // console.log("Job finished: ", jobId);
         jobQueue.jobCompleted(jobId);
-
-
-
       } else if (message.startsWith("dispensingWell:")) {
-        console.log("YEET");
-        console.log("wellid = ");
         const wellId = message.split(":")[1];
-        console.log(wellId);
+        console.log("wellid = ", wellId);
         setDispensingWell(wellId);
       } else if (message.startsWith("completedWell:")) {
         const wellId = message.split(":")[1];
-        console.log("Completed well:", wellId);
         setCompletedWells((prevCompletedWells) => [
           ...prevCompletedWells,
           wellId,
         ]);
       } else if (message.startsWith("receivedCoordspos:")) {
-        console.log("Coords");
         const posStr = message.split(":")[1];
         const posValues = posStr.split(",");
         const xPos = parseFloat(posValues[0].split("=")[1]);
@@ -117,6 +109,14 @@ function App() {
         );
         setReceivedCoords({ xPos, yPos, zPos, pipVal });
 
+        // Check if the message contains a jobId
+        if (message.includes("jobId")) {
+          const jobId = parseInt(message.split("jobId:")[1]);
+          console.log(`Received jobId: ${jobId}`);
+          // Do something with the jobId
+          jobQueue.jobCompleted(jobId);
+        }
+
         // You can now use the positional data as needed in your application
       } else {
         console.log("Received default message:", message);
@@ -127,74 +127,74 @@ function App() {
   };
 
   return (
-    <AxisContext.Provider value={axisLimits}>
-      <WebSocketProvider handleMessage={handleMessage} jobQueue={jobQueue}>
-      <PositionsContext.Provider
-          value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the PositionsContext
-        >
-        <div className="App">
-          <Sidebar
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            setActiveLayout={setActiveLayout}
-            activeLayout={activeLayout}
-            reloadPage={reloadPage}
-          />
-
-          {activeLayout === "Home" && (
-            <Layout
-              onButtonClick={handleButtonClick}
-              currentAction={action}
-              actionVolume={actionVolume}
-              actionVersion={actionVersion}
-              onActionComplete={resetAction}
-              startDispensingEnabled={startDispensingEnabled}
-              setStartDispensingEnabled={setStartDispensingEnabled}
-              sendSelectionEnabled={sendSelectionEnabled}
-              setSendSelectionEnabled={setSendSelectionEnabled}
-              dispensingWell={dispensingWell}
-              setDispensingWell={setDispensingWell}
-              completedWells={completedWells}
-              setCompletedWells={setCompletedWells}
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-              receivedCoords={receivedCoords}
-              savedPositions={savedPositions}
-              selectedPlateId={selectedPlateId}
-              setSelectedPlateId={setSelectedPlateId}
-              setActiveLayout={setActiveLayout}
-            />
-          )}
-          {activeLayout === "DevLayout" && (
-            <DevLayout
-              // Pass all required props to DevLayout component
-              receivedCoords={receivedCoords}
-            />
-          )}
-          {activeLayout === "PositionalLayout" && (
-            <DndProvider backend={HTML5Backend}>
-              <PositionalLayout
-                // Pass all required props to DevLayout component
-                receivedCoords={receivedCoords}
-                savedPositions={savedPositions}
-                setSavedPositions={setSavedPositions}
-                setSelectedPlateId={setSelectedPlateId}
+    <JobQueueContext.Provider value={jobQueue}>
+      <AxisContext.Provider value={axisLimits}>
+        <WebSocketProvider handleMessage={handleMessage}>
+          <PositionsContext.Provider
+            value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the PositionsContext
+          >
+            <div className="App">
+              <Sidebar
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                setActiveLayout={setActiveLayout}
+                activeLayout={activeLayout}
+                reloadPage={reloadPage}
               />
-            </DndProvider>
-          )}
-          {/* Add more layout components here with their respective conditions */}
-          {activeLayout === "JobLayout" && (
-            <JobLayout
-              // Pass all required props to DevLayout component
-              receivedCoords={receivedCoords}
-            />
-          )}
-        </div>
 
-        </PositionsContext.Provider>
-
-      </WebSocketProvider>
-    </AxisContext.Provider>
+              {activeLayout === "Home" && (
+                <Layout
+                  onButtonClick={handleButtonClick}
+                  currentAction={action}
+                  actionVolume={actionVolume}
+                  actionVersion={actionVersion}
+                  onActionComplete={resetAction}
+                  startDispensingEnabled={startDispensingEnabled}
+                  setStartDispensingEnabled={setStartDispensingEnabled}
+                  sendSelectionEnabled={sendSelectionEnabled}
+                  setSendSelectionEnabled={setSendSelectionEnabled}
+                  dispensingWell={dispensingWell}
+                  setDispensingWell={setDispensingWell}
+                  completedWells={completedWells}
+                  setCompletedWells={setCompletedWells}
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                  receivedCoords={receivedCoords}
+                  savedPositions={savedPositions}
+                  selectedPlateId={selectedPlateId}
+                  setSelectedPlateId={setSelectedPlateId}
+                  setActiveLayout={setActiveLayout}
+                />
+              )}
+              {activeLayout === "DevLayout" && (
+                <DevLayout
+                  // Pass all required props to DevLayout component
+                  receivedCoords={receivedCoords}
+                />
+              )}
+              {activeLayout === "PositionalLayout" && (
+                <DndProvider backend={HTML5Backend}>
+                  <PositionalLayout
+                    // Pass all required props to DevLayout component
+                    receivedCoords={receivedCoords}
+                    savedPositions={savedPositions}
+                    setSavedPositions={setSavedPositions}
+                    setSelectedPlateId={setSelectedPlateId}
+                  />
+                </DndProvider>
+              )}
+              {/* Add more layout components here with their respective conditions */}
+              {activeLayout === "JobLayout" && (
+                <JobLayout
+                  // Pass all required props to DevLayout component
+                  receivedCoords={receivedCoords}
+                />
+              )}
+            </div>
+          </PositionsContext.Provider>
+        </WebSocketProvider>
+      </AxisContext.Provider>
+    </JobQueueContext.Provider>
   );
 }
 

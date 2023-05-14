@@ -1,7 +1,5 @@
-// JobQueueContext.jsx
 import { createContext } from 'react';
-import JobQueue from '../components/JobQueue/JobQueue';
 
-const JobQueueContext = createContext(new JobQueue());
+const JobQueueContext = createContext();
 
 export default JobQueueContext;

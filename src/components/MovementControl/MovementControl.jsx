@@ -141,7 +141,7 @@ const MovementControl = ({
 
   const resetCounters = () => {
     resetButtonPressCounts();
-    sendMessage(`manualCoords:0,0`);  // Moves X and Y to 0
+    sendMessage(`manualCoords:0,0,0`, true);  // Moves X, Y and Z to 0
     setIsMoving(true);
     setAxesNetValues(prevValues => ({
       ...prevValues,

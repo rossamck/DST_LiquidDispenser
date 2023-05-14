@@ -1,10 +1,11 @@
 // WebSocketContext.jsx
 
-import { createContext, useEffect, useState, useCallback, } from 'react';
+import { createContext, useEffect, useState, useCallback, useContext} from 'react';
+import JobQueueContext from '../../context/JobQueueContext';
 
 const WebSocketContext = createContext();
 
-const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
+const WebSocketProvider = ({ children, handleMessage }) => {
   const [config, setConfig] = useState(null); // Add this line to manage the fetched configuration
 
   const [socket, setSocket] = useState(null);
@@ -14,7 +15,8 @@ const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
     return localStorage.getItem('userWebSocketIP') || null;
   });
   
-  
+  const jobQueue = useContext(JobQueueContext);
+
 
   useEffect(() => {
     fetch('/config.json') // Fetch the config.json file from the public folder
@@ -41,6 +43,7 @@ const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
             console.log("Jobmessage = ", jobMessage);
             socket.send(jobMessage);
           },
+          message: message
         });
       } else {
         socket.send(message);

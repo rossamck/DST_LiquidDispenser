@@ -11,10 +11,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-// const char* ssid = "VM6701124_2G";
-// const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+const char* ssid = "VM6701124_2G";
+const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -226,7 +226,7 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
         sendI2CMessage(manualMoveMessage);
         String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
-
+  
         webSocket.broadcastTXT(receivedCoordsMessage);
 
 
@@ -251,8 +251,9 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         // Send the coordinates over i2c
         String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY + "," + coordZ;
         sendI2CMessage(manualCoordsMessage);
-        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
-
+        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano() + " jobId:" + String(currentJobId);
+     Serial.print("Sending coords message: ");
+        Serial.println(receivedCoordsMessage);
         webSocket.broadcastTXT(receivedCoordsMessage);
 
       }

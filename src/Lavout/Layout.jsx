@@ -95,19 +95,33 @@ const Layout = ({
   };
 
   const onSendWells = () => {
-    // send the selectedWells data as a JSON string
-  
-    // edit this to add to job queue
-    
     setSendSelectionEnabled(false);
-    
     console.log("All selected wells:", allSelectedWells);
     
-    const wellsData = JSON.stringify(allSelectedWells);
-    sendMessage(`selectWells:${wellsData}`, true);
-    console.log("Sending data...");
-    console.log(wellsData);
+    // Group wells by sourceIndex
+    const groupedWells = allSelectedWells.reduce((groups, well) => {
+      const sourceIndex = well.sourceIndex;
+      if (!groups[sourceIndex]) {
+        groups[sourceIndex] = [];
+      }
+      groups[sourceIndex].push(well);
+      return groups;
+    }, {});
+  
+    // Send each group separately
+    Object.values(groupedWells).forEach((group, i, array) => {
+      const wellsData = JSON.stringify(group);
+      sendMessage(`selectWells:${wellsData}`, true);
+      console.log("Sending data...");
+      console.log(wellsData);
+      if (i === array.length - 1) {
+      console.log("Last array");
+      sendMessage(`manualCoords:0,0,0`, true);
+
+      }
+    });
   };
+  
   
 
 

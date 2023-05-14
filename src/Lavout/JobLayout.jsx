@@ -1,27 +1,31 @@
 // JobLayout.jsx
 
-import React, { useState } from "react";
+import React from "react";
 import Navbar from "./Navbar/Navbar";
-import SidePanelDev from "./SidePanel/SidePanelDev";
-import ContentDev from "./Content/ContentDev";
+import SidePanelJob from "./SidePanel/SidePanelJob";
+import ContentJob from "./Content/ContentJob";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
-import InfoPanelDev from "./InfoPanel/InfoPanelDev";
+import InfoPanelJob from "./InfoPanel/InfoPanelJob";
 // import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 
+
+
 const JobLayout = ({
-  onButtonClick,
   sidebarOpen,
   setSidebarOpen,
-  onAxesNetValuesUpdate,
   receivedCoords,
 
   
 }) => {
-  const [buttonPressCounts, setButtonPressCounts] = useState([]);
-  const [axesNetValues, setAxesNetValues] = useState([]);
 
-    // const { sendMessage } = useContext(WebSocketContext);
-
+  function getJobTitle(message) {
+    if (message.includes("selectWells")) {
+      return "Dispensing Wells";
+    }
+    if (message.includes("manualCoords:0,0,0")) {
+      return "Reset Position";
+    }
+  }
 
 
   return (
@@ -30,27 +34,18 @@ const JobLayout = ({
         <div className="grid grid-cols-12 gap-2 w-full flex-grow bg-gray-950">
           <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
           <div className="col-span-3">
-            <InfoPanelDev
-              buttonPressCounts={buttonPressCounts}
-              axesNetValues={axesNetValues}
-
+            <InfoPanelJob
             />
           </div>
           <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
-            <ContentDev
-            receivedCoords={receivedCoords}
-
-              
+            <ContentJob
+            getJobTitle={getJobTitle}
+                         
             />
           </div>
           <div className="col-span-3 flex flex-col h-[calc(100vh-3.75rem)]">
-            <SidePanelDev
-              // Pass all required props
-              onButtonPressCountsUpdate={setButtonPressCounts}
-              onAxesNetValuesUpdate={setAxesNetValues}
-              receivedCoords={receivedCoords}
-
-
+            <SidePanelJob
+            getJobTitle={getJobTitle}
             />
           </div>
         </div>

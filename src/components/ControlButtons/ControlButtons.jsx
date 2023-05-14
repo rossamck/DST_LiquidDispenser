@@ -6,8 +6,6 @@ const ControlButtons = ({
   onButtonClick,
   onSelectWells,
   onSendWells,
-  startDispensingEnabled,
-  setStartDispensingEnabled,
   sendSelectionEnabled,
   selectedPlateId,
   setSelectedPlateId,
@@ -26,12 +24,7 @@ const ControlButtons = ({
     }
   }, []);
 
-  const onStartDispensingClick = () => {
-    // Start dispensing process
-    setStartDispensingEnabled(false);
-    sendMessage("startDispensing", true);
-    console.log("Start dispensing");
-  };
+
 
   const onSelectWellsClick = () => {
     if (volume <= 0) {
@@ -97,15 +90,7 @@ const ControlButtons = ({
       >
         Send Selection
       </button>
-      <button
-        className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 ${
-          startDispensingEnabled ? "" : "opacity-50 cursor-not-allowed"
-        }`}
-        onClick={startDispensingEnabled ? onStartDispensingClick : undefined}
-        disabled={!startDispensingEnabled}
-      >
-        Start Dispensing
-      </button>
+
       <button
         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
         onClick={() => sendMessage("emergencyStop")}

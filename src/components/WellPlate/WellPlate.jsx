@@ -103,6 +103,7 @@ const WellPlate = ({
         const stepSize = 89;
         relX *= stepSize;
         relY *= stepSize;
+
   
         // If the plate is rotated, swap X and Y coordinates
         console.log("Selected PLATE ID");
@@ -112,9 +113,9 @@ const WellPlate = ({
         }
   
         // Apply the translation based on the plateId
-        const plateCornerCoordinates = { 0: [200, 200], 1: [700, 600], 2: [1000, 1200], 3: [1500, 1500] }; // Replace these values with the actual coordinates
+        const plateCornerCoordinates = { 0: [200, 800], 1: [200, 2300], 2: [1500, 100], 3: [1500, 1400] }; // Replace these values with the actual coordinates
         const absX = relX + plateCornerCoordinates[selectedPlateId][0];
-        const absY = relY + plateCornerCoordinates[selectedPlateId][1];
+        const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + plateCornerCoordinates[selectedPlateId][1] : relY + plateCornerCoordinates[selectedPlateId][1];
   
         // Return the well object with the new properties
         return {

@@ -33,11 +33,12 @@ const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
   const sendMessage = useCallback((message, addToQueue = false) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       if (addToQueue) {
+        const jobId = jobQueue.jobId; // Capture the jobId at this moment
         jobQueue.addJob({
           action: () => {
-            // Create a new message that includes the job ID as a prefix
-            const jobMessage = `jobId:${jobQueue.jobId} ${message}`;
-            console.log("Jobmessage = ",  jobMessage);
+            // Use the captured jobId in the message
+            const jobMessage = `jobId:${jobId} ${message}`;
+            console.log("Jobmessage = ", jobMessage);
             socket.send(jobMessage);
           },
         });
@@ -46,6 +47,7 @@ const WebSocketProvider = ({ children, handleMessage, jobQueue }) => {
       }
     }
   }, [socket, jobQueue]);
+  
   
   
   

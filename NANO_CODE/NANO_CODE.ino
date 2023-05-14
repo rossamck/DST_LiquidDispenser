@@ -27,12 +27,12 @@
 #define LIMIT_1 A0
 #define LIMIT_2 A1
 #define LIMIT_3 A2
-#define LIMIT_3 A3
+#define LIMIT_4 A3
 
-// Stepper motor objects
-SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1);
+// Stepper motor objects  
+SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1, true); // Pass true to invert the direction
 SingleStepper stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
-SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN);
+SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN, LIMIT_3, true);
 SingleStepper stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN);
 MultiStepper multiStepper(stepper_X, stepper_Y, stepper_Z);
 

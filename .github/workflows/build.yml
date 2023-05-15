@@ -17,6 +17,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 16
+          
+      - name: Update package lists
+        run: apt-get update
+        
+      - name: Fix broken packages
+        run: apt-get install -f
+        
+      - name: Check for held packages
+        run: apt-mark showhold
+
 
       - name: Install Wine
         run: |

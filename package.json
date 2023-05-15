@@ -34,7 +34,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
-    "dist": "electron-builder -w"
+    "dist": "electron-builder"
   },
   "eslintConfig": {
     "extends": [

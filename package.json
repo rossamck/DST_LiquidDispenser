@@ -81,7 +81,7 @@
       "build/**/*",
       "node_modules/**/*",
       "package.json",
-      "public/electon.js"
+      "public/electron.js"
     ],
     "mac": {
       "target": "dmg"

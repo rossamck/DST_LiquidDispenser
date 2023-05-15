@@ -33,4 +33,4 @@ jobs:
       with:
         files: ./dist/*.dmg
       env:
-        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

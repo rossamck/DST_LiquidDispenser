@@ -346,11 +346,11 @@ const MovementControl = ({
           // Z case reversed so 0 is top
         case "PageDown":
           wrappedOnZUp();
-          setActiveButton("z-inc");
+          setActiveButton("z-dec");
           break;
         case "PageUp":
           wrappedOnZDown();
-          setActiveButton("z-dec");
+          setActiveButton("z-inc");
           break;
         case "w":
           wrappedOnPIPUp();
@@ -436,7 +436,7 @@ const MovementControl = ({
         </button>
         <button
           title="Move Down (Z-axis)"
-          className={getButtonClassName("z-inc")}
+          className={getButtonClassName("z-dec")}
           onClick={wrappedOnZUp}
           disabled={isMoving}
         >
@@ -445,7 +445,7 @@ const MovementControl = ({
         </button>
         <button
           title="Move Up (Z-axis)"
-          className={getButtonClassName("z-dec")}
+          className={getButtonClassName("z-inc")}
           onClick={wrappedOnZDown}
           disabled={isMoving}
         >

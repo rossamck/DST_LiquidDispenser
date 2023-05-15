@@ -17,6 +17,7 @@ const DraggableModule = ({ id, name, isDropped }) => {
     backgroundColor: isDropped ? 'lightblue' : 'lightgrey',
     cursor: 'move',
     borderRadius: '10px',
+    zIndex: 10,
   });
 
   return (

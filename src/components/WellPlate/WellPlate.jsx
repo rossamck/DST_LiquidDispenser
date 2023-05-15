@@ -122,8 +122,8 @@ const WellPlate = ({
           wellId: well,
           volume: selectedVolumes[well] || actionVolume,
           sourceIndex: selectedColorIndex?.index,
-          xCoord: absX,
-          yCoord: absY
+          xCoord: relX,
+          yCoord: relY
         };
       });
   

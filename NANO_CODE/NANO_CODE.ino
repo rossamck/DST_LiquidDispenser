@@ -34,7 +34,7 @@ SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1, true); // Pass true to i
 SingleStepper stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
 SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN, LIMIT_3);
 SingleStepper stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN, LIMIT_4, true);
-MultiStepper multiStepper(stepper_X, stepper_Y, stepper_Z);
+MultiStepper multiStepper(stepper_X, stepper_Y);
 
 struct ReceivedData {
   bool dataReceived = false;
@@ -114,11 +114,13 @@ void moveMotors(float currentX, float currentY, float currentZ) {
     Serial.print(", deltaZ=");
     Serial.print(deltaZ);
     
-    multiStepper.move(stepsX, stepsY, stepsZ);
+    multiStepper.move(stepsX, stepsY);
     multiStepper.runToPosition();
 
     previousX = currentX;
     previousY = currentY;
+    previousZ = currentZ;
+
 }
 
 void setup() {
@@ -140,8 +142,8 @@ void setup() {
   digitalWrite(M0_PIN, HIGH);
   digitalWrite(M1_PIN, HIGH);
   digitalWrite(M2_PIN, LOW);
-  multiStepper.setMaxSpeed(10000, 10000, 10000);
-  multiStepper.setAcceleration(2000, 2000, 2000);
+  multiStepper.setMaxSpeed(10000, 10000);
+  multiStepper.setAcceleration(2000, 2000);
   stepper_Z.setMaxSpeed(10000);
   stepper_Z.setAcceleration(2000);
   stepper_PIP.setMaxSpeed(10000);
@@ -271,7 +273,9 @@ void loop() {
       stepper_X.runToLimit();
     } else if (receivedData.moveToLimitAxis == "Y") {
       stepper_Y.runToLimit();
-    }  // Add other axes here if needed
+    } else if (receivedData.moveToLimitAxis == "Z") {
+      stepper_Z.runToLimit();
+    } 
     receivedData.moveToLimitReceived = false;
   } 
   

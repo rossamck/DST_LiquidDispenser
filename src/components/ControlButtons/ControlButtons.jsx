@@ -24,6 +24,17 @@ const ControlButtons = ({
     }
   }, []);
 
+// New useEffect hook
+useEffect(() => {
+    const filteredPositions = savedPositions.filter(
+      (position) => position.moduleId === 1
+    );
+    if (filteredPositions.length > 0) {
+      setSelectedPlateId(filteredPositions[0].slotId);
+    }
+  }, [savedPositions, setSelectedPlateId]);
+
+
 
 
   const onSelectWellsClick = () => {

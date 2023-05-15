@@ -24,10 +24,21 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%, -50%)',
+    transform: 'translate(-50%, -50%) rotate(90deg)',
+    transformOrigin: 'center',
     fontSize: '24px',
     fontWeight: 'bold',
     color: 'darkgrey',
+  };
+
+  const moduleNameStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) rotate(90deg)',
+    transformOrigin: 'center',
+    fontSize: '16px',
+    color: 'black',
   };
 
   const dotStyle = {
@@ -52,19 +63,16 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
         width: isVertical ? '150px' : '200px',
         height: isVertical ? '200px' : '150px',
         border: isFilled ? 'none' : '1px dashed gray',
-        backgroundColor: isFilled ? 'lightblue' : (isOver ? 'lightgrey' : 'white'),
+        backgroundColor: isFilled ? 'lightblue' : isOver ? 'lightgrey' : 'white',
         borderRadius: '8px',
-        position: 'relative', // Added position relative for number positioning
+        position: 'relative', // Added position relative for number and module name positioning
       }}
     >
-      {!isFilled && (
-        <div style={numberStyle}>{id + 1}</div>
-      )}
+      {!isFilled && <div style={numberStyle}>{id + 1}</div>}
       <div style={dotStyle} /> {/* Added dot */}
-      {children}
+      <div style={moduleNameStyle}>{children}</div> {/* Rotated module name */}
     </div>
   );
 };
-
 
 export default DroppableSlot;

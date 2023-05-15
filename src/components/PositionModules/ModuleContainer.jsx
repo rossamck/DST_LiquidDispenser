@@ -77,7 +77,7 @@ const ModuleContainer = ({ resetPositions, setResetPositions, savePositions, set
           <DraggableModule key={module.id} {...module} />
         ))}
       </div>
-      <div className="flex flex-col items-center gap-10 pt-10">
+      <div className="flex flex-col items-center gap-10 mt-10 -rotate-90">
         <div className="flex flex-row justify-center gap-x-4">
           {slots.slice(0, 1).map((slot, i) => (
             <DroppableSlot

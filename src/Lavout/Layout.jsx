@@ -98,8 +98,20 @@ const Layout = ({
     setSendSelectionEnabled(false);
     console.log("All selected wells:", allSelectedWells);
     
+    // Define the transformation
+    const plateCornerCoordinates = { 0: [190, 630], 1: [200, 2373], 2: [1500, 100], 3: [1500, 1400] };
+    
+    // Apply the transformation to each well
+    const transformedWells = allSelectedWells.map(well => {
+      const relX = well.xCoord;
+      const relY = well.yCoord;
+      const absX = relX + plateCornerCoordinates[selectedPlateId][0];
+      const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + plateCornerCoordinates[selectedPlateId][1] : relY + plateCornerCoordinates[selectedPlateId][1];
+      return { ...well, xCoord: absX, yCoord: absY };
+    });
+    
     // Group wells by sourceIndex
-    const groupedWells = allSelectedWells.reduce((groups, well) => {
+    const groupedWells = transformedWells.reduce((groups, well) => {
       const sourceIndex = well.sourceIndex;
       if (!groups[sourceIndex]) {
         groups[sourceIndex] = [];
@@ -107,20 +119,21 @@ const Layout = ({
       groups[sourceIndex].push(well);
       return groups;
     }, {});
-  
+    
     // Send each group separately
     Object.values(groupedWells).forEach((group, i, array) => {
       const wellsData = JSON.stringify(group);
-      sendMessage(`selectWells:${wellsData}`, true);
       console.log("Sending data...");
+      sendMessage(`selectWells:${wellsData}`, true);
+
       console.log(wellsData);
       if (i === array.length - 1) {
-      console.log("Last array");
-      sendMessage(`manualCoords:0,0,0`, true);
-
+        console.log("Last array");
+        sendMessage(`manualCoords:0,0,0`, true);
       }
     });
   };
+  
   
   
 

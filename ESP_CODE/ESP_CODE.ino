@@ -125,7 +125,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
     case WStype_TEXT:
       String message = String((char*)payload);
-            // Parse and remove jobId from the message
+      // Parse and remove jobId from the message
       if (message.startsWith("jobId:")) {
         int jobIdEndIndex = message.indexOf(' ');
         String jobIdStr = message.substring(6, jobIdEndIndex);
@@ -181,13 +181,13 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
           int srcIndex = wellData.indexOf("sourceIndex:");
           int xIndex = wellData.indexOf("xCoord:");  // New line
           int yIndex = wellData.indexOf("yCoord:");  // New line
-          
+
 
           String wellId = wellData.substring(idIndex + 7, volIndex - 1);
           float volume = wellData.substring(volIndex + 7, srcIndex - 1).toFloat();
           int sourceIndex = wellData.substring(srcIndex + 12, xIndex - 1).toInt();  // Updated line
-  int x = wellData.substring(xIndex + 7, yIndex).toInt();
-int y = wellData.substring(yIndex + 7).toInt();                        // New line
+          int x = wellData.substring(xIndex + 7, yIndex).toInt();
+          int y = wellData.substring(yIndex + 7).toInt();  // New line
 
 
 
@@ -200,7 +200,7 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         Serial.print("Number of selected wells: ");
         Serial.println(selectedWells.size());
         webSocket.broadcastTXT("ready");
-                Serial.println("Starting dispensing");
+        Serial.println("Starting dispensing");
         dispensing = true;
         currentWell = selectedWells.begin();
         handleDispensing();
@@ -226,13 +226,13 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
         sendI2CMessage(manualMoveMessage);
         String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
-  
+
         webSocket.broadcastTXT(receivedCoordsMessage);
 
 
       }
 
-            else if (message.startsWith("clickPipette:")) {
+      else if (message.startsWith("clickPipette:")) {
         int separatorIndex = message.indexOf(",");
         String axis = message.substring(13, separatorIndex);
         float value = message.substring(separatorIndex + 1).toFloat();
@@ -245,7 +245,7 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
         sendI2CMessage(manualMoveMessage);
         String pipMessage = "pipettedClicked" + requestDataFromNano() + " jobId:" + String(currentJobId);
-  
+
         webSocket.broadcastTXT(pipMessage);
 
 
@@ -257,7 +257,7 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
 
         String coordX = message.substring(13, separatorIndex1);
         String coordY = message.substring(separatorIndex1 + 1, separatorIndex2);
-                String coordZ = message.substring(separatorIndex2 + 1);
+        String coordZ = message.substring(separatorIndex2 + 1);
 
         Serial.print("Received coords: X=");
         Serial.print(coordX);
@@ -271,7 +271,7 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
         String manualCoordsMessage = "manualCoords:" + coordX + "," + coordY + "," + coordZ;
         sendI2CMessage(manualCoordsMessage);
         String receivedCoordsMessage = "receivedCoords" + requestDataFromNano() + " jobId:" + String(currentJobId);
-     Serial.print("Sending coords message: ");
+        Serial.print("Sending coords message: ");
         Serial.println(receivedCoordsMessage);
         webSocket.broadcastTXT(receivedCoordsMessage);
 
@@ -353,10 +353,10 @@ void handleDispensing() {
     Serial.println(receivedWellId);
 
     String completedWellMessage = "completedWell:" + currentWell->wellId;
-String wellCoordsMessage = "receivedCoords" + String("pos:X=") + String(currentWell->x) + ",Y=" + String(currentWell->y) + ",Z=0,PIP=0";
-// update this to include z and pip
+    String wellCoordsMessage = "receivedCoords" + String("pos:X=") + String(currentWell->x) + ",Y=" + String(currentWell->y) + ",Z=0,PIP=0";
+    // update this to include z and pip
     webSocket.broadcastTXT(completedWellMessage);
-        webSocket.broadcastTXT(wellCoordsMessage);
+    webSocket.broadcastTXT(wellCoordsMessage);
 
 
     // Reset the flag
@@ -369,9 +369,8 @@ String wellCoordsMessage = "receivedCoords" + String("pos:X=") + String(currentW
     // All wells have been dispensed
     Serial.println("Dispensing finished");
     dispensing = false;
-      String dispenseFinishedMessage = "dispensefinished:" + String(currentJobId);
-              webSocket.broadcastTXT(dispenseFinishedMessage);
-
+    String dispenseFinishedMessage = "dispensefinished:" + String(currentJobId);
+    webSocket.broadcastTXT(dispenseFinishedMessage);
   }
 }
 
@@ -385,8 +384,8 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 
   // Call either connectToWiFi() or createAccessPoint() here based on your requirement
-  // connectToWiFi();
-   createAccessPoint();
+  connectToWiFi();
+  // createAccessPoint();
 
   server.begin();
   server.on("/socket.io/", HTTP_OPTIONS, []() {

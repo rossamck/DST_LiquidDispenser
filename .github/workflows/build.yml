@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build, Package, Release and Deploy
 
 on:
   push:
@@ -23,7 +23,17 @@ jobs:
 
       - name: Build
         run: npm run build
-      
+
+      - name: Package app
+        run: npm run dist
+
+      - name: Create GitHub release and upload artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          files: 'dist/*'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Deploy to server
         uses: appleboy/scp-action@master
         with:
@@ -35,7 +45,7 @@ jobs:
           source: "build/"
           target: "/var/www/DST_LiquidDispenser"
           overwrite: true
-            
+
       - name: Restart Nginx
         uses: appleboy/ssh-action@master
         with:

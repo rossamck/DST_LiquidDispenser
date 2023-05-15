@@ -18,24 +18,19 @@ jobs:
         with:
           node-version: 16
           
-      - name: Update package lists
-        run: sudo apt-get update
-        
-      - name: Fix broken packages
-        run: sudo apt-get install -f
-        
-      - name: Check for held packages
-        run: sudo apt-mark showhold
-
-
-      - name: Install Wine
-        run: sudo apt-get install wine-stable
+     - name: Install Wine
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get upgrade
+          sudo apt install wine64
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: npm run build
+        
 
       - name: Package app
         run: npm run dist

@@ -100,7 +100,7 @@ const WellPlate = ({
         let relX = parseInt(well.slice(1)) - 1; // Converting 1, 2, 3, etc. to 0, 1, 2, etc.
   
         // Apply the step size
-        const stepSize = 89;
+        const stepSize = 90;
         relX *= stepSize;
         relY *= stepSize;
 
@@ -113,7 +113,7 @@ const WellPlate = ({
         }
   
         // Apply the translation based on the plateId
-        const plateCornerCoordinates = { 0: [200, 800], 1: [200, 2300], 2: [1500, 100], 3: [1500, 1400] }; // Replace these values with the actual coordinates
+        const plateCornerCoordinates = { 0: [190, 630], 1: [200, 2373], 2: [1500, 100], 3: [1500, 1400] }; // Replace these values with the actual coordinates
         const absX = relX + plateCornerCoordinates[selectedPlateId][0];
         const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + plateCornerCoordinates[selectedPlateId][1] : relY + plateCornerCoordinates[selectedPlateId][1];
   

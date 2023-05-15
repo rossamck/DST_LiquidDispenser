@@ -385,8 +385,8 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 
   // Call either connectToWiFi() or createAccessPoint() here based on your requirement
-  connectToWiFi();
-  //  createAccessPoint();
+  // connectToWiFi();
+   createAccessPoint();
 
   server.begin();
   server.on("/socket.io/", HTTP_OPTIONS, []() {

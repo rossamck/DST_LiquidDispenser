@@ -444,7 +444,7 @@ const MovementControl = ({
           onClick={wrappedOnZUp}
           disabled={isMoving}
         >
-          Down
+          Up
           {/* for Z axis buttons are reversed; 0 is top and 500 is bottom */}
         </button>
         <button
@@ -453,7 +453,7 @@ const MovementControl = ({
           onClick={wrappedOnZDown}
           disabled={isMoving}
         >
-          Up
+          Down
         </button>
         <button
           title="PIP Increase"

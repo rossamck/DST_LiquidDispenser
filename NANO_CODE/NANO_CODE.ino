@@ -32,8 +32,8 @@
 // Stepper motor objects  
 SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1, true); // Pass true to invert the direction
 SingleStepper stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
-SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN, LIMIT_3, true);
-SingleStepper stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN);
+SingleStepper stepper_Z(Z_STEP_PIN, Z_DIR_PIN, LIMIT_3);
+SingleStepper stepper_PIP(PIP_STEP_PIN, PIP_DIR_PIN, LIMIT_4, true);
 MultiStepper multiStepper(stepper_X, stepper_Y, stepper_Z);
 
 struct ReceivedData {
@@ -150,16 +150,39 @@ void setup() {
   //Limit switch setup
   pinMode(LIMIT_1, INPUT_PULLUP);
   pinMode(LIMIT_2, INPUT_PULLUP);
+    pinMode(LIMIT_3, INPUT_PULLUP);
+  pinMode(LIMIT_4, INPUT_PULLUP);
 }
 
 void loop() {
 
 
-  int switchState = digitalRead(LIMIT_1);
+  int switchState1 = digitalRead(LIMIT_1);
+    int switchState2 = digitalRead(LIMIT_2);
+
+  int switchState3 = digitalRead(LIMIT_3);
+
+  int switchState4 = digitalRead(LIMIT_4);
+
 
   // Check if the switch is closed
-  if (switchState == LOW) {
-    Serial.println("Switch is closed");
+  if (switchState1 == LOW) {
+    Serial.println("Switch 1 is closed");
+    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  }
+
+    if (switchState2 == LOW) {
+    Serial.println("Switch 2 is closed");
+    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  }
+
+    if (switchState3 == LOW) {
+    Serial.println("Switch 3 is closed");
+    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  }
+
+    if (switchState4 == LOW) {
+    Serial.println("Switch 4 is closed");
     delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
   }
 

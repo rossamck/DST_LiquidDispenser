@@ -117,8 +117,30 @@ function App() {
           jobQueue.jobCompleted(jobId);
         }
 
+      }  else if (message.startsWith("pipettedClickedpos:")) {
+        const posStr = message.split(":")[1];
+        const posValues = posStr.split(",");
+        const xPos = parseFloat(posValues[0].split("=")[1]);
+        const yPos = parseFloat(posValues[1].split("=")[1]);
+        const zPos = parseFloat(posValues[2].split("=")[1]);
+        const pipVal = parseInt(posValues[3].split("=")[1]);
+    
+        console.log(
+          `Received positional data: X=${xPos}, Y=${yPos}, Z=${zPos}, PIP=${pipVal}`
+        );
+        setReceivedCoords({ xPos, yPos, zPos, pipVal });
+    
+        // Extract the jobId
+        if (message.includes("jobId")) {
+          const jobId = parseInt(message.split("jobId:")[1].split('.')[0]);
+          console.log(`Received jobId: ${jobId}`);
+          // Do something with the jobId
+          jobQueue.jobCompleted(jobId);
+        }
+    
         // You can now use the positional data as needed in your application
-      } else {
+      } 
+      else {
         console.log("Received default message:", message);
 
         // Handle the default case (if the message doesn't match any of the cases)

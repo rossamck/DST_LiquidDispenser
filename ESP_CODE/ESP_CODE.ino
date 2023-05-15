@@ -232,6 +232,25 @@ int y = wellData.substring(yIndex + 7).toInt();                        // New li
 
       }
 
+            else if (message.startsWith("clickPipette:")) {
+        int separatorIndex = message.indexOf(",");
+        String axis = message.substring(13, separatorIndex);
+        float value = message.substring(separatorIndex + 1).toFloat();
+        Serial.print("Received movement message: Axis=");
+        Serial.print(axis);
+        Serial.print(", Value=");
+        Serial.println(value);
+
+        // Add the following lines to send the manualMove information over i2c
+        String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
+        sendI2CMessage(manualMoveMessage);
+        String pipMessage = "pipettedClicked" + requestDataFromNano() + " jobId:" + String(currentJobId);
+  
+        webSocket.broadcastTXT(pipMessage);
+
+
+      }
+
       else if (message.startsWith("manualCoords:")) {
         int separatorIndex1 = message.indexOf(',');
         int separatorIndex2 = message.indexOf(',', separatorIndex1 + 1);

@@ -31,15 +31,10 @@ const MovementControl = ({
   const axisLimits = useContext(AxisContext);
   const [warningMessage, setWarningMessage] = useState(null);
 
-
-
   const [activeButton, setActiveButton] = useState(null);
   const [customValue, setCustomValue] = useState(1);
   const [isMoving, setIsMoving] = useState(false);
   const [initialCoordsReceived, setInitialCoordsReceived] = useState(false);
-
-
-
 
   // Inside MovementControl component, add these new state variables
   const [buttonPressCounts, setButtonPressCounts] = useState({
@@ -67,7 +62,6 @@ const MovementControl = ({
   useEffect(() => {
     onAxesNetValuesUpdate(axesNetValues);
   }, [axesNetValues, onAxesNetValuesUpdate]);
-
 
   useEffect(() => {
     if (!initialCoordsReceived && receivedCoords) {
@@ -125,7 +119,6 @@ const MovementControl = ({
     [customValue, sendMessage, axisLimits]
   );
 
-
   const resetButtonPressCounts = () => {
     setButtonPressCounts({
       y_inc: 0,
@@ -138,19 +131,24 @@ const MovementControl = ({
       pip_dec: 0,
     });
   };
+  const handlePipetteClick = () => {
+    sendMessage(`clickPipette:PIP,200`, true);
+    sendMessage(`clickPipette:PIP,0`, true);
+
+    
+  };
 
   const resetCounters = () => {
     resetButtonPressCounts();
-    sendMessage(`manualCoords:0,0,0`, true);  // Moves X, Y and Z to 0
+    sendMessage(`manualCoords:0,0,0`, true); // Moves X, Y and Z to 0
     setIsMoving(true);
-    setAxesNetValues(prevValues => ({
+    setAxesNetValues((prevValues) => ({
       ...prevValues,
       X: 0,
       Y: 0,
     }));
     sendMessage("resetCounter");
   };
-  
 
   const moveToLimit = (axis) => {
     // Implement the moveToLimit functionality here
@@ -178,7 +176,6 @@ const MovementControl = ({
       Z: zCoordinate,
     }));
   };
-  
 
   const [activeTab, setActiveTab] = useState(0);
   const handleTabSelect = (index) => {
@@ -196,7 +193,7 @@ const MovementControl = ({
       content: (
         <div className="text-center mt-4">
           <h2 className="text-white mb-2">Co-ordinate Entry</h2>
-      
+
           <div className="flex justify-center flex-col">
             <div className="flex justify-center items-center mb-4">
               <div className="flex items-center">
@@ -263,13 +260,22 @@ const MovementControl = ({
           </div>
         </div>
       ),
-      
+
       margin: "mx-auto",
     },
 
     {
-      label: "Tab 3",
-      content: <div>Tab 3 content goes here</div>,
+      label: "Pipette",
+      content: (
+        <div>
+          <button
+            className="mt-4 p-2 w-full rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+            onClick={handlePipetteClick}
+          >
+            Click Pipette
+          </button>
+        </div>
+      ),
       margin: "mr-2",
     },
   ];
@@ -325,7 +331,7 @@ const MovementControl = ({
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (isMoving) return; // Add this line
-  
+
       switch (event.key) {
         case "ArrowUp":
           wrappedOnYUp();
@@ -343,7 +349,7 @@ const MovementControl = ({
           wrappedOnXUp();
           setActiveButton("x-inc");
           break;
-          // Z case reversed so 0 is top
+        // Z case reversed so 0 is top
         case "PageDown":
           wrappedOnZUp();
           setActiveButton("z-dec");
@@ -364,14 +370,14 @@ const MovementControl = ({
           break;
       }
     };
-  
+
     const handleKeyUp = () => {
       setActiveButton(null);
     };
-  
+
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
-  
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("keyup", handleKeyUp);
@@ -387,7 +393,6 @@ const MovementControl = ({
     wrappedOnPIPDown,
     isMoving,
   ]);
-  
 
   const getButtonClassName = (name) => {
     const baseClassName =
@@ -400,7 +405,6 @@ const MovementControl = ({
 
   return (
     <div className="flex flex-col items-center mt-4">
-          
       <div className="grid grid-cols-3 grid-rows-2 gap-4 mb-4">
         <button
           title="Y Increase"
@@ -468,9 +472,7 @@ const MovementControl = ({
           PIP Down
         </button>
       </div>
-      {warningMessage && (
-        <div className="text-red-500">{warningMessage}</div>
-      )}
+      {warningMessage && <div className="text-red-500">{warningMessage}</div>}
       <div className="mt-4">
         <div className="mb-4">
           <label htmlFor="customValue" className="mr-2 text-white">

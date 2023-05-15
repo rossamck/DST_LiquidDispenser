@@ -23,6 +23,9 @@ jobs:
       run: npm ci
 
     - name: Build app
+      run: npm run build
+
+    - name: Package app
       run: npm run dist
 
     - name: Release app

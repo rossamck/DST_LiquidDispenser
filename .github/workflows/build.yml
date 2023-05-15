@@ -23,6 +23,15 @@ jobs:
 
       - name: Build
         run: npm run build
+        
+      - name: Install Wine
+        run: |
+          sudo dpkg --add-architecture i386
+          wget -nc https://dl.winehq.org/wine-builds/winehq.key
+          sudo apt-key add winehq.key
+          sudo add-apt-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+          sudo apt-get update
+          sudo apt-get install --install-recommends winehq-stable
 
       - name: Package app
         run: npm run dist

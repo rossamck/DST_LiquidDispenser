@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.1.4",
+  "version": "0.1.1",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
@@ -34,6 +34,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
+    "package": "electron-packager . --asar",
     "dist": "electron-builder"
   },
   "eslintConfig": {
@@ -65,18 +66,15 @@
     "tailwindcss": "^3.3.1"
   },
   "build": {
-    "appId": "com.example.yourapp",
+    "appId": "com.example.liquiddispenser",
     "productName": "LiquidDispenser",
     "publish": [{
       "provider": "github",
       "owner": "rossamck",
-      "repo": "dst-liquid-dispenser",
+      "repo": "DST_LiquidDispenser",
       "releaseType": "release"
     }],
-    "directories": {
-      "buildResources": "resources",
-      "output": "dist"
-    },
+    
     "files": [
       "build/**/*",
       "node_modules/**/*",
@@ -92,6 +90,5 @@
     "linux": {
       "target": "AppImage"
     }
-}
-
+  }
 }

@@ -30,17 +30,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
-  
-    "build": "react-scripts build",
-  
-    "dist:mac": "electron-builder --mac",
-    "dist:win": "electron-builder --win --x64",
-    "dist:linux": "electron-builder --linux"
+    "dist": "electron-builder"
   },
-  
   "eslintConfig": {
     "extends": [
       "react-app",

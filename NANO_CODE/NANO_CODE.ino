@@ -134,6 +134,7 @@ void setup() {
   //   pinMode(SDA_PIN, INPUT_PULLUP);
   // pinMode(SCL_PIN, INPUT_PULLUP);
 
+
   // Stepper motor setup
   pinMode(M0_PIN, OUTPUT);
   pinMode(M1_PIN, OUTPUT);
@@ -154,6 +155,14 @@ void setup() {
   pinMode(LIMIT_2, INPUT_PULLUP);
     pinMode(LIMIT_3, INPUT_PULLUP);
   pinMode(LIMIT_4, INPUT_PULLUP);
+
+    Serial.println("Calibrating Z...");
+  // stepper_Z.runToLimit();
+
+  //       stepper_Z.move(500 * microstep_amount);  // Move by deltaY number of microsteps
+  //     stepper_Z.runToPosition();
+
+
 }
 
 void loop() {

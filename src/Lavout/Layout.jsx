@@ -7,7 +7,7 @@ import Content from "./Content/Content";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
-import config from "../configuration/ModuleConfig.json";
+import ConfigContext from "../context/ModuleConfigContext";
 
 const Layout = ({
   onButtonClick,
@@ -36,12 +36,22 @@ const Layout = ({
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
   const [activeWellPlate, setActiveWellPlate] = useState("");
-  const [activeSourceModule, setActiveSourceModule] = useState(null);
+  const [activeSourceModule, setActiveSourceModule] = useState("");
+  const [activeSourceModuleId, setActiveSourceModuleId] = useState("");
 
+  const config = useContext(ConfigContext);
   
   useEffect(() => {
     console.log("Active Source Module:", activeSourceModule);
-  }, [activeSourceModule]);
+    console.log("TEST");
+    if (activeSourceModule !== "") {
+      const activeModule = config[activeSourceModule];
+      const sourceModuleId = activeModule.moduleId;
+      console.log(sourceModuleId);
+      setActiveSourceModuleId(sourceModuleId)
+    }
+  }, [activeSourceModule, config]);
+  
 
   //preset stuff (move to own file)
   const [presets, setPresets] = useState(() => {
@@ -102,6 +112,9 @@ const Layout = ({
     // console.log("Well plate updated:", selectedWells);
   };
 
+  // obtain the source for each group then get the coordinates from them
+
+
   const onSendWells = () => {
     setSendSelectionEnabled(false);
     console.log("All selected wells:", allSelectedWells);
@@ -131,7 +144,7 @@ const Layout = ({
     // Send each group separately
     Object.values(groupedWells).forEach((group, i, array) => {
       const wellsData = JSON.stringify(group);
-      console.log("Sending data...");
+      console.log("Sending data...", wellsData);
       sendMessage(`selectWells:${wellsData}`, true);
   
       console.log(wellsData);
@@ -174,7 +187,7 @@ const Layout = ({
               setActiveLayout={setActiveLayout}
               // activeWellPlate={"96 Well"}
               activeWellPlate={activeWellPlate}
-              selectedSourceModuleId={5}
+              selectedSourceModuleId={activeSourceModuleId}
 
               
             />

@@ -41,21 +41,14 @@ const Content = ({
     console.log("Selected Plate ID:", selectedPlateId);
   }, [selectedPlateId]);
 
-  // useEffect(() => {
-  //   if (selectedSourceModuleId) {
-  //     const sourceModule = Object.values(config).find((module) => module.moduleId === selectedSourceModuleId);
-  //     setActiveSourceModule(sourceModule);
-  //   }
-  // }, [config, selectedSourceModuleId]);
-
   useEffect(() => {
-    const sourceModule = Object.values(config).find((module) => module.moduleId === 5);
-    console.log("source module: ", sourceModule);
-    console.log("Liquid sources: ", sourceModule.liquidSources);
-    setActiveSourceModule(sourceModule);
-  }, [config]);
-  
-  
+    if (selectedSourceModuleId) {
+      const sourceModule = Object.values(config).find((module) => module.moduleId === selectedSourceModuleId);
+      setActiveSourceModule(sourceModule);
+    }
+  }, [config, selectedSourceModuleId]);
+
+   
 
   const handleLiquidSourceSelect = (index) => {
     const selectedColourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;

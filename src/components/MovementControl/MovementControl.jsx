@@ -456,12 +456,12 @@ const MovementControl = ({
           Down
         </button>
         <button
-          title="PIP Increase"
+          title="PIP Decre"
           className={getButtonClassName("pip-inc")}
           onClick={wrappedOnPIPUp}
           disabled={isMoving}
         >
-          PIP Up
+          PIP Down!
         </button>
         <button
           title="PIP Decrease"
@@ -469,7 +469,7 @@ const MovementControl = ({
           onClick={wrappedOnPIPDown}
           disabled={isMoving}
         >
-          PIP Down
+          PIP Up!
         </button>
       </div>
       {warningMessage && <div className="text-red-500">{warningMessage}</div>}

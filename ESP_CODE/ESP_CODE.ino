@@ -11,10 +11,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-const char* ssid = "VM6701124_2G";
-const char* password = "fnDdpj9q6qdt";
-// const char* ssid = "iPhone (3)";
-// const char* password = "13245768";
+// const char* ssid = "VM6701124_2G";
+// const char* password = "fnDdpj9q6qdt";
+const char* ssid = "iPhone (3)";
+const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);

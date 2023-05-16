@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useEffect } from "react";
 import PositionsContext from "../../context/PositionsContext";
-import config from "../../configuration/WellPlate.json";
+import config from "../../configuration/ModuleConfig.json";
 
 const SavedPositionsTable = () => {
   const { savedPositions } = useContext(PositionsContext); // Consume savedPositions from the PositionsContext
@@ -10,7 +10,7 @@ const SavedPositionsTable = () => {
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
-    // Set modules state from the WellPlate.json data
+    // Set modules state from the ModuleConfig.json data
     setModules(Object.entries(config).map(([name, moduleData]) => ({
       id: moduleData.moduleId,
       name: name

@@ -22,6 +22,7 @@ const ControlPanel = ({
   selectedPlateId,
   setSelectedPlateId,
   setActiveWellPlate,
+  setActiveSourceModule,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [isVolumeSelected, setIsVolumeSelected] = useState(false); 
@@ -49,6 +50,7 @@ const ControlPanel = ({
             isVolumeSelected={isVolumeSelected}
             setIsVolumeSelected={setIsVolumeSelected}
             setActiveWellPlate={setActiveWellPlate}
+            setActiveSourceModule={setActiveSourceModule}
           />
         </div>
       ),

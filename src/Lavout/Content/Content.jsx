@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import WellPlate from "../../components/WellPlate/WellPlate";
 import LiquidSource from "../../components/LiquidSource/LiquidSource";
+import ConfigContext from "../../context/ModuleConfigContext";
+
 
 const Content = ({
   currentAction,
@@ -15,18 +17,16 @@ const Content = ({
   selectedPlateId,
   setActiveLayout,
   activeWellPlate,
+  selectedSourceModuleId,
 }) => {
   const WELL_PLATE_WIDTH = '100%';
-  const colourIndexPairs = [
-    { color: "bg-pink-300", index: 1, highlightedColor: "bg-pink-100" },
-    { color: "bg-green-300", index: 2, highlightedColor: "bg-green-100" },
-    { color: "bg-blue-300", index: 3, highlightedColor: "bg-blue-100" },
-    { color: "bg-red-300", index: 4, highlightedColor: "bg-red-100" },
-    { color: "bg-teal-300", index: 5, highlightedColor: "bg-teal-100" },
-    { color: "bg-yellow-300", index: 6, highlightedColor: "bg-yellow-100" },
-    { color: "bg-purple-300", index: 7, highlightedColor: "bg-purple-100" },
-    { color: "bg-orange-300", index: 8, highlightedColor: "bg-orange-100" },
-  ];
+  const config = useContext(ConfigContext);
+  const [activeSourceModule, setActiveSourceModule] = useState(null);
+
+  
+
+  const colourIndexPairs = activeSourceModule?.liquidSources || [];
+
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(colourIndexPairs[0]);
 
@@ -36,10 +36,26 @@ const Content = ({
 
   useEffect(() => {
     if (selectedPlateId === null) {
-      console.log("NULL!!22");
+      console.log("No plate selected!");
     }
     console.log("Selected Plate ID:", selectedPlateId);
   }, [selectedPlateId]);
+
+  // useEffect(() => {
+  //   if (selectedSourceModuleId) {
+  //     const sourceModule = Object.values(config).find((module) => module.moduleId === selectedSourceModuleId);
+  //     setActiveSourceModule(sourceModule);
+  //   }
+  // }, [config, selectedSourceModuleId]);
+
+  useEffect(() => {
+    const sourceModule = Object.values(config).find((module) => module.moduleId === 5);
+    console.log("source module: ", sourceModule);
+    console.log("Liquid sources: ", sourceModule.liquidSources);
+    setActiveSourceModule(sourceModule);
+  }, [config]);
+  
+  
 
   const handleLiquidSourceSelect = (index) => {
     const selectedColourIndexPair = colourIndexPairs.find(pair => pair.index === index) ?? null;
@@ -85,6 +101,8 @@ const Content = ({
               wellPlateWidth={WELL_PLATE_WIDTH}
               selectedColorIndex={selectedColorIndex}
               onSelect={handleLiquidSourceSelect}
+              rows={activeSourceModule?.rows}
+              cols={activeSourceModule?.cols}
             />
           </div>
         </>

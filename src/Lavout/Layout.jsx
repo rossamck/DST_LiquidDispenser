@@ -1,13 +1,13 @@
 // Layout.jsx
 
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Navbar from "./Navbar/Navbar";
 import SidePanel from "./SidePanel/SidePanel";
 import Content from "./Content/Content";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
-import config from "../configuration/WellPlate.json";
+import config from "../configuration/ModuleConfig.json";
 
 const Layout = ({
   onButtonClick,
@@ -36,7 +36,12 @@ const Layout = ({
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
   const [activeWellPlate, setActiveWellPlate] = useState("");
+  const [activeSourceModule, setActiveSourceModule] = useState(null);
 
+  
+  useEffect(() => {
+    console.log("Active Source Module:", activeSourceModule);
+  }, [activeSourceModule]);
 
   //preset stuff (move to own file)
   const [presets, setPresets] = useState(() => {
@@ -169,6 +174,8 @@ const Layout = ({
               setActiveLayout={setActiveLayout}
               // activeWellPlate={"96 Well"}
               activeWellPlate={activeWellPlate}
+              selectedSourceModuleId={5}
+
               
             />
           </div>
@@ -191,6 +198,7 @@ const Layout = ({
               selectedPlateId={selectedPlateId}
               setSelectedPlateId={setSelectedPlateId}
               setActiveWellPlate={setActiveWellPlate}
+              setActiveSourceModule={setActiveSourceModule}
             />
           </div>
         </div>

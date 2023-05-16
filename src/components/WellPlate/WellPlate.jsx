@@ -1,6 +1,6 @@
 // WellPlate.jsx
 import React, { useState, useEffect, useCallback } from "react";
-import config from "../../configuration/WellPlate.json";
+import config from "../../configuration/ModuleConfig.json";
 
 const Well = ({
   selected,

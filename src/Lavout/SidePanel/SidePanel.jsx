@@ -15,6 +15,7 @@ const SidePanel = ({
   selectedPlateId,
   setSelectedPlateId,
   setActiveWellPlate,
+  setActiveSourceModule,
 }) => {
   return (
     <div className="col-span-3 flex flex-col h-full">
@@ -33,6 +34,7 @@ const SidePanel = ({
         selectedPlateId={selectedPlateId}
         setSelectedPlateId={setSelectedPlateId}
         setActiveWellPlate={setActiveWellPlate}
+        setActiveSourceModule={setActiveSourceModule}
       />
     </div>
   );

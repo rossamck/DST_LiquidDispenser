@@ -48,7 +48,7 @@ void SingleStepper::runToLimit() {
   long steps_moved = 0;
   while (digitalRead(_limit_switch_pin)) {
     // Keep running while the limit switch is not hit
-    _stepper.move(_invert_direction ? 1 : -1);
+    _stepper.move(_invert_direction ? 100 : -100);
     _stepper.runToPosition();
     steps_moved++;
   }
@@ -57,6 +57,8 @@ void SingleStepper::runToLimit() {
   _stepper.stop();
 
   // Print the number of steps moved
+  setCurrentPosition(0);
+
   Serial.print("Number of steps moved to hit limit: ");
   Serial.println(steps_moved);
 }

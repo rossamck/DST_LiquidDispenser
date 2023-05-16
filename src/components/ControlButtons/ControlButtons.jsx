@@ -1,7 +1,7 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { FiCheck } from "react-icons/fi";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
-import config from "../../configuration/WellPlate.json";
+import ConfigContext from "../../context/ModuleConfigContext";
 
 const ControlButtons = ({
   onButtonClick,
@@ -13,11 +13,17 @@ const ControlButtons = ({
   isVolumeSelected,
   setIsVolumeSelected,
   setActiveWellPlate,
+  setActiveSourceModule,
+  setActiveWasteModule,
+  
 }) => {
   const [volume, setVolume] = useState("");
   const { sendMessage } = useContext(WebSocketContext);
   const [savedPositions, setSavedPositions] = useState([]);
   const [filteredPositions, setFilteredPositions] = useState([]);
+  const config = useContext(ConfigContext);
+ 
+  
 
   useEffect(() => {
     const savedPositionsData = localStorage.getItem("savedPositions");
@@ -49,34 +55,43 @@ const ControlButtons = ({
     console.log("NAME: ", wellPlateName);
   };
 
-  const filterPositions = (positions) => {
+  const onSourceButtonClick = (moduleId, sourceName) => {
+    console.log(`Button clicked: Name: ${sourceName}, Module ID ${moduleId}`);
+    setActiveSourceModule(sourceName);
+  };
+
+  const onWasteButtonClick = (moduleId, wasteName) => {
+    console.log(`Button clicked: Name: ${wasteName}, Module ID ${moduleId}`);
+    setActiveWasteModule(wasteName);
+  };
+
+const filterPositions = useCallback((positions) => {
     return positions
       .map((position) => {
         const moduleConfigEntry = Object.entries(config).find(
           ([, module]) => module.moduleId === position.moduleId
         );
-
+  
         if (moduleConfigEntry) {
-          const [wellPlateName, moduleConfig] = moduleConfigEntry;
-          if (moduleConfig.isWellPlate) {
-            return { ...position, wellPlateName };
+          const [moduleName, moduleConfig] = moduleConfigEntry;
+          if (moduleConfig.isWellPlate || moduleConfig.isSource || moduleConfig.isWaste) {
+            return { ...position, moduleName, ...moduleConfig };
           }
         }
-
+  
         return null;
       })
       .filter(Boolean);
-  };
+  }, [config]); 
+
 
   useEffect(() => {
     if (savedPositions.length > 0) {
       const filtered = filterPositions(savedPositions);
+      console.log("Filtered: ", filtered);
       setFilteredPositions(filtered);
-      if (filtered.length > 0 && selectedPlateId === null) {
-        setSelectedPlateId(filtered[0].slotId);
-      }
     }
-  }, [savedPositions, selectedPlateId, setSelectedPlateId]);
+  }, [savedPositions, filterPositions]); 
 
   return (
     <div className="flex flex-col items-center justify-between h-full">
@@ -121,42 +136,89 @@ const ControlButtons = ({
         STOP
       </button>
       <hr className="border-gray-300 mt-4 w-full" />
-      <div className="flex flex-col items-center justify-center">
-        {filteredPositions.length > 0 ? (
-          <>
-            <h3 className="text-white font-bold mt-3 mb-3">
-              Available Well Plates:
-            </h3>
-
-            <ul>
-              {filteredPositions.map((position, index) => (
-                <li key={position.slotId}>
-                  <button
-                    className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
-                      position.slotId === selectedPlateId ? "opacity-50" : ""
-                    }`}
-                    onClick={() =>
-                      onWellPlateButtonClick(
-                        position.slotId,
-                        position.moduleId,
-                        position.wellPlateName
-                      )
-                    }
-                  >
-                    {position.wellPlateName} ({position.slotId + 1})
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : (
-          <h3 className="text-white font-bold mt-3 mb-3">
-            Please select a well plate position
-          </h3>
-        )}
-      </div>
+    <div className="flex flex-col items-center justify-center">
+      {filteredPositions.length > 0 ? (
+        <>
+                <h3 className="text-white font-bold mt-3 mb-3">
+        Available Modules:
+      </h3>
+      <div className="flex">
+        <ul className="mr-4">
+          <h4 className="text-white font-bold mb-2">Well Plates:</h4>
+          {filteredPositions.filter(pos => pos.isWellPlate).map((position, index) => (
+            <li key={position.slotId}>
+              <button
+                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
+                  position.slotId === selectedPlateId ? "opacity-50" : ""
+                }`}
+                onClick={() =>
+                  onWellPlateButtonClick(
+                    position.slotId,
+                    position.moduleId,
+                    position.moduleName
+                  )
+                }
+              >
+                {position.moduleName} ({position.slotId + 1})
+              </button>
+            </li>
+          ))}
+        </ul>
+        <ul className="mr-4">
+          <h4 className="text-white font-bold mb-2">Source Modules:</h4>
+          <li>
+    <button
+      className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
+      onClick={() => {
+        onSourceButtonClick("Default Source");
+      }}
+    >
+      Default Source
+    </button>
+  </li>
+          {filteredPositions.filter(pos => pos.isSource).map((position, index) => (
+            <li key={position.slotId}>
+              <button
+                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
+                onClick={() =>
+                  onSourceButtonClick(
+                    position.moduleName
+                  )
+                }
+              >
+                {position.moduleName} ({position.slotId + 1})
+              </button>
+            </li>
+          ))}
+ 
+        </ul>
+        <ul>
+          <h4 className="text-white font-bold mb-2">Waste Modules:</h4>
+          {filteredPositions.filter(pos => pos.isWaste).map((position, index) => (
+            <li key={position.slotId}>
+              <button
+                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
+                onClick={() =>
+                  onWasteButtonClick(
+                    position.moduleName
+                  )
+                }
+              >
+                {position.moduleName} ({position.slotId + 1})
+              </button>
+              </li>
+          ))}
+          </ul>
+          </div>
+        </>
+      ) : (
+        <h3 className="text-white font-bold mt-3 mb-3">
+          Please select modules before proceeding
+        </h3>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default ControlButtons;

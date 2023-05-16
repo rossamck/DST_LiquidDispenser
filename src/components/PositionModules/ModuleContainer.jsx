@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import DraggableModule from "./DraggableModule";
 import DroppableSlot from "./DroppableSlot";
 import PositionsContext from "../../context/PositionsContext";
-import config from "../../configuration/WellPlate.json";
+import ConfigContext from "../../context/ModuleConfigContext";
 
 
 const ModuleContainer = ({
@@ -11,6 +11,8 @@ const ModuleContainer = ({
   savePositions,
   setSavePositions,
 }) => {
+  const config = useContext(ConfigContext);
+
   const [modules, setModules] = useState([]);
 
 
@@ -29,16 +31,17 @@ const ModuleContainer = ({
     }
   }, [setSavedPositions]);
 
-
+  
   useEffect(() => {
-    // Set modules state from the WellPlate.json data
-    setModules(Object.entries(config).map(([name, moduleData]) => ({
+    // Set modules state from the ModuleConfig.json data
+    setModules(Object.entries(config).filter(([name, moduleData]) => moduleData.showModule)
+        .map(([name, moduleData]) => ({
       id: moduleData.moduleId,
       name: name,
       isWellPlate: moduleData.isWellPlate,
       // add any other properties you need from moduleData
     })));
-  }, []);
+  }, [config]);
 
 
   const handleDrop = (moduleId, slotId) => {

@@ -16,6 +16,8 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { WebSocketProvider } from "./components/WebSocketContext/WebSocketContext";
 import "./components/scrollbar/scrollbar.css";
 import Sidebar from "./components/SideBar/SideBar";
+import ConfigContext from './context/ModuleConfigContext';
+import config from "./configuration/ModuleConfig.json";
 
 
 function App() {
@@ -149,6 +151,8 @@ function App() {
   };
 
   return (
+    <ConfigContext.Provider value={config}>
+
     <JobQueueContext.Provider value={jobQueue}>
       <AxisContext.Provider value={axisLimits}>
         <WebSocketProvider handleMessage={handleMessage}>
@@ -217,6 +221,8 @@ function App() {
         </WebSocketProvider>
       </AxisContext.Provider>
     </JobQueueContext.Provider>
+    </ConfigContext.Provider>
+
   );
 }
 

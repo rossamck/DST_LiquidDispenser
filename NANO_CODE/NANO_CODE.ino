@@ -114,14 +114,19 @@ void moveMotors(float currentX, float currentY, float currentZ) {
     Serial.print(", deltaZ=");
     Serial.print(deltaZ);
     
-    multiStepper.move(stepsX, stepsY);
-    multiStepper.runToPosition();
-
-    previousX = currentX;
-    previousY = currentY;
-    previousZ = currentZ;
-
+    if (deltaZ != 0) {
+        Serial.println("Z MOVE!");
+        stepper_Z.move(stepsZ);
+        stepper_Z.runToPosition();
+        previousZ = currentZ;
+    } else {
+        multiStepper.move(stepsX, stepsY);
+        multiStepper.runToPosition();
+        previousX = currentX;
+        previousY = currentY;
+    }
 }
+
 
 void setup() {
   // I2C setup

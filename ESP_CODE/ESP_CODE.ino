@@ -11,10 +11,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-// const char* ssid = "VM6701124_2G";
-// const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+const char* ssid = "VM6701124_2G";
+const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -247,6 +247,25 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         String pipMessage = "pipettedClicked" + requestDataFromNano() + " jobId:" + String(currentJobId);
 
         webSocket.broadcastTXT(pipMessage);
+
+
+      }
+
+      else if (message.startsWith("moveZ:")) {
+        int separatorIndex = message.indexOf(",");
+        String axis = message.substring(6, separatorIndex);
+        float value = message.substring(separatorIndex + 1).toFloat();
+        Serial.print("Received movement message: Axis=");
+        Serial.print(axis);
+        Serial.print(", Value=");
+        Serial.println(value);
+
+        // Add the following lines to send the manualMove information over i2c
+        String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
+        sendI2CMessage(manualMoveMessage);
+        String ZMoveMessage = "ZMoved" + requestDataFromNano() + " jobId:" + String(currentJobId);
+
+        webSocket.broadcastTXT(ZMoveMessage);
 
 
       }

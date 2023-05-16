@@ -1,4 +1,5 @@
 import React from "react";
+import "./SourceColours.css"
 
 const LiquidSource = ({ onSelect, colourIndexPairs, wellPlateWidth, selectedColorIndex, rows, cols }) => {
   const sourceButtons = colourIndexPairs.map(({ color, index }) => (

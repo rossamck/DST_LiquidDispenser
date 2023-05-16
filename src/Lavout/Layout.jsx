@@ -37,7 +37,10 @@ const Layout = ({
   const { sendMessage } = useContext(WebSocketContext);
   const [activeWellPlate, setActiveWellPlate] = useState("");
   const [activeSourceModule, setActiveSourceModule] = useState("");
+  const [activeWasteModule, setActiveWasteModule] = useState("");
+
   const [activeSourceModuleId, setActiveSourceModuleId] = useState("");
+  
 
   const config = useContext(ConfigContext);
   
@@ -120,14 +123,18 @@ const Layout = ({
     console.log("All selected wells:", allSelectedWells);
     
     // Retrieve the corner coordinates based on the activeWellPlate
-    const cornerCoordinates = config[activeWellPlate].cornerCoordinates;
-    
+    const PlateCornerCoordinates = config[activeWellPlate].cornerCoordinates;
+    const SourceCornerCoordinates = config[activeSourceModule].cornerCoordinates;
+    const SourceStepSizeV = config[activeSourceModule].stepSizeV;
+    const SourceStepSizeH = config[activeSourceModule].stepSizeh;
+    const SourceCols = config[activeSourceModule].cols;
+  
     // Apply the transformation to each well
     const transformedWells = allSelectedWells.map(well => {
       const relX = well.xCoord;
       const relY = well.yCoord;
-      const absX = relX + cornerCoordinates[selectedPlateId][0];
-      const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + cornerCoordinates[selectedPlateId][1] : relY + cornerCoordinates[selectedPlateId][1];
+      const absX = relX + PlateCornerCoordinates[selectedPlateId][0];
+      const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + PlateCornerCoordinates[selectedPlateId][1] : relY + PlateCornerCoordinates[selectedPlateId][1];
       return { ...well, xCoord: absX, yCoord: absY };
     });
     
@@ -140,14 +147,37 @@ const Layout = ({
       groups[sourceIndex].push(well);
       return groups;
     }, {});
-    
+
+
     // Send each group separately
-    Object.values(groupedWells).forEach((group, i, array) => {
+    Object.entries(groupedWells).forEach(([sourceIndex, group], i, array) => {
+      const sourceRow = Math.floor((sourceIndex - 1) / SourceCols);
+      const sourceCol = (sourceIndex - 1) % SourceCols;
+      const manualX = SourceCornerCoordinates[0][0] + sourceCol * SourceStepSizeH;
+      const manualY = SourceCornerCoordinates[0][1] + sourceRow * SourceStepSizeV;
+  
+      // Send manualCoords before each sourceIndex group
+      sendMessage(`manualCoords:${manualX},${manualY},0`, true); // move to liquid source
+      console.log("new test: ", `manualCoords:${manualX},${manualY},0`)
+
+      // Lower Z by set amount
+      sendMessage(`moveZ:Z,300`, true); // reduce height by 300 (500 max)
+
+      // Click pipette to collect liquid
+      sendMessage(`clickPipette:PIP,200`, true);
+      sendMessage(`clickPipette:PIP,0`, true);
+
+      sendMessage(`moveZ:Z,-300`, true); // reduce height by 300 (500 max)
+
+
+      
+
+
+      
       const wellsData = JSON.stringify(group);
       console.log("Sending data...", wellsData);
       sendMessage(`selectWells:${wellsData}`, true);
   
-      console.log(wellsData);
       if (i === array.length - 1) {
         console.log("Last array");
         sendMessage(`manualCoords:0,0,0`, true);
@@ -212,6 +242,7 @@ const Layout = ({
               setSelectedPlateId={setSelectedPlateId}
               setActiveWellPlate={setActiveWellPlate}
               setActiveSourceModule={setActiveSourceModule}
+              setActiveWasteModule={setActiveWasteModule}
             />
           </div>
         </div>

@@ -24,22 +24,25 @@
   "Default Source": {
     "moduleId": 3,
     "rows": 2,
-    "cols": 4,
+    "cols": 5,
     "cornerCoordinates": { "0": [300, 400], "1": [300, 400], "2": [300, 400], "3": [300, 400] },
-    "stepSize": 90,
+    "stepSizeh": 100,
+    "stepSizeV": 80,
     "isWellPlate": false,
     "isSource": true,
     "isWaste": false,
     "showModule": false,
     "liquidSources": [
-      { "color": "bg-pink-300", "index": 1, "highlightedColor": "bg-pink-100" },
-      { "color": "bg-green-300", "index": 2, "highlightedColor": "bg-green-100" },
-      { "color": "bg-blue-300", "index": 3, "highlightedColor": "bg-blue-100" },
-      { "color": "bg-red-300", "index": 4, "highlightedColor": "bg-red-100" },
-      { "color": "bg-teal-300", "index": 5, "highlightedColor": "bg-teal-100" },
+      { "color": "bg-green-300", "index": 1, "highlightedColor": "bg-green-100" },
+      { "color": "bg-lightblue-300", "index": 2, "highlightedColor": "bg-lightblue-100" },
+      { "color": "bg-red-300", "index": 3, "highlightedColor": "bg-red-100" },
+      { "color": "bg-teal-300", "index": 4, "highlightedColor": "bg-teal-100" },
+      { "color": "bg-pink-300", "index": 5, "highlightedColor": "bg-pink-100" },
       { "color": "bg-yellow-300", "index": 6, "highlightedColor": "bg-yellow-100" },
       { "color": "bg-purple-300", "index": 7, "highlightedColor": "bg-purple-100" },
-      { "color": "bg-orange-300", "index": 8, "highlightedColor": "bg-orange-100" }
+      { "color": "bg-cyan-300", "index": 8, "highlightedColor": "bg-cyan-100" },
+      { "color": "bg-indigo-300", "index": 9, "highlightedColor": "bg-indigo-100" },
+      { "color": "bg-orange-300", "index": 10, "highlightedColor": "bg-orange-100" }
     ]
   },
   "4 Well": {
@@ -58,16 +61,15 @@
     "rows": 1,
     "cols": 2,
     "cornerCoordinates": { "0": [190, 630], "1": [200, 2373], "2": [1500, 100], "3": [1500, 1400] },
-    "stepSize": 100,
+    "stepSizeh": 90,
+    "stepSizeV": 90,
     "isWellPlate": false,
     "isSource": true,
     "isWaste": false,
     "showModule": true,
     "liquidSources": [
-      { "color": "bg-pink-300", "index": 1, "highlightedColor": "bg-pink-100" },
-      { "color": "bg-green-300", "index": 2, "highlightedColor": "bg-green-100" },
-      { "color": "bg-blue-300", "index": 3, "highlightedColor": "bg-blue-100" },
-      { "color": "bg-red-300", "index": 4, "highlightedColor": "bg-red-100" } 
+      { "color": "bg-green-300", "index": 1, "highlightedColor": "bg-green-100" },
+      { "color": "bg-lightblue-300", "index": 2, "highlightedColor": "bg-lightblue-100" }
     ]
   },
   "Dual Waste": {

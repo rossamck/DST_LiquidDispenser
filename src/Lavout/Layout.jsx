@@ -34,6 +34,8 @@ const Layout = ({
 
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
+  const [activeWellPlate, setActiveWellPlate] = useState("");
+
 
   //preset stuff (move to own file)
   const [presets, setPresets] = useState(() => {
@@ -164,6 +166,8 @@ const Layout = ({
               setDispensingWell={setDispensingWell}
               selectedPlateId={selectedPlateId}
               setActiveLayout={setActiveLayout}
+              // activeWellPlate={"96 Well"}
+              activeWellPlate={activeWellPlate}
               
             />
           </div>
@@ -185,6 +189,7 @@ const Layout = ({
               completedWells={completedWells}
               selectedPlateId={selectedPlateId}
               setSelectedPlateId={setSelectedPlateId}
+              setActiveWellPlate={setActiveWellPlate}
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { FiCheck } from "react-icons/fi";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
+import config from "../../configuration/WellPlate.json";
 
 const ControlButtons = ({
   onButtonClick,
@@ -11,10 +12,12 @@ const ControlButtons = ({
   setSelectedPlateId,
   isVolumeSelected,
   setIsVolumeSelected,
+  setActiveWellPlate,
 }) => {
   const [volume, setVolume] = useState("");
   const { sendMessage } = useContext(WebSocketContext);
   const [savedPositions, setSavedPositions] = useState([]);
+  const [filteredPositions, setFilteredPositions] = useState([]);
 
   useEffect(() => {
     const savedPositionsData = localStorage.getItem("savedPositions");
@@ -25,26 +28,13 @@ const ControlButtons = ({
     }
   }, []);
 
-// New useEffect hook
-useEffect(() => {
-    const filteredPositions = savedPositions.filter(
-      (position) => position.moduleId === 1
-    );
-    if (filteredPositions.length > 0) {
-      setSelectedPlateId(filteredPositions[0].slotId);
-    }
-  }, [savedPositions, setSelectedPlateId]);
-
-
-
-
   const onSelectWellsClick = () => {
     if (volume <= 0) {
       alert("Please enter a positive volume.");
       return;
     }
     onSelectWells(volume);
-    setIsVolumeSelected(true);  // Set isVolumeSelected to true when volume is selected
+    setIsVolumeSelected(true); // Set isVolumeSelected to true when volume is selected
   };
 
   const onSendWellsClick = () => {
@@ -52,20 +42,41 @@ useEffect(() => {
     onSendWells();
   };
 
-  const onWellPlateButtonClick = (slotId, moduleId) => {
+  const onWellPlateButtonClick = (slotId, moduleId, wellPlateName) => {
     console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}`);
-    setSelectedPlateId(slotId); // Update selected well plate
+    setSelectedPlateId(slotId); 
+    setActiveWellPlate(wellPlateName); 
+    console.log("NAME: ", wellPlateName);
   };
 
-  const filteredPositions = savedPositions.filter(
-    (position) => position.moduleId === 1
-  );
+  const filterPositions = (positions) => {
+    return positions
+      .map((position) => {
+        const moduleConfigEntry = Object.entries(config).find(
+          ([, module]) => module.moduleId === position.moduleId
+        );
+
+        if (moduleConfigEntry) {
+          const [wellPlateName, moduleConfig] = moduleConfigEntry;
+          if (moduleConfig.isWellPlate) {
+            return { ...position, wellPlateName };
+          }
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+  };
 
   useEffect(() => {
-    if (filteredPositions.length > 0) {
-      // setSelectedPlateId(filteredPositions[0].slotId); // Default to first well plate
+    if (savedPositions.length > 0) {
+      const filtered = filterPositions(savedPositions);
+      setFilteredPositions(filtered);
+      if (filtered.length > 0 && selectedPlateId === null) {
+        setSelectedPlateId(filtered[0].slotId);
+      }
     }
-  }, [filteredPositions]);
+  }, [savedPositions, selectedPlateId, setSelectedPlateId]);
 
   return (
     <div className="flex flex-col items-center justify-between h-full">
@@ -89,7 +100,7 @@ useEffect(() => {
           onButtonClick("clearWellsButton");
           setIsVolumeSelected(false);
         }}
-              >
+      >
         Clear All Wells
       </button>
 
@@ -121,14 +132,18 @@ useEffect(() => {
               {filteredPositions.map((position, index) => (
                 <li key={position.slotId}>
                   <button
-                    className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 ${
+                    className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
                       position.slotId === selectedPlateId ? "opacity-50" : ""
                     }`}
                     onClick={() =>
-                      onWellPlateButtonClick(position.slotId, position.moduleId)
+                      onWellPlateButtonClick(
+                        position.slotId,
+                        position.moduleId,
+                        position.wellPlateName
+                      )
                     }
                   >
-                    Wellplate ({position.slotId + 1})
+                    {position.wellPlateName} ({position.slotId + 1})
                   </button>
                 </li>
               ))}
@@ -136,7 +151,7 @@ useEffect(() => {
           </>
         ) : (
           <h3 className="text-white font-bold mt-3 mb-3">
-          Please select a well plate position
+            Please select a well plate position
           </h3>
         )}
       </div>

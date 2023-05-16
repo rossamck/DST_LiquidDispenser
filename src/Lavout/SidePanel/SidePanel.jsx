@@ -14,6 +14,7 @@ const SidePanel = ({
   sendSelectionEnabled,
   selectedPlateId,
   setSelectedPlateId,
+  setActiveWellPlate,
 }) => {
   return (
     <div className="col-span-3 flex flex-col h-full">
@@ -31,6 +32,7 @@ const SidePanel = ({
         sendSelectionEnabled={sendSelectionEnabled}
         selectedPlateId={selectedPlateId}
         setSelectedPlateId={setSelectedPlateId}
+        setActiveWellPlate={setActiveWellPlate}
       />
     </div>
   );

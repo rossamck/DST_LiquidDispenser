@@ -34,9 +34,12 @@ const ModuleContainer = ({
     // Set modules state from the WellPlate.json data
     setModules(Object.entries(config).map(([name, moduleData]) => ({
       id: moduleData.moduleId,
-      name: name
+      name: name,
+      isWellPlate: moduleData.isWellPlate,
+      // add any other properties you need from moduleData
     })));
   }, []);
+
 
   const handleDrop = (moduleId, slotId) => {
     setSlots((prevSlots) => {
@@ -91,6 +94,7 @@ const ModuleContainer = ({
       <h2 className="text-center">Modules</h2>
 
         {modules.map((module) => (
+          
           <DraggableModule key={module.id} {...module} />
         ))}
       </div>

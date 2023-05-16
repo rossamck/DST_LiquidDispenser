@@ -276,7 +276,7 @@ const WellPlate = ({
   const onMouseUp = () => {
     setIsMouseDown(false);
   };
-
+  console.log("PLATE TYPE:", plateType);
   const { rows, cols } = config[plateType];
   const MAX_WELL_WIDTH = 150; // This could be the width of wells in the 96-well plate
 

@@ -14,6 +14,7 @@ const Content = ({
   setDispensingWell,
   selectedPlateId,
   setActiveLayout,
+  activeWellPlate,
 }) => {
   const WELL_PLATE_WIDTH = '100%';
   const colourIndexPairs = [
@@ -61,10 +62,10 @@ const Content = ({
         paddingBottom: "2rem",
       }}
     >
-      {selectedPlateId !== null ? (
+    {activeWellPlate !== '' && selectedPlateId !== null ? (
         <>
           <WellPlate
-            plateType={"96 Well"} // update
+            plateType={activeWellPlate} // update
             currentAction={currentAction}
             actionVolume={actionVolume}
             actionVersion={actionVersion}

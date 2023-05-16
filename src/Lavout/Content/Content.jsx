@@ -64,6 +64,7 @@ const Content = ({
       {selectedPlateId !== null ? (
         <>
           <WellPlate
+            plateType={"96 Well"} // update
             currentAction={currentAction}
             actionVolume={actionVolume}
             actionVersion={actionVersion}

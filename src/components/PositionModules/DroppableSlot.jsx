@@ -36,6 +36,7 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%) rotate(90deg)',
+    textAlign: 'center',
     transformOrigin: 'center',
     fontSize: '16px',
     color: 'black',
@@ -43,8 +44,8 @@ const DroppableSlot = ({ id, onDrop, children, isFilled }) => {
 
   const dotStyle = {
     position: 'absolute',
-    top: '5px', // Adjust as needed
-    [dotPosition]: '5px', // Adjust as needed
+    top: '5px',
+    [dotPosition]: '5px', 
     width: '10px',
     height: '10px',
     borderRadius: '50%',

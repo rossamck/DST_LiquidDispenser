@@ -1,18 +1,21 @@
 // SavedPositionsTable.jsx
 
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import PositionsContext from "../../context/PositionsContext";
+import config from "../../configuration/WellPlate.json";
 
 const SavedPositionsTable = () => {
   const { savedPositions } = useContext(PositionsContext); // Consume savedPositions from the PositionsContext
 
-  const [modules] = useState([
-    { id: 1, name: "Well Plate" },
-    { id: 2, name: "Module 2" },
-    { id: 3, name: "Module 3" },
-    { id: 4, name: "Module 4" },
-    // ...
-  ]);
+  const [modules, setModules] = useState([]);
+
+  useEffect(() => {
+    // Set modules state from the WellPlate.json data
+    setModules(Object.entries(config).map(([name, moduleData]) => ({
+      id: moduleData.moduleId,
+      name: name
+    })));
+  }, []);
 
   return (
     <div className="mt-6">

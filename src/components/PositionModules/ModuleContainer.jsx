@@ -2,36 +2,47 @@ import React, { useState, useEffect, useContext } from "react";
 import DraggableModule from "./DraggableModule";
 import DroppableSlot from "./DroppableSlot";
 import PositionsContext from "../../context/PositionsContext";
+import config from "../../configuration/WellPlate.json";
 
-const ModuleContainer = ({ resetPositions, setResetPositions, savePositions, setSavePositions }) => {
-  const [modules] = useState([
-    { id: 1, name: "Well Plate" },
-    { id: 2, name: "Module 2" },
-    { id: 3, name: "Module 3" },
-    { id: 4, name: "Module 4" },
-    // ...
-  ]);
+
+const ModuleContainer = ({
+  resetPositions,
+  setResetPositions,
+  savePositions,
+  setSavePositions,
+}) => {
+  const [modules, setModules] = useState([]);
+
 
   const [slots, setSlots] = useState(() => {
-    const savedSlots = localStorage.getItem('slots');
+    const savedSlots = localStorage.getItem("slots");
     return savedSlots ? JSON.parse(savedSlots) : Array(4).fill([]);
   });
 
   const { setSavedPositions } = useContext(PositionsContext);
 
   useEffect(() => {
-    const savedPositionsData = localStorage.getItem('savedPositions');
+    const savedPositionsData = localStorage.getItem("savedPositions");
     if (savedPositionsData) {
       const savedPositions = JSON.parse(savedPositionsData);
       setSavedPositions(savedPositions);
     }
   }, [setSavedPositions]);
-  
+
+
+  useEffect(() => {
+    // Set modules state from the WellPlate.json data
+    setModules(Object.entries(config).map(([name, moduleData]) => ({
+      id: moduleData.moduleId,
+      name: name
+    })));
+  }, []);
+
   const handleDrop = (moduleId, slotId) => {
-    setSlots(prevSlots => {
+    setSlots((prevSlots) => {
       const newSlots = [...prevSlots];
       newSlots[slotId] = [{ id: moduleId, isFilled: true }];
-      localStorage.setItem('slots', JSON.stringify(newSlots)); // save to localStorage
+      localStorage.setItem("slots", JSON.stringify(newSlots)); // save to localStorage
       return newSlots;
     });
   };
@@ -43,15 +54,21 @@ const ModuleContainer = ({ resetPositions, setResetPositions, savePositions, set
       setSlots(emptySlots);
 
       // Clear the slots from localStorage
-      localStorage.setItem('slots', JSON.stringify(emptySlots));
+      localStorage.setItem("slots", JSON.stringify(emptySlots));
 
       // Reset the `resetPositions` state back to false
       setResetPositions(false);
 
       // Reset savedPositions
-      const emptySavedPositions = Array(4).fill({ slotId: null, moduleId: null });
+      const emptySavedPositions = Array(4).fill({
+        slotId: null,
+        moduleId: null,
+      });
       setSavedPositions(emptySavedPositions);
-      localStorage.setItem('savedPositions', JSON.stringify(emptySavedPositions));
+      localStorage.setItem(
+        "savedPositions",
+        JSON.stringify(emptySavedPositions)
+      );
     }
   }, [resetPositions, setResetPositions, setSavedPositions]);
 
@@ -63,85 +80,96 @@ const ModuleContainer = ({ resetPositions, setResetPositions, savePositions, set
       });
 
       setSavedPositions(newSavedPositions);
-      localStorage.setItem('savedPositions', JSON.stringify(newSavedPositions)); // save to localStorage
+      localStorage.setItem("savedPositions", JSON.stringify(newSavedPositions)); // save to localStorage
       setSavePositions(false);
     }
-}, [savePositions, setSavePositions, setSavedPositions, slots]);
-
-
+  }, [savePositions, setSavePositions, setSavedPositions, slots]);
 
   return (
-    <div className="mx-4">
-      <div className="grid grid-cols-4 gap-10">
+    <div className="mx-4 flex">
+      <div style={{ width: "25%" }}>
+      <h2 className="text-center">Modules</h2>
+
         {modules.map((module) => (
           <DraggableModule key={module.id} {...module} />
         ))}
       </div>
-      <div className="flex flex-col items-center gap-10 mt-10 -rotate-90">
-        <div className="flex flex-row justify-center gap-x-4">
-          {slots.slice(0, 1).map((slot, i) => (
-            <DroppableSlot
-              key={i}
-              id={i}
-              onDrop={handleDrop}
-              isFilled={slot.length > 0}
-              className={i === 1 ? "ml-auto" : ""}
-            >
-              {slot.map(({ id: moduleId }) => {
-                const module = modules.find((m) => m.id === moduleId);
-                return (
-                  <DraggableModule
-                    key={moduleId}
-                    isDropped={true}
-                    {...module}
-                  />
-                );
-              })}
-            </DroppableSlot>
-          ))}
-          {/* Add the smaller rectangle here */}
-          <div className="rounded border border-gray-500 w-12 h-100px m-4" style={{ background: 'repeating-linear-gradient(-45deg, transparent, transparent 5px, darkgrey 5px, darkgrey 10px)' }}></div>
-          {slots.slice(1, 2).map((slot, i) => (
-            <DroppableSlot
-              key={i + 1}
-              id={i + 1}
-              onDrop={handleDrop}
-              isFilled={slot.length > 0}
-              className={i === 1 ? "ml-auto" : ""}
-            >
-              {slot.map(({ id: moduleId }) => {
-                const module = modules.find((m) => m.id === moduleId);
-                return (
-                  <DraggableModule
-                    key={moduleId}
-                    isDropped={true}
-                    {...module}
-                  />
-                );
-              })}
-            </DroppableSlot>
-          ))}
-        </div>
-        <div className="flex flex-row justify-center gap-x-4">
-          {slots.slice(2).map((slot, i) => (
-            <DroppableSlot 
-              key={i + 2} 
-              id={i + 2} 
-              onDrop={handleDrop} 
-              isFilled={slot.length > 0}
-            >
-              {slot.map(({ id: moduleId }) => {
-                const module = modules.find((m) => m.id === moduleId);
-                return (
-                  <DraggableModule
-                    key={moduleId}
-                    isDropped={true}
-                    {...module}
-                  />
-                );
-              })}
-            </DroppableSlot>
-          ))}
+      <div style={{ width: "75%" }}>
+        <div className="flex flex-col items-center gap-10 mt-10 -rotate-90">
+          <div className="flex flex-row justify-center gap-x-4">
+            {slots.slice(0, 1).map((slot, i) => (
+              <DroppableSlot
+                key={i}
+                id={i}
+                onDrop={handleDrop}
+                isFilled={slot.length > 0}
+                className={i === 1 ? "ml-auto" : ""}
+              >
+                {slot.map(({ id: moduleId }) => {
+                  const module = modules.find((m) => m.id === moduleId);
+                  return (
+                    <DraggableModule
+                      key={moduleId}
+                      isDropped={true}
+                      {...module}
+                    />
+                  );
+                })}
+              </DroppableSlot>
+            ))}
+            <div>
+              <div>
+                <div
+                  className="m-2 w-6 ml mt-6 h-36 bg-gray-200 rounded border border-black"
+                  style={{
+                    backgroundImage:
+                      "repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.2) 20px)",
+                  }}
+                ></div>
+              </div>
+            </div>
+            {slots.slice(1, 2).map((slot, i) => (
+              <DroppableSlot
+                key={i + 1}
+                id={i + 1}
+                onDrop={handleDrop}
+                isFilled={slot.length > 0}
+                className={i === 1 ? "ml-auto" : ""}
+              >
+                {slot.map(({ id: moduleId }) => {
+                  const module = modules.find((m) => m.id === moduleId);
+                  return (
+                    <DraggableModule
+                      key={moduleId}
+                      isDropped={true}
+                      {...module}
+                    />
+                  );
+                })}
+              </DroppableSlot>
+            ))}
+          </div>
+          <div className="flex flex-row justify-center gap-x-4">
+            {slots.slice(2).map((slot, i) => (
+              <DroppableSlot
+                key={i + 2}
+                id={i + 2}
+                onDrop={handleDrop}
+                isFilled={slot.length > 0}
+              >
+                {slot.map(({ id: moduleId }) => {
+                  const module = modules.find((m) => m.id === moduleId);
+                  return (
+                    <DraggableModule
+                      key={moduleId}
+                      isDropped={true}
+                      {...module}
+                    />
+                  );
+                })}
+              </DroppableSlot>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -20,6 +20,7 @@ const ControlButtons = ({
     const savedPositionsData = localStorage.getItem("savedPositions");
     if (savedPositionsData) {
       const parsedPositions = JSON.parse(savedPositionsData);
+      console.log(parsedPositions);
       setSavedPositions(parsedPositions);
     }
   }, []);

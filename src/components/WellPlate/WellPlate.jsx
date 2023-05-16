@@ -1,5 +1,6 @@
 // WellPlate.jsx
 import React, { useState, useEffect, useCallback } from "react";
+import config from "../../configuration/WellPlate.json";
 
 const Well = ({
   selected,
@@ -11,6 +12,7 @@ const Well = ({
   colourIndexPairs,
   allSelectedWells,
   sourceIndexHighlight,
+  width,
 }) => {
   let backgroundColor = "bg-white";
 
@@ -31,17 +33,37 @@ const Well = ({
 
   return (
     <div
-      className={`w-12 h-12 border border-gray-300 flex flex-col justify-center items-center m-0 select-none rounded-full shadow ${backgroundColor}`}
+      style={{
+        width: width,
+        paddingTop: width,
+        position: "relative",
+      }}
+      className={`border border-gray-300 m-0 select-none rounded-full ${backgroundColor}`}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
     >
-      {label}
-      {volume && <span className="text-xs">{volume} μL</span>}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        {label}
+        {volume && <span className="text-xs">{volume} μL</span>}
+      </div>
     </div>
   );
 };
 
 const WellPlate = ({
+  plateType,
   currentAction,
   actionVersion,
   onActionComplete,
@@ -54,7 +76,6 @@ const WellPlate = ({
   selectedColorIndex,
   colourIndexPairs,
   selectedPlateId,
-
 }) => {
   const [highlightedWells, setHighlightedWells] = useState(new Set());
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -63,6 +84,11 @@ const WellPlate = ({
   const [selectedWells, setSelectedWells] = useState(new Set());
   // const [selectedWellLabels, setSelectedWellLabels] = useState([]);
   const [selectedVolumes, setSelectedVolumes] = useState({});
+
+  const generateRows = (rowCount) => {
+    const rowLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return rowLetters.slice(0, rowCount).split("");
+  };
 
   const selectWells = useCallback(() => {
     if (!actionVolume) {
@@ -96,43 +122,38 @@ const WellPlate = ({
     setAllSelectedWells((prev) => {
       const newSelectedWells = Array.from(highlightedWells).map((well) => {
         // Compute the relative coordinates
-        let relY = well.charCodeAt(0) - 'A'.charCodeAt(0); // Converting A, B, C, etc. to 0, 1, 2, etc.
+        let relY = well.charCodeAt(0) - "A".charCodeAt(0); // Converting A, B, C, etc. to 0, 1, 2, etc.
         let relX = parseInt(well.slice(1)) - 1; // Converting 1, 2, 3, etc. to 0, 1, 2, etc.
-  
+
+        const stepSize = config[plateType].stepSize; // update
+
         // Apply the step size
-        const stepSize = 90;
         relX *= stepSize;
         relY *= stepSize;
 
-  
         // If the plate is rotated, swap X and Y coordinates
         console.log("Selected PLATE ID");
         console.log(selectedPlateId);
         if (selectedPlateId === 2 || selectedPlateId === 3) {
           [relX, relY] = [relY, relX];
         }
-  
-        // Apply the translation based on the plateId
-        const plateCornerCoordinates = { 0: [190, 630], 1: [200, 2373], 2: [1500, 100], 3: [1500, 1400] }; // Replace these values with the actual coordinates
-        const absX = relX + plateCornerCoordinates[selectedPlateId][0];
-        const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + plateCornerCoordinates[selectedPlateId][1] : relY + plateCornerCoordinates[selectedPlateId][1];
-  
+
         // Return the well object with the new properties
         return {
           wellId: well,
           volume: selectedVolumes[well] || actionVolume,
           sourceIndex: selectedColorIndex?.index,
           xCoord: relX,
-          yCoord: relY
+          yCoord: relY,
         };
       });
-  
+
       const mergedWells = [...prev, ...newSelectedWells];
       const deduplicatedWells = mergedWells.filter(
         (well, index, self) =>
           index === self.findIndex((w) => w.wellId === well.wellId)
       );
-  
+
       // Sort the deduplicatedWells array alphanumerically
       const groupBySourceIndex = (array) => {
         return array.reduce((acc, well) => {
@@ -143,31 +164,30 @@ const WellPlate = ({
           return acc;
         }, {});
       };
-      
+
       const sortAlphanumerically = (a, b) => {
         const rowA = a.wellId.charAt(0);
         const rowB = b.wellId.charAt(0);
         const colA = parseInt(a.wellId.slice(1), 10);
         const colB = parseInt(b.wellId.slice(1), 10);
-      
+
         if (rowA === rowB) {
           return colA - colB;
         }
         return rowA.localeCompare(rowB);
       };
-      
+
       const groupedWells = groupBySourceIndex(deduplicatedWells);
       const sortedWells = [];
-      
+
       Object.values(groupedWells).forEach((group) => {
         const sortedGroup = group.sort(sortAlphanumerically);
         sortedWells.push(...sortedGroup);
       });
-      
-  
+
       return sortedWells;
     });
-  
+
     setHighlightedWells(new Set());
   }, [
     actionVolume,
@@ -177,6 +197,7 @@ const WellPlate = ({
     selectedColorIndex,
     selectedSourceIndices,
     selectedPlateId,
+    plateType,
   ]);
 
   const clearWells = useCallback(() => {
@@ -256,8 +277,10 @@ const WellPlate = ({
     setIsMouseDown(false);
   };
 
-  const rows = "ABCDEFGH";
-  const cols = 12;
+  const { rows, cols } = config[plateType];
+  const MAX_WELL_WIDTH = 150; // This could be the width of wells in the 96-well plate
+
+  const wellWidth = Math.min(600 / cols, MAX_WELL_WIDTH);
 
   return (
     <div
@@ -265,8 +288,14 @@ const WellPlate = ({
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
     >
-      <div className="grid grid-cols-12 gap-0">
-        {rows.split("").map((row) =>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gap: "0px", // equivalent of Tailwind's gap-0
+        }}
+      >
+        {generateRows(rows).map((row) =>
           Array.from({ length: cols }, (_, i) => {
             const label = `${row}${i + 1}`;
             const selected = selectedWells.has(label);
@@ -287,6 +316,7 @@ const WellPlate = ({
                 colourIndexPairs={colourIndexPairs}
                 allSelectedWells={allSelectedWells}
                 sourceIndexHighlight={sourceIndexHighlight}
+                width={wellWidth}
               />
             );
           })

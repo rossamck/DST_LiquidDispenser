@@ -151,7 +151,7 @@ const Layout = ({
               selectedPlateId={selectedPlateId} 
               />
           </div>
-          <div className="col-span-6 relative p-4 bg-blue-100 h-[calc(100vh-3.75rem)]">
+          <div className="col-span-6 relative p-4 bg-blue-100" style={{ height: 'calc(100vh - 6.25rem)' }}>
             <Content
               currentAction={currentAction}
               actionVolume={actionVolume}

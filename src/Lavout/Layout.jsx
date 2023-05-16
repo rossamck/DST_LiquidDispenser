@@ -7,6 +7,7 @@ import Content from "./Content/Content";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
+import config from "../configuration/WellPlate.json";
 
 const Layout = ({
   onButtonClick,
@@ -100,15 +101,15 @@ const Layout = ({
     setSendSelectionEnabled(false);
     console.log("All selected wells:", allSelectedWells);
     
-    // Define the transformation
-    const plateCornerCoordinates = { 0: [190, 630], 1: [200, 2373], 2: [1500, 100], 3: [1500, 1400] };
+    // Retrieve the corner coordinates based on the activeWellPlate
+    const cornerCoordinates = config[activeWellPlate].cornerCoordinates;
     
     // Apply the transformation to each well
     const transformedWells = allSelectedWells.map(well => {
       const relX = well.xCoord;
       const relY = well.yCoord;
-      const absX = relX + plateCornerCoordinates[selectedPlateId][0];
-      const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + plateCornerCoordinates[selectedPlateId][1] : relY + plateCornerCoordinates[selectedPlateId][1];
+      const absX = relX + cornerCoordinates[selectedPlateId][0];
+      const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + cornerCoordinates[selectedPlateId][1] : relY + cornerCoordinates[selectedPlateId][1];
       return { ...well, xCoord: absX, yCoord: absY };
     });
     
@@ -127,7 +128,7 @@ const Layout = ({
       const wellsData = JSON.stringify(group);
       console.log("Sending data...");
       sendMessage(`selectWells:${wellsData}`, true);
-
+  
       console.log(wellsData);
       if (i === array.length - 1) {
         console.log("Last array");

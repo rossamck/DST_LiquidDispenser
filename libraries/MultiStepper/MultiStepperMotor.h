@@ -1,12 +1,12 @@
-#ifndef MultiStepperMotor_h
-#define MultiStepperMotor_h
+#ifndef MultiStepper_h
+#define MultiStepper_h
 
 #include <AccelStepper.h>
 
-class MultiStepperMotor
+class SingleStepper
 {
 public:
-    MultiStepperMotor(uint8_t step_pin, uint8_t dir_pin, int8_t limit_switch_pin = -1);
+    SingleStepper(uint8_t step_pin, uint8_t dir_pin, int8_t limit_switch_pin = -1, bool invert_direction = false);
     void setMaxSpeed(float speed);
     void setAcceleration(float acceleration);
     void move(long relative_steps);
@@ -15,26 +15,27 @@ public:
     long currentPosition();
     void setCurrentPosition(long position);
 
-    AccelStepper &getXStepper() { return _stepper; }
-    AccelStepper &getYStepper() { return _stepper; }
+    AccelStepper &getStepper() { return _stepper; }
 
 private:
     AccelStepper _stepper;
     int8_t _limit_switch_pin;
+        bool _invert_direction;
+
 };
 
-class MultiStepperXY
+class MultiStepper
 {
 public:
-    MultiStepperXY(MultiStepperMotor &stepper_x, MultiStepperMotor &stepper_y);
-    void setMaxSpeed(float speed);
-    void setAcceleration(float acceleration);
+    MultiStepper(SingleStepper &stepper_x, SingleStepper &stepper_y);
+    void setMaxSpeed(float speed_x, float speed_y);
+    void setAcceleration(float acceleration_x, float acceleration_y);
     void move(long relative_steps_x, long relative_steps_y);
     void runToPosition();
 
 private:
-    MultiStepperMotor &_stepper_x;
-    MultiStepperMotor &_stepper_y;
+    SingleStepper &_stepper_x;
+    SingleStepper &_stepper_y;
 };
 
 #endif

@@ -132,7 +132,7 @@ const Layout = ({
       console.log(wellsData);
       if (i === array.length - 1) {
         console.log("Last array");
-        sendMessage(`manualCoords:0,0,0`, true);
+        // sendMessage(`manualCoords:0,0,0`, true);
       }
     });
   };

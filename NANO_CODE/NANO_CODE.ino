@@ -29,7 +29,7 @@
 #define LIMIT_3 A2
 #define LIMIT_4 A3
 
-#define PIP_STEP_AMOUNT 20 // Define the number of steps for the PIP motor
+#define PIP_STEP_AMOUNT 30 // Define the number of steps for the PIP motor
 
 
 // Stepper motor objects  

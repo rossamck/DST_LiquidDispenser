@@ -198,6 +198,14 @@ const Layout = ({
       return groups;
     }, {});
 
+    sendMessage(`manualCoords:1430,1375,0`, true);
+    sendMessage("ZMove:Z,150", true);
+    sendMessage("ZMove:Z,50", true);
+    sendMessage("ZMove:Z,25", true);
+    sendMessage("ZMove:Z,10", true);
+    sendMessage("ZMove:Z,500", true);
+
+
 
     // Send each group separately
   Object.entries(groupedWells).forEach(([sourceIndex, group], i, array) => {
@@ -207,6 +215,8 @@ const Layout = ({
     // Use the slotId to select the correct set of corner coordinates
     const manualX = SourceCornerCoordinates[slotId][0] + sourceCol * SourceStepSizeH;
     const manualY = SourceCornerCoordinates[slotId][1] + sourceRow * SourceStepSizeV;
+
+    // add tip collection here!
   
       // Send manualCoords before each sourceIndex group
       sendMessage(`manualCoords:${manualX},${manualY},0`, true); // move to liquid source
@@ -229,21 +239,23 @@ const Layout = ({
       const wellsData = JSON.stringify(group);
       console.log("Sending data...", wellsData);
       sendMessage(`selectWells:${wellsData}`, true);
+
+      sendMessage(testmessage2, true);
+
+      // Temporary hardcoded location for waste liquid
+      sendMessage(`manualCoords:1700,400,0`, true);
+      sendMessage("ZMove:Z,150", true);
+      sendMessage(`clickPipette:PIP,200`, true);
+      sendMessage(`clickPipette:PIP,0`, true);
+
+      // Move z back to top 
+      sendMessage("ZMove:Z,500", true);
   
       if (i === array.length - 1) {
         console.log("Last array");
         //do this after last job in the list
         //move z to top
-        sendMessage(testmessage2, true);
 
-        // Temporary hardcoded location for waste liquid
-        sendMessage(`manualCoords:1700,400,0`, true);
-        sendMessage("ZMove:Z,150", true);
-        sendMessage(`clickPipette:PIP,200`, true);
-        sendMessage(`clickPipette:PIP,0`, true);
-
-        // Move z back to top 
-        sendMessage("ZMove:Z,500", true);
 
         // return home
         sendMessage(`manualCoords:0,0,0`, true);

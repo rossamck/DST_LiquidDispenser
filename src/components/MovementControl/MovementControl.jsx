@@ -103,11 +103,13 @@ const MovementControl = ({
 
         if (newValue > axisLimit.max || newValue < axisLimit.min) {
           setWarningMessage(`The new value exceeds the ${axis} axis limits.`);
+          console.log("You tried to set it to: ", newValue);
           return prevValues;
         }
 
         setWarningMessage(null); // Clear the warning message if the value is within limits
 
+        console.log("Manual movement: ", `manualMove:${axis},${newValue}`)
         sendMessage(`manualMove:${axis},${newValue}`);
         setIsMoving(true);
         return {

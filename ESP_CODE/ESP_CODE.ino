@@ -11,10 +11,10 @@
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-const char* ssid = "VM6701124_2G";
-const char* password = "fnDdpj9q6qdt";
-// const char* ssid = "iPhone (3)";
-// const char* password = "13245768";
+// const char* ssid = "VM6701124_2G";
+// const char* password = "fnDdpj9q6qdt";
+const char* ssid = "iPhone (3)";
+const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -232,6 +232,25 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
       }
 
+            else if (message.startsWith("ZMove:")) {
+        int separatorIndex = message.indexOf(",");
+        String axis = message.substring(6, separatorIndex);
+        float value = message.substring(separatorIndex + 1).toFloat();
+        Serial.print("Received movement message: Axis=");
+        Serial.print(axis);
+        Serial.print(", Value=");
+        Serial.println(value);
+
+        // Add the following lines to send the manualMove information over i2c
+        String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
+        sendI2CMessage(manualMoveMessage);
+        String receivedCoordsMessage = "ZMoved" + requestDataFromNano() + " jobId:" + String(currentJobId);
+
+        webSocket.broadcastTXT(receivedCoordsMessage);
+
+
+      }
+
       else if (message.startsWith("clickPipette:")) {
         int separatorIndex = message.indexOf(",");
         String axis = message.substring(13, separatorIndex);
@@ -251,24 +270,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
 
       }
 
-      else if (message.startsWith("moveZ:")) {
-        int separatorIndex = message.indexOf(",");
-        String axis = message.substring(6, separatorIndex);
-        float value = message.substring(separatorIndex + 1).toFloat();
-        Serial.print("Received movement message: Axis=");
-        Serial.print(axis);
-        Serial.print(", Value=");
-        Serial.println(value);
-
-        // Add the following lines to send the manualMove information over i2c
-        String manualMoveMessage = "manualMove:" + axis + "," + String(value, 2);
-        sendI2CMessage(manualMoveMessage);
-        String ZMoveMessage = "ZMoved" + requestDataFromNano() + " jobId:" + String(currentJobId);
-
-        webSocket.broadcastTXT(ZMoveMessage);
-
-
-      }
 
       else if (message.startsWith("manualCoords:")) {
         int separatorIndex1 = message.indexOf(',');
@@ -304,6 +305,10 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         // Add the following lines to send the moveToLimit information over i2c
         String moveToLimitMessage = "moveToLimit:" + axis;
         sendI2CMessage(moveToLimitMessage);
+
+        String receivedCoordsMessage = "receivedCoords" + requestDataFromNano();
+
+        webSocket.broadcastTXT(receivedCoordsMessage);
 
       }
 

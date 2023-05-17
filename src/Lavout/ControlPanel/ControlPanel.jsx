@@ -1,11 +1,11 @@
-// ControlPanel.jsx
-
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import ControlButtons from "../../components/ControlButtons/ControlButtons";
 import clsx from "clsx";
 import "./ControlPanel.css";
 import Presets from "../../components/Presets/Presets";
 import IPAddressForm from "../../components/IPAddressForm/IPAddressForm";
+import { WebSocketContext } from "../../components/WebSocketContext/WebSocketContext";
+
 
 const ControlPanel = ({
   className,
@@ -26,7 +26,13 @@ const ControlPanel = ({
   setActiveWasteModule,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [isVolumeSelected, setIsVolumeSelected] = useState(false); 
+  const [isVolumeSelected, setIsVolumeSelected] = useState(false);
+  const { sendMessage } = useContext(WebSocketContext);
+
+  const handleCalibrateZAxis = () => {
+    console.log("calibrate z");
+    sendMessage(`moveToLimit:Z`, true);
+  }
 
   const handleTabSelect = (index) => {
     setActiveTab(index);
@@ -39,9 +45,7 @@ const ControlPanel = ({
         <div className="mt-4">
           <ControlButtons
             onButtonClick={onButtonClick}
-            onSelectWells={(volume) =>
-              onButtonClick("selectWellsButton", volume)
-            }
+            onSelectWells={(volume) => onButtonClick("selectWellsButton", volume)}
             onSendWells={onSendWells}
             startDispensingEnabled={startDispensingEnabled}
             setStartDispensingEnabled={setStartDispensingEnabled}
@@ -72,7 +76,6 @@ const ControlPanel = ({
       ),
       margin: "mx-auto", // Centered horizontally
     },
-    
     {
       label: "Options",
       content: (
@@ -109,9 +112,17 @@ const ControlPanel = ({
         ></span>
       </div>
       <div>{tabs[activeTab].content}</div>
-      
 
+      {activeTab === 2 && (
+        <div className="mt-4">
+          <button className="mt-4 p-2 w-24 rounded bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 focus:outline-none"
+            onClick={() => handleCalibrateZAxis()}>
+            Calibrate Z Axis
+          </button>
+        </div>
+      )}
     </aside>
   );
 };
+
 export default ControlPanel;

@@ -29,6 +29,9 @@
 #define LIMIT_3 A2
 #define LIMIT_4 A3
 
+#define PIP_STEP_AMOUNT 20 // Define the number of steps for the PIP motor
+
+
 // Stepper motor objects  
 SingleStepper stepper_X(X_STEP_PIN, X_DIR_PIN, LIMIT_1, true); // Pass true to invert the direction
 SingleStepper stepper_Y(Y_STEP_PIN, Y_DIR_PIN, LIMIT_2);
@@ -57,6 +60,9 @@ struct ReceivedData {
   String coordZ;
 
   bool setHomeReceived = false;
+
+  bool zMotorMoveReceived = false;
+
 } receivedData;
 
 float previousX = 0;
@@ -98,33 +104,51 @@ void sendCurrentPositions() {
 }
 
 
-void moveMotors(float currentX, float currentY, float currentZ) {
+void moveMotors(float currentX, float currentY) {
     float deltaX = currentX - previousX;
     float deltaY = currentY - previousY;
-    float deltaZ = currentZ - previousZ;
 
     long stepsX = deltaX * microstep_amount;
     long stepsY = deltaY * microstep_amount;
-    long stepsZ = deltaZ * microstep_amount;
 
     Serial.print("deltaX=");
     Serial.print(deltaX);
     Serial.print(", deltaY=");
     Serial.print(deltaY);
-    Serial.print(", deltaZ=");
-    Serial.print(deltaZ);
     
-    if (deltaZ != 0) {
-        Serial.println("Z MOVE!");
-        stepper_Z.move(stepsZ);
-        stepper_Z.runToPosition();
-        previousZ = currentZ;
-    } else {
-        multiStepper.move(stepsX, stepsY);
-        multiStepper.runToPosition();
-        previousX = currentX;
-        previousY = currentY;
-    }
+    multiStepper.move(stepsX, stepsY);
+    multiStepper.runToPosition();
+
+    previousX = currentX;
+    previousY = currentY;
+
+
+}
+
+void moveZMotor(float currentZ) {
+    float deltaZ = currentZ - previousZ;
+    long stepsZ = deltaZ * microstep_amount;
+
+    Serial.print("deltaZ=");
+    Serial.print(deltaZ);
+
+    stepper_Z.move(stepsZ);
+    stepper_Z.runToPosition();
+
+    previousZ = currentZ;
+}
+
+void movePIPMotor() {
+    long stepsPIP = PIP_STEP_AMOUNT * microstep_amount;
+
+    Serial.print("Moving PIP Motor by ");
+    Serial.print(stepsPIP);
+    Serial.println(" steps");
+
+    stepper_PIP.move(stepsPIP);
+    stepper_PIP.runToPosition();
+
+    previousPIP += PIP_STEP_AMOUNT; // Update previousPIP to reflect the new position
 }
 
 
@@ -182,25 +206,25 @@ void loop() {
 
 
   // Check if the switch is closed
-  if (switchState1 == LOW) {
-    Serial.println("Switch 1 is closed");
-    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
-  }
+  // if (switchState1 == LOW) {
+  //   Serial.println("Switch 1 is closed");
+  //   delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  // }
 
-    if (switchState2 == LOW) {
-    Serial.println("Switch 2 is closed");
-    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
-  }
+  //   if (switchState2 == LOW) {
+  //   Serial.println("Switch 2 is closed");
+  //   delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  // }
 
-    if (switchState3 == LOW) {
-    Serial.println("Switch 3 is closed");
-    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
-  }
+  //   if (switchState3 == LOW) {
+  //   Serial.println("Switch 3 is closed");
+  //   delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  // }
 
-    if (switchState4 == LOW) {
-    Serial.println("Switch 4 is closed");
-    delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
-  }
+  //   if (switchState4 == LOW) {
+  //   Serial.println("Switch 4 is closed");
+  //   delay(500);  // Add a short delay to avoid flooding the serial monitor with messages
+  // }
 
   if (receivedData.dataReceived) {
     Serial.print("Received well ID: ");
@@ -219,9 +243,18 @@ void loop() {
         float currentZ = receivedData.coordZ.toFloat();
 
 
-    moveMotors(currentX, currentY, currentZ);
+    moveMotors(currentX, currentY);
+        // Move Z motor down
 
-        delay(1000); //replace this with function to dispense
+    moveZMotor(50);
+
+    movePIPMotor();
+
+
+    // Move Z motor back up
+    moveZMotor(100);
+
+
     Serial.print("Send well response for: ");
         Serial.println(receivedData.wellId);
 
@@ -229,7 +262,11 @@ void loop() {
     receivedData.sendResponse = true;
     receivedData.dataReceived = false;
 
-  } 
+  } else if (receivedData.zMotorMoveReceived) {
+    float currentZ = receivedData.coordZ.toFloat();
+    moveZMotor(currentZ);
+    receivedData.zMotorMoveReceived = false;
+}
   
   else if (receivedData.manualMoveReceived) { 
     Serial.print("Received Data: ");
@@ -290,6 +327,8 @@ void loop() {
     } else if (receivedData.moveToLimitAxis == "Z") {
       stepper_Z.runToLimit();
     } 
+        receivedData.sendCoords = true;
+
     receivedData.moveToLimitReceived = false;
   } 
   
@@ -298,12 +337,15 @@ void loop() {
     float currentY = receivedData.coordY.toFloat();
     float currentZ = receivedData.coordZ.toFloat();
 
-    moveMotors(currentX, currentY, currentZ); // And also here
+    moveMotors(currentX, currentY); // And also here
 
 
     receivedData.sendCoords = true;
     receivedData.manualCoordsReceived = false;
   }
+
+
+
 
   else if (receivedData.setHomeReceived) {
     Serial.println("Setting home position!");
@@ -373,6 +415,13 @@ Serial.print(", Z=");
 Serial.println(receivedData.coordZ);
 
   }
+  else if (receivedMessage.startsWith("moveZMotor:")) {
+    String zMoveData = receivedMessage.substring(11);
+    receivedData.coordZ = zMoveData.toFloat();
+    receivedData.zMotorMoveReceived = true;
+    Serial.print("Received moveZMotor: Z=");
+    Serial.println(receivedData.coordZ);
+}
 
   else if (receivedMessage.startsWith("getCurrentCoords")) {
     receivedData.sendCoords = true;
@@ -421,5 +470,4 @@ void requestEvent() {
 }
 
   
-
 

@@ -8,6 +8,7 @@ import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 import ConfigContext from "../context/ModuleConfigContext";
+import PositionsContext from "../context/PositionsContext";
 
 const Layout = ({
   onButtonClick,
@@ -33,6 +34,7 @@ const Layout = ({
 }) => {
 
 
+  const { savedPositions } = useContext(PositionsContext); // Consume savedPositions from the PositionsContext
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
   const [activeWellPlate, setActiveWellPlate] = useState("");
@@ -43,17 +45,58 @@ const Layout = ({
   
 
   const config = useContext(ConfigContext);
+
+
+  
   
   useEffect(() => {
     console.log("Active Source Module:", activeSourceModule);
-    console.log("TEST");
     if (activeSourceModule !== "") {
       const activeModule = config[activeSourceModule];
       const sourceModuleId = activeModule.moduleId;
-      console.log(sourceModuleId);
-      setActiveSourceModuleId(sourceModuleId)
+      console.log("Source Module Id:", sourceModuleId);
+  
+      setActiveSourceModuleId(sourceModuleId);
+      console.log("Active source module id: ", sourceModuleId);
+  
+      // Check the values in savedPositions
+      console.log("Saved Positions: ", savedPositions);
+  
+      const correspondingSlot = savedPositions.find(
+        position => position.moduleId === sourceModuleId
+      );
+      if (correspondingSlot) {
+        console.log("Corresponding slotId: ", correspondingSlot.slotId);
+      } else {
+        console.log("No corresponding slot found for moduleId: ", sourceModuleId);
+      }
     }
-  }, [activeSourceModule, config]);
+  }, [activeSourceModule, config, savedPositions]);
+  
+  
+  useEffect(() => {
+    console.log("Active Source Module:", activeWasteModule);
+    if (activeWasteModule !== "") {
+      const activeModule = config[activeSourceModule];
+      const wasteModuleId = activeModule.moduleId;
+      console.log("Source Module Id:", wasteModuleId);
+  
+      setActiveSourceModuleId(wasteModuleId);
+      console.log("Active source module id: ", wasteModuleId);
+  
+      // Check the values in savedPositions
+      console.log("Saved Positions: ", savedPositions);
+  
+      const correspondingSlot = savedPositions.find(
+        position => position.moduleId === wasteModuleId
+      );
+      if (correspondingSlot) {
+        console.log("Corresponding slotId: ", correspondingSlot.slotId);
+      } else {
+        console.log("No corresponding slot found for moduleId: ", wasteModuleId);
+      }
+    }
+  }, [activeWasteModule, config, savedPositions]);
   
 
   //preset stuff (move to own file)
@@ -122,13 +165,19 @@ const Layout = ({
     setSendSelectionEnabled(false);
     console.log("All selected wells:", allSelectedWells);
     
-    // Retrieve the corner coordinates based on the activeWellPlate
+    // get the corner coordinates based on activeWellPlate value
     const PlateCornerCoordinates = config[activeWellPlate].cornerCoordinates;
     const SourceCornerCoordinates = config[activeSourceModule].cornerCoordinates;
     const SourceStepSizeV = config[activeSourceModule].stepSizeV;
     const SourceStepSizeH = config[activeSourceModule].stepSizeh;
     const SourceCols = config[activeSourceModule].cols;
   
+    // Find the corresponding slotId for the activeSourceModule
+    const correspondingSlot = savedPositions.find(
+      position => position.moduleId === activeSourceModuleId
+    );
+    const slotId = correspondingSlot ? correspondingSlot.slotId : 1; // If not found, default to 1 (CHECK THIS)
+  console.log("send wells slotid: ", slotId);
     // Apply the transformation to each well
     const transformedWells = allSelectedWells.map(well => {
       const relX = well.xCoord;
@@ -137,6 +186,7 @@ const Layout = ({
       const absY = (selectedPlateId === 0 || selectedPlateId === 1) ? -relY + PlateCornerCoordinates[selectedPlateId][1] : relY + PlateCornerCoordinates[selectedPlateId][1];
       return { ...well, xCoord: absX, yCoord: absY };
     });
+
     
     // Group wells by sourceIndex
     const groupedWells = transformedWells.reduce((groups, well) => {
@@ -150,36 +200,52 @@ const Layout = ({
 
 
     // Send each group separately
-    Object.entries(groupedWells).forEach(([sourceIndex, group], i, array) => {
-      const sourceRow = Math.floor((sourceIndex - 1) / SourceCols);
-      const sourceCol = (sourceIndex - 1) % SourceCols;
-      const manualX = SourceCornerCoordinates[0][0] + sourceCol * SourceStepSizeH;
-      const manualY = SourceCornerCoordinates[0][1] + sourceRow * SourceStepSizeV;
+  Object.entries(groupedWells).forEach(([sourceIndex, group], i, array) => {
+    const sourceRow = Math.floor((sourceIndex - 1) / SourceCols);
+    const sourceCol = (sourceIndex - 1) % SourceCols;
+    
+    // Use the slotId to select the correct set of corner coordinates
+    const manualX = SourceCornerCoordinates[slotId][0] + sourceCol * SourceStepSizeH;
+    const manualY = SourceCornerCoordinates[slotId][1] + sourceRow * SourceStepSizeV;
   
       // Send manualCoords before each sourceIndex group
       sendMessage(`manualCoords:${manualX},${manualY},0`, true); // move to liquid source
       console.log("new test: ", `manualCoords:${manualX},${manualY},0`)
 
-      // Lower Z by set amount
-      sendMessage(`moveZ:Z,300`, true); // reduce height by 300 (500 max)
+      // Lower Z to position
+      const testmessage = "ZMove:Z,50";
+      console.log("Manual movement: ", testmessage)
+      sendMessage(testmessage, true);
 
       // Click pipette to collect liquid
       sendMessage(`clickPipette:PIP,200`, true);
       sendMessage(`clickPipette:PIP,0`, true);
 
-      sendMessage(`moveZ:Z,-300`, true); // reduce height by 300 (500 max)
+      // move z back up
+      const testmessage2 = "ZMove:Z,500";
+      sendMessage(testmessage2, true);
 
-
-      
-
-
-      
+      // send the wells array to esp/nano
       const wellsData = JSON.stringify(group);
       console.log("Sending data...", wellsData);
       sendMessage(`selectWells:${wellsData}`, true);
   
       if (i === array.length - 1) {
         console.log("Last array");
+        //do this after last job in the list
+        //move z to top
+        sendMessage(testmessage2, true);
+
+        // Temporary hardcoded location for waste liquid
+        sendMessage(`manualCoords:1700,400,0`, true);
+        sendMessage("ZMove:Z,150", true);
+        sendMessage(`clickPipette:PIP,200`, true);
+        sendMessage(`clickPipette:PIP,0`, true);
+
+        // Move z back to top 
+        sendMessage("ZMove:Z,500", true);
+
+        // return home
         sendMessage(`manualCoords:0,0,0`, true);
       }
     });

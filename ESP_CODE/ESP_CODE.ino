@@ -13,8 +13,10 @@
 
 // const char* ssid = "VM6701124_2G";
 // const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
+const char* ssid = "iPhone (58)";
+const char* password = "kennyg123";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);

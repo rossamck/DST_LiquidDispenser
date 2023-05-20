@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
@@ -12,6 +12,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "clsx": "^1.2.1",
+    "copyfiles": "^2.4.1",
     "electron-updater": "^5.3.0",
     "express": "^4.18.2",
     "polished": "^4.2.2",
@@ -30,7 +31,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && npm run postbuild",
+    "postbuild": "copyfiles -u 1 src/electron.js build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
@@ -58,6 +60,7 @@
   "devDependencies": {
     "asar": "^3.2.0",
     "autoprefixer": "^10.4.14",
+    "copyfiles": "^2.4.1", 
     "electron": "^24.3.0",
     "electron-builder": "^23.6.0",
     "electron-packager": "^17.1.1",
@@ -68,18 +71,19 @@
   "build": {
     "appId": "com.example.liquiddispenser",
     "productName": "LiquidDispenser",
-    "publish": [{
-      "provider": "github",
-      "owner": "rossamck",
-      "repo": "DST_LiquidDispenser",
-      "releaseType": "release"
-    }],
-    
+    "main": "build/electron.js",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "rossamck",
+        "repo": "DST_LiquidDispenser",
+        "releaseType": "release"
+      }
+    ],
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "package.json",
-      "src/electron.js"
+      "package.json"
     ],
     "mac": {
       "target": "dmg"

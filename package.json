@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
@@ -71,6 +71,14 @@
   "build": {
     "appId": "com.example.liquiddispenser",
     "productName": "LiquidDispenser",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "rossamck",
+        "repo": "DST_LiquidDispenser",
+        "releaseType": "release"
+      }
+    ],
     "files": [
       "build/**/*",
       "node_modules/**/*",

@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macOS-latest, macOS-arm64, ubuntu-latest]
 
     steps:
       - name: Checkout code
@@ -21,7 +21,6 @@ jobs:
         with:
           node-version: 18.15.0
           cache: 'npm'
-
 
       - name: Install dependencies
         run: npm ci
@@ -34,21 +33,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
         with:
           name: dist
           path: dist/
 
-      - name: Deploy to server
+      - name: Upload to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
-          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-          source: "dist/*"
-          target: "/hdd/BuildFiles"
-          overwrite: true
+          source: dist/
+          target: /hdd/BuildFiles

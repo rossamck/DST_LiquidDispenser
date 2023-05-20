@@ -71,7 +71,6 @@
   "build": {
     "appId": "com.example.liquiddispenser",
     "productName": "LiquidDispenser",
-    "main": "build/electron.js",
     "publish": [
       {
         "provider": "github",

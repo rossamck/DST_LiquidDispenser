@@ -4,9 +4,10 @@
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
-  "main": "electron.js",
+  "main": "public/electron.js",
   "homepage": "./",
   "dependencies": {
+    "@tailwindcss/forms": "^0.5.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -31,7 +32,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && npm run postbuild",
-    "postbuild": "copyfiles -u 1 electron.js build",
+    "postbuild": "copyfiles -u 1 src/electron.js build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
@@ -81,8 +82,7 @@
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "package.json",
-      "electron.js"
+      "package.json"
     ],
     "mac": {
       "target": "dmg"

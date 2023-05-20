@@ -82,7 +82,8 @@
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "electron.js"
     ],
     "mac": {
       "target": "dmg"

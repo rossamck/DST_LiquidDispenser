@@ -27,6 +27,9 @@ jobs:
         run: npm ci
 
       - name: Build Electron app
+        run: npm run build
+
+      - name: Package Electron app
         run: npm run dist
 
       - name: Archive production artifacts

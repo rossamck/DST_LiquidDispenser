@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",

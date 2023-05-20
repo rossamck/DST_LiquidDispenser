@@ -31,6 +31,9 @@ jobs:
 
       - name: Package Electron app
         run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2

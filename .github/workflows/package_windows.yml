@@ -1,5 +1,3 @@
-name: Electron Build and Package Windows
-
 on:
   push:
     paths:
@@ -10,37 +8,45 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]  # You can add 'macos-latest', 'ubuntu-latest' for other platforms.
+        os: [windows-latest, macos-latest, macos-arm64, ubuntu-latest]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
 
-    - name: Build Electron app
-      run: npm run dist
+      - name: Install dependencies
+        run: npm install
 
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: dist/
-      
-    - name: Deploy to server
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
-        source: "dist/*"
-        target: "/hdd/BuildFiles"
-        overwrite: true
+      - name: Build Electron app
+        run: npm run dist
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/
+
+      - name: Deploy to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
+          source: "dist/*"
+          target: "/hdd/BuildFiles"
+          overwrite: true

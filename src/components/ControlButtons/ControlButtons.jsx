@@ -55,10 +55,10 @@ const ControlButtons = ({
     console.log("NAME: ", wellPlateName);
   };
 
-  const onSourceButtonClick = (moduleId, sourceName) => {
-    console.log(`Button clicked: Name: ${sourceName}, Module ID ${moduleId}`);
-    setActiveSourceModule(sourceName);
-  };
+  // const onSourceButtonClick = (moduleId, sourceName) => {
+  //   console.log(`Button clicked: Name: ${sourceName}, Module ID ${moduleId}`);
+  //   setActiveSourceModule(sourceName);
+  // };
 
   const onWasteButtonClick = (moduleId, wasteName) => {
     console.log(`Button clicked: Name: ${wasteName}, Module ID ${moduleId}`);

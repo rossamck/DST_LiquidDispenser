@@ -96,7 +96,7 @@ const Layout = ({
         console.log("No corresponding slot found for moduleId: ", wasteModuleId);
       }
     }
-  }, [activeWasteModule, config, savedPositions]);
+  }, [activeWasteModule, config, savedPositions, activeSourceModule]);
   
 
   //preset stuff (move to own file)

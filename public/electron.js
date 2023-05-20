@@ -9,6 +9,7 @@ server.listen(3000);
 let win;
 
 function createWindow() {
+  console.log('Creating window...'); // Debugging statement
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -20,14 +21,17 @@ function createWindow() {
 
   win.maximize();
   win.loadURL('http://localhost:3000');
+  console.log('Window created.'); // Debugging statement
 }
 
 app.whenReady().then(() => {
+  console.log('App is ready.'); // Debugging statement
   autoUpdater.checkForUpdatesAndNotify();
   createWindow();
 });
 
 autoUpdater.on('update-available', () => {
+  console.log('Update available.'); // Debugging statement
   dialog.showMessageBox({
     type: 'info',
     title: 'Update available',
@@ -42,6 +46,7 @@ autoUpdater.on('update-available', () => {
 });
 
 autoUpdater.on('update-downloaded', () => {
+  console.log('Update downloaded.'); // Debugging statement
   dialog.showMessageBox({
     type: 'info',
     title: 'Update ready',

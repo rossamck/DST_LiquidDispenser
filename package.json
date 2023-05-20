@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.2.18",
+  "version": "0.2.24",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
@@ -32,7 +32,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && npm run postbuild",
-    "postbuild": "copyfiles -u 1 src/electron.js build",
+    "postbuild": "copyfiles -u 1 public/electron.js build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
@@ -92,6 +92,8 @@
     },
     "linux": {
       "target": "AppImage"
-    }
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
   }
+  
 }

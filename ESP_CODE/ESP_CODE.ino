@@ -5,16 +5,16 @@
 #include <vector>
 #include <Wire.h>
 #include <Ticker.h>
-
+#include <ArduinoJson.h>
 #define SDA_PIN 4  // D2 on ESP8266
 #define SCL_PIN 5  // D1 on ESP8266
 
 #define ARDUINO_NANO_I2C_ADDR 8
 
-// const char* ssid = "VM6701124_2G";
-// const char* password = "fnDdpj9q6qdt";
-const char* ssid = "iPhone (3)";
-const char* password = "13245768";
+const char* ssid = "VM6701124_2G";
+const char* password = "fnDdpj9q6qdt";
+// const char* ssid = "iPhone (3)";
+// const char* password = "13245768";
 const int ledPin = LED_BUILTIN;
 
 ESP8266WebServer server(80);
@@ -31,11 +31,17 @@ struct Well {
   int y;
 };
 
+StaticJsonDocument<200> doc;
 
 
 std::vector<Well> selectedWells;
 std::vector<Well>::iterator currentWell;
 int currentJobId = -1;  // Initialize to -1 or another value that indicates no jobId has been set
+
+void sendJobIdMessage(int jobId) {
+  String jobIdMessage = "jobId:" + String(jobId);
+  webSocket.broadcastTXT(jobIdMessage);
+}
 
 
 String requestDataFromNano() {
@@ -156,55 +162,42 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, size_t length)
         ledState = !ledState;
         digitalWrite(ledPin, ledState ? LOW : HIGH);
 
-      } else if (message.startsWith("selectWells:")) {
-        selectedWells.clear();
-        String wellsData = message.substring(12);
-        Serial.println("Processing wells data: " + wellsData);
+      } 
 
-        wellsData.replace("},{", "};{");
-        int startIndex = 0;
-        int endIndex = wellsData.length();
+      else if (message.startsWith("selectWell:")) {
+  String wellData = message.substring(11);
+  Serial.println("Processing well data: " + wellData);
 
-        while (startIndex < endIndex) {
-          int nextSeparator = wellsData.indexOf(';', startIndex);
-          if (nextSeparator == -1) {
-            nextSeparator = endIndex;
-          }
+  // Parse JSON
+  DeserializationError error = deserializeJson(doc, wellData);
 
-          String wellData = wellsData.substring(startIndex + 1, nextSeparator - 1);
-          wellData.replace("\"", "");
-          wellData.replace("}", "");
-          wellData.replace("{", "");
+  // Check for errors in parsing
+  if (error) {
+    Serial.println("Failed to parse JSON");
+    return;
+  }
 
-          int idIndex = wellData.indexOf("wellId:");
-          int volIndex = wellData.indexOf("volume:");
-          int srcIndex = wellData.indexOf("sourceIndex:");
-          int xIndex = wellData.indexOf("xCoord:");  // New line
-          int yIndex = wellData.indexOf("yCoord:");  // New line
+  // Access values with JsonDocument
+  const char* wellId = doc["wellId"];
+  float volume = doc["volume"];
+  int sourceIndex = doc["sourceIndex"];
+  int x = doc["xCoord"];
+  int y = doc["yCoord"];
 
+  selectedWells.push_back({ wellId, volume, sourceIndex, x, y });
 
-          String wellId = wellData.substring(idIndex + 7, volIndex - 1);
-          float volume = wellData.substring(volIndex + 7, srcIndex - 1).toFloat();
-          int sourceIndex = wellData.substring(srcIndex + 12, xIndex - 1).toInt();  // Updated line
-          int x = wellData.substring(xIndex + 7, yIndex).toInt();
-          int y = wellData.substring(yIndex + 7).toInt();  // New line
+  // Print the number of selected wells
+  Serial.print("Number of selected wells: ");
+  Serial.println(selectedWells.size());
+}
 
-
-
-          selectedWells.push_back({ wellId, volume, sourceIndex, x, y });  // Updated line
-
-          startIndex = nextSeparator + 1;
-        }
-
-        // Print the number of selected wells
-        Serial.print("Number of selected wells: ");
-        Serial.println(selectedWells.size());
-        webSocket.broadcastTXT("ready");
-        Serial.println("Starting dispensing");
-        dispensing = true;
-        currentWell = selectedWells.begin();
-        handleDispensing();
-      }
+else if (message.startsWith("endOfWells")) {
+  webSocket.broadcastTXT("ready");
+  Serial.println("Starting dispensing");
+  dispensing = true;
+  currentWell = selectedWells.begin();
+  handleDispensing();
+}
 
       else if (message == "startDispensing") {
         Serial.println("Starting dispensing");
@@ -395,6 +388,10 @@ void handleDispensing() {
     dispensing = false;
     String dispenseFinishedMessage = "dispensefinished:" + String(currentJobId);
     webSocket.broadcastTXT(dispenseFinishedMessage);
+    sendJobIdMessage(currentJobId);
+
+            selectedWells.clear();
+
   }
 }
 
@@ -419,7 +416,7 @@ void setup() {
     server.send(200, "text/plain", "");
   });
 
-  webSocket.begin();
+  webSocket.begin(); 
   webSocket.onEvent(webSocketEvent);
 
   Wire.begin(SDA_PIN, SCL_PIN);

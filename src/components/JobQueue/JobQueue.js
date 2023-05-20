@@ -13,9 +13,10 @@ class JobQueue {
   }
 
   addJob(job) {
-    const newJob = { ...job, id: this.jobId, status: 'pending', message: job.message };
+    const newJob = { ...job, status: 'pending', message: job.message };
+    // Use the provided jobId, or generate a new one if not provided
+    newJob.id = job.id !== undefined ? job.id : this.generateJobId();
     this.queue.push(newJob);
-    this.jobId += 1;
     console.log('Added job:', newJob.id);
     if (!this.currentJob) {
       console.log('Starting execution of job:', newJob.id);

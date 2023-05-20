@@ -35,6 +35,43 @@ const WebSocketProvider = ({ children, handleMessage }) => {
   const sendMessage = useCallback((message, addToQueue = false) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       if (addToQueue) {
+        if (message.startsWith("selectWells:")) {
+          console.log("VERY POG");
+  
+          // Extract the JSON data from the message
+          const jsonData = message.substring("selectWells:".length);
+          try {
+            const dataArray = JSON.parse(jsonData);
+            const numObjects = dataArray.length;
+            console.log(`Number of objects in the array: ${numObjects}`);
+  
+            const jobId = jobQueue.generateJobId(); // Generate a new jobId here
+
+            // Add a single job to the queue that includes all the actions
+            jobQueue.addJob({
+              action: () => {
+                dataArray.forEach((object, index) => {
+                  const objectMessage = JSON.stringify(object);
+                  const prefixedMessage = `selectWell:${objectMessage}`;
+                  const jobMessage = `jobId:${jobId} ${prefixedMessage}`;
+                  console.log("Sending message:", jobMessage);
+                  socket.send(jobMessage);
+                });
+      
+                const endOfWellsMessage = `jobId:${jobId} endOfWells`;
+                console.log("Sending endOfWells message:", endOfWellsMessage);
+                socket.send(endOfWellsMessage);
+              },
+              message: message,
+              id: jobId // Pass the jobId into the addJob method
+            });
+          } catch (error) {
+            console.error("Invalid JSON data:", error);
+          }
+  
+          return; // Exit the function after defining the separate action
+        }
+  
         const jobId = jobQueue.jobId; // Capture the jobId at this moment
         jobQueue.addJob({
           action: () => {
@@ -50,6 +87,8 @@ const WebSocketProvider = ({ children, handleMessage }) => {
       }
     }
   }, [socket, jobQueue]);
+  
+  
   
   
   

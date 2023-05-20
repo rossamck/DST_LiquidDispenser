@@ -79,7 +79,13 @@ function App() {
 
       if (message === "update_status") {
         // Perform the action for updating the status column in the well information table
-      } else if (message === "ready") {
+      }else if (message.startsWith("jobId:")) {
+        const jobId = parseInt(message.split(":")[1]);
+        console.log(`Received test jobId: ${jobId}`);
+        // Do something with the jobId
+        jobQueue.jobCompleted(jobId);
+      } 
+      else if (message === "ready") {
         // Update start dispensing button
         console.log("Update dispensing button");
         setStartDispensingEnabled(true);

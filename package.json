@@ -1,10 +1,10 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
-  "main": "src/electron.js",
+  "main": "electron.js",
   "homepage": "./",
   "dependencies": {
     "@tailwindcss/forms": "^0.5.3",

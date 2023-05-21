@@ -3,7 +3,7 @@ name: Electron Build and Package
 on:
   push:
     paths:
-      - 'package.json'
+      - "package.json"
 
 jobs:
   build:
@@ -20,8 +20,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18.15.0
-          cache: 'npm'
-
+          cache: "npm"
 
       - name: Cache node modules
         uses: actions/cache@v2
@@ -60,7 +59,7 @@ jobs:
         with:
           name: dist
           path: dist/
-    
+
       - name: List directory contents
         run: ls -a dist/
 
@@ -79,7 +78,10 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset 
+      - name: Fetch repository
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+
+      - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
           files: |

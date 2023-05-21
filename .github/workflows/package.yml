@@ -148,3 +148,15 @@ jobs:
           asset_path: ./dist/latest-mac.yml
           asset_name: latest-mac.yml
           asset_content_type: text/yaml
+
+
+      - name: Upload Mac Release Asset (ZIP)
+        uses: actions/upload-release-asset@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./dist/LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac.zip
+            asset_name: LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac.zip
+            asset_content_type: application/zip
+        

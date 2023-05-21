@@ -68,6 +68,16 @@ jobs:
         id: pkg
         run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
 
+      - name: Set up Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreply.github.com"
+      
+      - name: Push tag
+        run: |
+          git tag v${{ steps.pkg.outputs.version }}
+          git push --tags
+      
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -78,7 +88,7 @@ jobs:
           release_name: Release v${{ steps.pkg.outputs.version }}
           draft: false
           prerelease: false
-
+      
       - name: Upload Release Asset 
         uses: softprops/action-gh-release@v1
         with:
@@ -93,3 +103,4 @@ jobs:
             dist/latest-mac.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      

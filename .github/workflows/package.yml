@@ -59,7 +59,7 @@ jobs:
           path: dist/
     
       - name: List directory contents
-        run: ls -a
+        run: ls -a src/
 
       - name: Get version
         id: pkg

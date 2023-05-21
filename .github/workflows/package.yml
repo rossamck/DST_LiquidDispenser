@@ -36,7 +36,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: List dist contents
-        run: ls -R ./dist
+        run: ls ./dist
 
 
       - name: Archive production artifacts
@@ -63,7 +63,7 @@ jobs:
         run: echo "::set-output name=VERSION::$(node -p "require('./package.json').version")"
 
       - name: List dist contents
-        run: ls -R ./dist
+        run: ls ./dist
 
       - name: Create Release
         id: create_release
@@ -126,6 +126,26 @@ jobs:
           asset_name: LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-win-x64.exe.blockmap
           asset_content_type: application/octet-stream
 
+      - name: Upload Mac Release Asset (ZIP)
+        uses: actions/upload-release-asset@v1
+        env:
+              GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+              upload_url: ${{ steps.create_release.outputs.upload_url }}
+              asset_path: ./dist/LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac.zip
+              asset_name: LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac-x64.zip
+              asset_content_type: application/zip
+
+      - name: Upload Mac Blockmap Release Asset (ZIP)
+        uses: actions/upload-release-asset@v1
+        env:
+                GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./dist/LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac-x64.zip.blockmap
+                asset_name: LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac-x64.zip.blockmap
+                asset_content_type: application/octet-stream
+
       - name: Upload latest.yml
         uses: actions/upload-release-asset@v1
         env:
@@ -157,13 +177,5 @@ jobs:
           asset_content_type: text/yaml
 
 
-      - name: Upload Mac Release Asset (ZIP)
-        uses: actions/upload-release-asset@v1
-        env:
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./dist/LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac.zip
-            asset_name: LiquidDispenser-${{ steps.get_version.outputs.VERSION }}-mac.zip
-            asset_content_type: application/zip
+
         

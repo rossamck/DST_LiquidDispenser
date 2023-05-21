@@ -81,6 +81,9 @@ jobs:
       - name: Fetch repository
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
+      - name: Set GITHUB_REF
+        run: echo "GITHUB_REF=refs/tags/v${{ steps.pkg.outputs.version }}" >> $GITHUB_ENV
+
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
@@ -95,3 +98,4 @@ jobs:
             dist/latest-mac.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+

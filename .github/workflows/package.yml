@@ -57,24 +57,45 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           tag_name: v${{ steps.pkg.outputs.version }}
           release_name: Release v${{ steps.pkg.outputs.version }}
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset 
-        uses: softprops/action-gh-release@v1
+      - name: Upload Release Asset
+        uses: actions/github-script@v4
         with:
-          files: |
-            dist/LiquidDispenser-${{ steps.pkg.outputs.version }}-linux-x86_64.AppImage
-            dist/LiquidDispenser-${{ steps.pkg.outputs.version }}-mac-x64.dmg
-            dist/LiquidDispenser-${{ steps.pkg.outputs.version }}-mac-x64.dmg.blockmap
-            dist/LiquidDispenser-${{ steps.pkg.outputs.version }}-win-x64.exe
-            dist/LiquidDispenser-${{ steps.pkg.outputs.version }}-win-x64.exe.blockmap
-            dist/latest.yml
-            dist/latest-linux.yml
-            dist/latest-mac.yml
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const upload_url = "${{ steps.create_release.outputs.upload_url }}";
+            const version = "${{ steps.pkg.outputs.version }}";
+            const files = [
+              `dist/LiquidDispenser-${version}-linux-x86_64.AppImage`,
+              `dist/LiquidDispenser-${version}-mac-x64.dmg`,
+              `dist/LiquidDispenser-${version}-mac-x64.dmg.blockmap`,
+              `dist/LiquidDispenser-${version}-win-x64.exe`,
+              `dist/LiquidDispenser-${version}-win-x64.exe.blockmap`,
+              `dist/latest.yml`,
+              `dist/latest-linux.yml`,
+              `dist/latest-mac.yml`,
+            ];
+
+            for (const file of files) {
+              const filePath = path.join(process.env.GITHUB_WORKSPACE, file);
+              if (fs.existsSync(filePath)) {
+                await github.repos.uploadReleaseAsset({
+                  url: upload_url,
+                  headers: {
+                    'content-type': 'application/octet-stream',
+                    'content-length': fs.statSync(filePath).size,
+                  },
+                  name: path.basename(file),
+                  file: fs.createReadStream(filePath),
+                });
+              }
+            }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

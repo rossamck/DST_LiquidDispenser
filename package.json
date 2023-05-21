@@ -1,6 +1,6 @@
 {
   "name": "dst-liquid-dispenser",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "author": "github.com/rossamck",
   "description": "User interface for Liquid Dispenser",
@@ -85,7 +85,7 @@
       "package.json"
     ],
     "mac": {
-      "target": ["dmg", "zip"]
+      "target": "zip"
     },
     "win": {
       "target": "nsis"

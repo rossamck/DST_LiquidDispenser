@@ -2,6 +2,8 @@ name: Electron Build and Package
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "package.json"
 

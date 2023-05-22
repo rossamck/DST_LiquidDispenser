@@ -30,6 +30,10 @@ const Content = ({
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(colourIndexPairs[0]);
 
+  useEffect(() => {
+    console.log("Active Well Plate new:", activeWellPlate);
+  }, [activeWellPlate]);
+
   const handlePositionClick = useCallback(() => {
     setActiveLayout("PositionalLayout");
   }, [setActiveLayout]);
@@ -74,7 +78,7 @@ const Content = ({
     {activeWellPlate !== '' && selectedPlateId !== null ? (
         <>
           <WellPlate
-            plateType={activeWellPlate} // update
+            activeWellPlate={activeWellPlate} // update
             currentAction={currentAction}
             actionVolume={actionVolume}
             actionVersion={actionVersion}

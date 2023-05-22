@@ -8,7 +8,7 @@ import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanel from "./InfoPanel/InfoPanel";
 import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 import ConfigContext from "../context/ModuleConfigContext";
-import PositionsContext from "../context/PositionsContext";
+import ModulePositionsContext from "../context/ModulePositionsContext";
 
 const Layout = ({
   onButtonClick,
@@ -34,69 +34,26 @@ const Layout = ({
 }) => {
 
 
-  const { savedPositions } = useContext(PositionsContext); // Consume savedPositions from the PositionsContext
+  const { savedPositions } = useContext(ModulePositionsContext); // Consume savedPositions from the ModulePositionsContext
   const [allSelectedWells, setAllSelectedWells] = useState([]);
   const { sendMessage } = useContext(WebSocketContext);
   const [activeWellPlate, setActiveWellPlate] = useState("");
-  const [activeSourceModule, setActiveSourceModule] = useState("");
+  const [activeSourceModule, setActiveSourceModule] = useState("-1");
   const [activeWasteModule, setActiveWasteModule] = useState("");
-
-  const [activeSourceModuleId, setActiveSourceModuleId] = useState("");
   
+  const { setSavedPositions } = useContext(ModulePositionsContext);
+
+  useEffect(() => {
+    const savedPositionsData = localStorage.getItem("savedPositions");
+    if (savedPositionsData) {
+      const savedPositions = JSON.parse(savedPositionsData);
+      console.log("saved positions: ", savedPositions);
+      setSavedPositions(savedPositions);
+    }
+  }, [setSavedPositions]);
+
 
   const config = useContext(ConfigContext);
-
-
-  
-  
-  useEffect(() => {
-    console.log("Active Source Module:", activeSourceModule);
-    if (activeSourceModule !== "") {
-      const activeModule = config[activeSourceModule];
-      const sourceModuleId = activeModule.moduleId;
-      console.log("Source Module Id:", sourceModuleId);
-  
-      setActiveSourceModuleId(sourceModuleId);
-      console.log("Active source module id: ", sourceModuleId);
-  
-      // Check the values in savedPositions
-      console.log("Saved Positions: ", savedPositions);
-  
-      const correspondingSlot = savedPositions.find(
-        position => position.moduleId === sourceModuleId
-      );
-      if (correspondingSlot) {
-        console.log("Corresponding slotId: ", correspondingSlot.slotId);
-      } else {
-        console.log("No corresponding slot found for moduleId: ", sourceModuleId);
-      }
-    }
-  }, [activeSourceModule, config, savedPositions]);
-  
-  
-  useEffect(() => {
-    console.log("Active Source Module:", activeWasteModule);
-    if (activeWasteModule !== "") {
-      const activeModule = config[activeSourceModule];
-      const wasteModuleId = activeModule.moduleId;
-      console.log("Source Module Id:", wasteModuleId);
-  
-      setActiveSourceModuleId(wasteModuleId);
-      console.log("Active source module id: ", wasteModuleId);
-  
-      // Check the values in savedPositions
-      console.log("Saved Positions: ", savedPositions);
-  
-      const correspondingSlot = savedPositions.find(
-        position => position.moduleId === wasteModuleId
-      );
-      if (correspondingSlot) {
-        console.log("Corresponding slotId: ", correspondingSlot.slotId);
-      } else {
-        console.log("No corresponding slot found for moduleId: ", wasteModuleId);
-      }
-    }
-  }, [activeWasteModule, config, savedPositions, activeSourceModule]);
   
 
   //preset stuff (move to own file)
@@ -159,25 +116,43 @@ const Layout = ({
   };
 
   // obtain the source for each group then get the coordinates from them
+  const getModuleById = (moduleId) => {
+    for(let moduleName in config) {
+      if(config[moduleName].moduleId === moduleId) {
+        return config[moduleName];
+      }
+    }
+    return null;
+  }
 
+  
 
   const onSendWells = () => {
     setSendSelectionEnabled(false);
     console.log("All selected wells:", allSelectedWells);
     
+    const activeWellPlateModule = getModuleById(activeWellPlate);
+    const activeSourceModuleModule = getModuleById(activeSourceModule);
+    
+    if (!activeWellPlateModule || !activeSourceModuleModule) {
+      console.error('Module not found');
+      return; // or handle this case as appropriate
+    }
+  
     // get the corner coordinates based on activeWellPlate value
-    const PlateCornerCoordinates = config[activeWellPlate].cornerCoordinates;
-    const SourceCornerCoordinates = config[activeSourceModule].cornerCoordinates;
-    const SourceStepSizeV = config[activeSourceModule].stepSizeV;
-    const SourceStepSizeH = config[activeSourceModule].stepSizeh;
-    const SourceCols = config[activeSourceModule].cols;
+    const PlateCornerCoordinates = activeWellPlateModule.cornerCoordinates;
+    const SourceCornerCoordinates = activeSourceModuleModule.cornerCoordinates;
+    const SourceStepSizeV = activeSourceModuleModule.stepSizeV;
+    const SourceStepSizeH = activeSourceModuleModule.stepSizeh;
+    const SourceCols = activeSourceModuleModule.cols;
   
     // Find the corresponding slotId for the activeSourceModule
     const correspondingSlot = savedPositions.find(
-      position => position.moduleId === activeSourceModuleId
+      position => position.moduleId === activeSourceModule
     );
     const slotId = correspondingSlot ? correspondingSlot.slotId : 1; // If not found, default to 1 (CHECK THIS)
-  console.log("send wells slotid: ", slotId);
+    
+    console.log("send wells slotid: ", slotId);
     // Apply the transformation to each well
     const transformedWells = allSelectedWells.map(well => {
       const relX = well.xCoord;
@@ -295,7 +270,7 @@ const Layout = ({
               setActiveLayout={setActiveLayout}
               // activeWellPlate={"96 Well"}
               activeWellPlate={activeWellPlate}
-              selectedSourceModuleId={activeSourceModuleId}
+              selectedSourceModuleId={activeSourceModule}
 
               
             />
@@ -321,6 +296,9 @@ const Layout = ({
               setActiveWellPlate={setActiveWellPlate}
               setActiveSourceModule={setActiveSourceModule}
               setActiveWasteModule={setActiveWasteModule}
+              activeWellPlate={activeWellPlate}
+              activeSourceModule={activeSourceModule}
+              activeWasteModule={activeWasteModule}
             />
           </div>
         </div>

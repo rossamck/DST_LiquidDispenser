@@ -1,11 +1,11 @@
 // SavedPositionsTable.jsx
 
 import React, { useContext, useState, useEffect } from "react";
-import PositionsContext from "../../context/PositionsContext";
+import ModulePositionsContext from "../../context/ModulePositionsContext";
 import config from "../../configuration/ModuleConfig.json";
 
 const SavedPositionsTable = () => {
-  const { savedPositions } = useContext(PositionsContext); // Consume savedPositions from the PositionsContext
+  const { savedPositions } = useContext(ModulePositionsContext); // Consume savedPositions from the ModulePositionsContext
 
   const [modules, setModules] = useState([]);
 

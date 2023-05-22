@@ -6,9 +6,10 @@ import DevLayout from "./Lavout/DevLayout";
 import PositionalLayout from "./Lavout/PositionalLayout";
 import JobLayout from "./Lavout/JobLayout";
 import AxisContext from "./AxisContext";
-import PositionsContext from "./context/PositionsContext";
+import ModulePositionsContext from "./context/ModulePositionsContext";
 import JobQueue from "./components/JobQueue/JobQueue";
 import JobQueueContext from "./context/JobQueueContext";
+import SelectedModulesContext from "./context/SelectedModulesContext";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -46,6 +47,15 @@ function App() {
   React.useEffect(() => {
     document.title = "Liquid Dispenser Client";
   }, []);
+
+  const initialSelectedModules = {
+    wellPlate: null,
+    source: null,
+    waste: null
+  };
+
+  const [selectedModules, setSelectedModules] = useState(initialSelectedModules);
+
 
   const reloadPage = () => {
     window.location.reload();
@@ -165,8 +175,10 @@ function App() {
       <JobQueueContext.Provider value={jobQueue}>
         <AxisContext.Provider value={axisLimits}>
           <WebSocketProvider handleMessage={handleMessage}>
-            <PositionsContext.Provider
-              value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the PositionsContext
+          <SelectedModulesContext.Provider value={[selectedModules, setSelectedModules]}>
+
+            <ModulePositionsContext.Provider
+              value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the ModulePositionsContext
             >
               <div className="App">
                 <Sidebar
@@ -226,7 +238,9 @@ function App() {
                   />
                 )}
               </div>
-            </PositionsContext.Provider>
+            </ModulePositionsContext.Provider>
+            </SelectedModulesContext.Provider>
+
           </WebSocketProvider>
         </AxisContext.Provider>
       </JobQueueContext.Provider>

@@ -63,7 +63,7 @@ const Well = ({
 };
 
 const WellPlate = ({
-  plateType,
+  activeWellPlate,
   currentAction,
   actionVersion,
   onActionComplete,
@@ -84,6 +84,18 @@ const WellPlate = ({
   const [selectedWells, setSelectedWells] = useState(new Set());
   // const [selectedWellLabels, setSelectedWellLabels] = useState([]);
   const [selectedVolumes, setSelectedVolumes] = useState({});
+
+  const [plateConfig, setPlateConfig] = useState({});
+
+  useEffect(() => {
+    for (let plateType in config) {
+      if (config[plateType].moduleId === activeWellPlate) {
+        setPlateConfig(config[plateType]);
+        break;
+      }
+    }
+  }, [activeWellPlate]);
+  
 
   const generateRows = (rowCount) => {
     const rowLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -125,7 +137,7 @@ const WellPlate = ({
         let relY = well.charCodeAt(0) - "A".charCodeAt(0); // Converting A, B, C, etc. to 0, 1, 2, etc.
         let relX = parseInt(well.slice(1)) - 1; // Converting 1, 2, 3, etc. to 0, 1, 2, etc.
 
-        const stepSize = config[plateType].stepSize; // update
+        const stepSize = plateConfig.stepSize;
 
         // Apply the step size
         relX *= stepSize;
@@ -198,7 +210,7 @@ const WellPlate = ({
     selectedColorIndex,
     selectedSourceIndices,
     selectedPlateId,
-    plateType,
+    plateConfig.stepSize,
   ]);
 
   const clearWells = useCallback(() => {
@@ -277,7 +289,7 @@ const WellPlate = ({
   const onMouseUp = () => {
     setIsMouseDown(false);
   };
-  const { rows, cols } = config[plateType];
+  const { rows, cols } = plateConfig;
   const MAX_WELL_WIDTH = 150; // This could be the width of wells in the 96-well plate
 
   const wellWidth = Math.min(600 / cols, MAX_WELL_WIDTH);

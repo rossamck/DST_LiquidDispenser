@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import DraggableModule from "./DraggableModule";
 import DroppableSlot from "./DroppableSlot";
-import PositionsContext from "../../context/PositionsContext";
+import ModulePositionsContext from "../../context/ModulePositionsContext";
 import ConfigContext from "../../context/ModuleConfigContext";
 
 
@@ -21,12 +21,13 @@ const ModuleContainer = ({
     return savedSlots ? JSON.parse(savedSlots) : Array(4).fill([]);
   });
 
-  const { setSavedPositions } = useContext(PositionsContext);
+  const { setSavedPositions } = useContext(ModulePositionsContext);
 
   useEffect(() => {
     const savedPositionsData = localStorage.getItem("savedPositions");
     if (savedPositionsData) {
       const savedPositions = JSON.parse(savedPositionsData);
+      console.log("saved positions: ", savedPositions);
       setSavedPositions(savedPositions);
     }
   }, [setSavedPositions]);

@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useCallback } from "react";
 import { FiCheck } from "react-icons/fi";
 import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 import ConfigContext from "../../context/ModuleConfigContext";
+import SelectedModulesContext from "../../context/SelectedModulesContext";
 
 const ControlButtons = ({
   onButtonClick,
@@ -15,6 +16,9 @@ const ControlButtons = ({
   setActiveWellPlate,
   setActiveSourceModule,
   setActiveWasteModule,
+  activeWellPlate,
+  activeSourceModule,
+  activeWasteModule,
   
 }) => {
   const [volume, setVolume] = useState("");
@@ -22,14 +26,15 @@ const ControlButtons = ({
   const [savedPositions, setSavedPositions] = useState([]);
   const [filteredPositions, setFilteredPositions] = useState([]);
   const config = useContext(ConfigContext);
- 
+  const [selectedModules, setSelectedModules] = useContext(SelectedModulesContext);
+
   
 
   useEffect(() => {
     const savedPositionsData = localStorage.getItem("savedPositions");
     if (savedPositionsData) {
       const parsedPositions = JSON.parse(savedPositionsData);
-      console.log(parsedPositions);
+      console.log("parsed positions: ", parsedPositions);
       setSavedPositions(parsedPositions);
     }
   }, []);
@@ -48,22 +53,35 @@ const ControlButtons = ({
     onSendWells();
   };
 
-  const onWellPlateButtonClick = (slotId, moduleId, wellPlateName) => {
-    console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}`);
-    setSelectedPlateId(slotId); 
-    setActiveWellPlate(wellPlateName); 
-    console.log("NAME: ", wellPlateName);
+  const onWellPlateButtonClick = (slotId, moduleId, moduleName) => {
+    console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}, Module Name ${moduleName}`);
+    setSelectedModules({
+      ...selectedModules,
+      wellPlate: { slotId, moduleId }
+    });
+    setSelectedPlateId(slotId);
+    setActiveWellPlate(moduleId);  // Change this line
   };
 
-  // const onSourceButtonClick = (moduleId, sourceName) => {
-  //   console.log(`Button clicked: Name: ${sourceName}, Module ID ${moduleId}`);
-  //   setActiveSourceModule(sourceName);
-  // };
-
-  const onWasteButtonClick = (moduleId, wasteName) => {
-    console.log(`Button clicked: Name: ${wasteName}, Module ID ${moduleId}`);
-    setActiveWasteModule(wasteName);
+  const onSourceButtonClick = (slotId, moduleId, moduleName) => {
+    console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}, Module Name ${moduleName}`);
+    setSelectedModules({
+      ...selectedModules,
+      source: { slotId, moduleId }
+    });
+    console.log("Selected modules: ", selectedModules);
+    setActiveSourceModule(moduleId);
   };
+  
+  const onWasteButtonClick = (slotId, moduleId, moduleName) => {
+    console.log(`Button clicked: Slot ID ${slotId + 1}, Module ID ${moduleId}, Module Name ${moduleName}`);
+    setSelectedModules({
+      ...selectedModules,
+      waste: { slotId, moduleId }
+    });
+    setActiveWasteModule(moduleId);
+  };
+  
 
 const filterPositions = useCallback((positions) => {
     return positions
@@ -92,6 +110,9 @@ const filterPositions = useCallback((positions) => {
       setFilteredPositions(filtered);
     }
   }, [savedPositions, filterPositions]); 
+
+
+  
 
   return (
     <div className="flex flex-col items-center justify-between h-full">
@@ -146,48 +167,59 @@ const filterPositions = useCallback((positions) => {
         <ul className="mr-4">
           <h4 className="text-white font-bold mb-2">Well Plates:</h4>
           {filteredPositions.filter(pos => pos.isWellPlate).map((position, index) => (
-            <li key={position.slotId}>
-              <button
-                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
-                  position.slotId === selectedPlateId ? "opacity-50" : ""
-                }`}
-                onClick={() =>
-                  onWellPlateButtonClick(
-                    position.slotId,
-                    position.moduleId,
-                    position.moduleName
-                  )
-                }
-              >
-                {position.moduleName} ({position.slotId + 1})
-              </button>
-            </li>
-          ))}
+  <li key={position.slotId}>
+    <button
+      className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
+        selectedModules.wellPlate && selectedModules.wellPlate.slotId === position.slotId ? "opacity-50" : ""
+      }`}
+      onClick={() =>
+        onWellPlateButtonClick(
+          position.slotId,
+          position.moduleId,
+          position.moduleName
+        )
+      }
+    >
+      {position.moduleName} ({position.slotId + 1})
+    </button>
+  </li>
+))}
         </ul>
         <ul className="mr-4">
           <h4 className="text-white font-bold mb-2">Source Modules:</h4>
           <li>
     <button
-      className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
-      onClick={() => {
-        setActiveSourceModule("Default Source");
-      }}
+        className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
+          selectedModules.source && selectedModules.source.slotId === -1 ? "opacity-50" : ""
+        }`}
+        onClick={() =>
+          onSourceButtonClick(
+            -1,
+            3,
+            "Default Source"
+          )
+        }
     >
       Default Source
     </button>
   </li>
           {filteredPositions.filter(pos => pos.isSource).map((position, index) => (
             <li key={position.slotId}>
-              <button
-                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
-                onClick={() =>
-                  setActiveSourceModule(
-                    position.moduleName
-                  )
-                }
-              >
-                {position.moduleName} ({position.slotId + 1})
-              </button>
+<button
+  className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
+    selectedModules.source && selectedModules.source.slotId === position.slotId ? "opacity-50" : ""
+  }`}
+  onClick={() =>
+    onSourceButtonClick(
+      position.slotId,
+      position.moduleId,
+      position.moduleName
+    )
+  }
+>
+  {position.moduleName} ({position.slotId + 1})
+</button>
+
             </li>
           ))}
  
@@ -196,16 +228,21 @@ const filterPositions = useCallback((positions) => {
           <h4 className="text-white font-bold mb-2">Waste Modules:</h4>
           {filteredPositions.filter(pos => pos.isWaste).map((position, index) => (
             <li key={position.slotId}>
-              <button
-                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full`}
-                onClick={() =>
-                  onWasteButtonClick(
-                    position.moduleName
-                  )
-                }
-              >
-                {position.moduleName} ({position.slotId + 1})
-              </button>
+<button
+  className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2 w-full ${
+    selectedModules.waste && selectedModules.waste.slotId === position.slotId ? "opacity-50" : ""
+  }`}
+  onClick={() =>
+    onWasteButtonClick(
+      position.slotId,
+      position.moduleId,
+      position.moduleName
+    )
+  }
+>
+  {position.moduleName} ({position.slotId + 1})
+</button>
+
               </li>
           ))}
           </ul>

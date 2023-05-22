@@ -51,6 +51,15 @@ ipcMain.handle('read-config', async (event, args) => {
   return { data, path: userDataConfigPath };
 });
 
+ipcMain.handle('edit-config', async (event, newConfig) => {
+  let userDataConfigPath = path.join(app.getPath('userData'), 'ModuleConfig.json');
+  
+  // Write new config to the file
+  fs.writeFileSync(userDataConfigPath, JSON.stringify(newConfig, null, 2), 'utf-8');
+});
+
+
+
 const server = express();
 server.use(express.static(`${__dirname}/../build`));
 server.listen(3000);

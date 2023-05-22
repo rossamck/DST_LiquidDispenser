@@ -117,9 +117,9 @@ const Layout = ({
 
   // obtain the source for each group then get the coordinates from them
   const getModuleById = (moduleId) => {
-    for(let moduleName in config) {
-      if(config[moduleName].moduleId === moduleId) {
-        return config[moduleName];
+    for(let moduleName in config.data) {
+      if(config.data[moduleName].moduleId === moduleId) {
+        return config.data[moduleName];
       }
     }
     return null;

@@ -35,7 +35,7 @@ const ModuleContainer = ({
   
   useEffect(() => {
     // Set modules state from the ModuleConfig.json data
-    setModules(Object.entries(config).filter(([name, moduleData]) => moduleData.showModule)
+    setModules(Object.entries(config.data).filter(([name, moduleData]) => moduleData.showModule)
         .map(([name, moduleData]) => ({
       id: moduleData.moduleId,
       name: name,

@@ -86,7 +86,7 @@ const ControlButtons = ({
 const filterPositions = useCallback((positions) => {
     return positions
       .map((position) => {
-        const moduleConfigEntry = Object.entries(config).find(
+        const moduleConfigEntry = Object.entries(config.data).find(
           ([, module]) => module.moduleId === position.moduleId
         );
   

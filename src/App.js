@@ -10,6 +10,7 @@ import ModulePositionsContext from "./context/ModulePositionsContext";
 import JobQueue from "./components/JobQueue/JobQueue";
 import JobQueueContext from "./context/JobQueueContext";
 import SelectedModulesContext from "./context/SelectedModulesContext";
+import IsElectronContext from "./context/IsElectronContext";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -41,6 +42,11 @@ function App() {
 
 
   const [config, setConfig] = useState(null);
+  const [isElectron, setIsElectron] = useState(false);
+  
+  React.useEffect(() => {
+    setIsElectron(window && window.process && window.process.type);
+  }, []);
 
   React.useEffect(() => {
     getConfig().then((loadedConfig) => setConfig(loadedConfig));
@@ -188,7 +194,9 @@ function App() {
 
 
   return (
-    <ConfigContext.Provider value={config.data}>
+    <IsElectronContext.Provider value={isElectron}>
+
+    <ConfigContext.Provider value={config}>
     <JobQueueContext.Provider value={jobQueue}>
         <AxisContext.Provider value={axisLimits}>
           <WebSocketProvider handleMessage={handleMessage}>
@@ -262,6 +270,8 @@ function App() {
         </AxisContext.Provider>
       </JobQueueContext.Provider>
     </ConfigContext.Provider>
+    </IsElectronContext.Provider>
+
   );
 }
 

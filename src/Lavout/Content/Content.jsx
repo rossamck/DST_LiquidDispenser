@@ -47,7 +47,7 @@ const Content = ({
 
   useEffect(() => {
     if (selectedSourceModuleId) {
-      const sourceModule = Object.values(config).find((module) => module.moduleId === selectedSourceModuleId);
+      const sourceModule = Object.values(config.data).find((module) => module.moduleId === selectedSourceModuleId);
       setActiveSourceModule(sourceModule);
     }
   }, [config, selectedSourceModuleId]);

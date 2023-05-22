@@ -18,7 +18,9 @@ import { WebSocketProvider } from "./components/WebSocketContext/WebSocketContex
 import "./components/scrollbar/scrollbar.css";
 import Sidebar from "./components/SideBar/SideBar";
 import ConfigContext from "./context/ModuleConfigContext";
-import config from "./configuration/ModuleConfig.json";
+
+// import config from "./configuration/ModuleConfig.json";
+import getConfig from "./configuration/configprovider";
 
 function App() {
   const [action, setAction] = useState(null);
@@ -36,6 +38,14 @@ function App() {
   const [selectedPlateId, setSelectedPlateId] = useState(null);
 
   const jobQueue = React.useRef(new JobQueue()).current;
+
+
+  const [config, setConfig] = useState(null);
+
+  React.useEffect(() => {
+    getConfig().then((loadedConfig) => setConfig(loadedConfig));
+  }, []);
+  
 
   const axisLimits = {
     x: { min: 0, max: 2100 },
@@ -170,9 +180,16 @@ function App() {
     }
   };
 
+  if (!config) {
+    // Config has not been loaded yet
+    return "Waiting for config...";
+  }
+  
+
+
   return (
-    <ConfigContext.Provider value={config}>
-      <JobQueueContext.Provider value={jobQueue}>
+    <ConfigContext.Provider value={config.data}>
+    <JobQueueContext.Provider value={jobQueue}>
         <AxisContext.Provider value={axisLimits}>
           <WebSocketProvider handleMessage={handleMessage}>
           <SelectedModulesContext.Provider value={[selectedModules, setSelectedModules]}>

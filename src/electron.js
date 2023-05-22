@@ -1,6 +1,33 @@
 const express = require('express');
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const fs = require('fs');
+const path = require('path');
+
+ipcMain.handle('read-config', async (event, args) => {
+  console.log("Testing handle!");
+  
+  let configPath;
+
+  if (app.isPackaged) {
+    // If running from a package, use the resources directory in the ASAR
+    configPath = path.join(process.resourcesPath, 'app.asar', 'build', 'ModuleConfig.json');
+  } else {
+    // If running in development, use the local path
+    configPath = path.join(__dirname, 'src/configuration/ModuleConfig.json');
+  }
+
+  // Check if the config file exists
+  if (!fs.existsSync(configPath)) {
+    throw new Error(`Config file not found: ${configPath}`);
+  }
+
+  // Read the config file
+  const rawData = fs.readFileSync(configPath);
+  const data = JSON.parse(rawData);
+
+  return data;
+});
 
 const server = express();
 server.use(express.static(`${__dirname}/../build`));
@@ -23,6 +50,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Emit 'ready' event when Electron app is ready
+  win.webContents.send('ready');
+
   autoUpdater.checkForUpdatesAndNotify();
   createWindow();
 });

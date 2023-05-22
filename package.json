@@ -15,12 +15,14 @@
     "copyfiles": "^2.4.1",
     "electron-updater": "^5.3.0",
     "express": "^4.18.2",
+    "fs-extra": "^11.1.1",
     "polished": "^4.2.2",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
+    "react-json-edit": "^0.3.1",
     "react-responsive-modal": "^6.4.1",
     "react-spring": "^9.7.1",
     "react-tabs": "^6.0.0",
@@ -32,7 +34,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build && npm run postbuild",
-    "postbuild": "copyfiles -u 1 public/electron.js build",
+    "postbuild": "copyfiles -u 1 public/electron.js build && copyfiles -u 1 src/configuration/ModuleConfig.json build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "start-electron": "electron .",
@@ -60,7 +62,7 @@
   "devDependencies": {
     "asar": "^3.2.0",
     "autoprefixer": "^10.4.14",
-    "copyfiles": "^2.4.1", 
+    "copyfiles": "^2.4.1",
     "electron": "^24.3.0",
     "electron-builder": "^23.6.0",
     "electron-packager": "^17.1.1",
@@ -85,7 +87,10 @@
       "package.json"
     ],
     "mac": {
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "target": "nsis"
@@ -95,5 +100,4 @@
     },
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
   }
-  
 }

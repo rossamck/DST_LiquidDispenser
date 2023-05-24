@@ -1,0 +1,15 @@
+.my-disabled-btn {
+    background-color: gray;
+    color: white;
+    font-weight: bold;
+    margin: 0 10px 0 10px;
+    border-radius: 8px;
+}
+
+.my-enabled-btn {
+    background-color: rgb(75, 132, 255);
+    color: white;
+    font-weight: bold;
+    margin: 0 10px 0 10px;
+    border-radius: 8px;
+}

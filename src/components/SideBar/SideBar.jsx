@@ -1,18 +1,19 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import BurgerMenu from "../../components/BurgerMenu/BurgerMenu";
 import SidebarIcons from "./SideBarIcons";
+import ReloadPageContext from "../../context/ReloadPageContext";
 
 function Sidebar({
   sidebarOpen,
   setSidebarOpen,
   setActiveLayout,
   activeLayout,
-  reloadPage,
 }) {
   const toggleSidebar = (event) => {
     event.stopPropagation(); // stop the event propagation
     setSidebarOpen(!sidebarOpen);
   };
+  const reloadPage = useContext(ReloadPageContext);
 
   const handleButtonClick = (layout) => {
     if (layout === "reset") {

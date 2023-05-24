@@ -1,6 +1,9 @@
 // WellPlate.jsx
-import React, { useState, useEffect, useCallback } from "react";
-import config from "../../configuration/ModuleConfig.json";
+import React, { useState, useEffect, useCallback, useContext } from "react";
+import ConfigContext from '../../context/ModuleConfigContext';
+
+// import config from "../../configuration/ModuleConfig.json";
+
 
 const Well = ({
   selected,
@@ -84,17 +87,19 @@ const WellPlate = ({
   const [selectedWells, setSelectedWells] = useState(new Set());
   // const [selectedWellLabels, setSelectedWellLabels] = useState([]);
   const [selectedVolumes, setSelectedVolumes] = useState({});
+  const config = useContext(ConfigContext);
 
   const [plateConfig, setPlateConfig] = useState({});
 
   useEffect(() => {
-    for (let plateType in config) {
-      if (config[plateType].moduleId === activeWellPlate) {
-        setPlateConfig(config[plateType]);
+    for (let plateType in config.data) {
+      if (config.data[plateType].moduleId === activeWellPlate) {
+        setPlateConfig(config.data[plateType]);
+        console.log("Setting this plate: ", config.data[plateType]);
         break;
       }
     }
-  }, [activeWellPlate]);
+  }, [activeWellPlate, config]);
   
 
   const generateRows = (rowCount) => {

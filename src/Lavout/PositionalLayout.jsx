@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Navbar from "./Navbar/Navbar";
 import SidePanelPos from "./SidePanel/SidePanelPos";
 import ContentPos from "./Content/ContentPos";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanelPos from "./InfoPanel/InfoPanelPos";
+import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
+
 
 const PositionalLayout = ({
   sidebarOpen,
@@ -16,7 +18,15 @@ const PositionalLayout = ({
   const [resetPositions, setResetPositions] = useState(false);
   const [savePositions, setSavePositions] = useState(false);
 
+  const { sendMessage } = useContext(WebSocketContext);
 
+  const { status } = useContext(WebSocketContext);
+  const isStatusConnected = status === 'connected';
+  
+  if (isStatusConnected && receivedCoords === null) {
+    console.log("Status is connected and receivedCoords is null");
+    sendMessage("getCurrentCoords");
+  }
 
   const handleResetPositions = () => {
     setResetPositions(true);

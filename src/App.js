@@ -11,6 +11,7 @@ import JobQueue from "./components/JobQueue/JobQueue";
 import JobQueueContext from "./context/JobQueueContext";
 import SelectedModulesContext from "./context/SelectedModulesContext";
 import IsElectronContext from "./context/IsElectronContext";
+import ReloadPageContext from "./context/ReloadPageContext";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -23,6 +24,8 @@ import ConfigContext from "./context/ModuleConfigContext";
 // import config from "./configuration/ModuleConfig.json";
 import getConfig from "./configuration/configprovider";
 
+import "./animations.css";
+
 function App() {
   const [action, setAction] = useState(null);
   const [actionVersion, setActionVersion] = useState(0);
@@ -31,7 +34,7 @@ function App() {
   const [sendSelectionEnabled, setSendSelectionEnabled] = useState(true);
   const [dispensingWell, setDispensingWell] = useState(null);
   const [completedWells, setCompletedWells] = useState([]);
-  const [activeLayout, setActiveLayout] = useState("Home"); // Add this line to manage the active layout
+  // const [activeLayout, setActiveLayout] = useState("Home"); // Add this line to manage the active layout
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [receivedCoords, setReceivedCoords] = useState(null);
@@ -40,10 +43,27 @@ function App() {
 
   const jobQueue = React.useRef(new JobQueue()).current;
 
-
   const [config, setConfig] = useState(null);
   const [isElectron, setIsElectron] = useState(false);
+
+  const [activeLayout, setActiveLayout] = useState(
+    localStorage.getItem("activeLayout") || "Home"
+  );
+
+  React.useEffect(() => {
+    console.log("Finding overlay...");
+    const overlay = document.getElementById('reload-overlay');
+    if (overlay) {
+      console.log("Found and removing overlay...");
+      document.body.removeChild(overlay);
+    } else { console.log("Could not find overlay"); }
+  }, []);
   
+
+  React.useEffect(() => {
+    localStorage.setItem("activeLayout", activeLayout);
+  }, [activeLayout]);
+
   React.useEffect(() => {
     setIsElectron(window && window.process && window.process.type);
   }, []);
@@ -51,7 +71,6 @@ function App() {
   React.useEffect(() => {
     getConfig().then((loadedConfig) => setConfig(loadedConfig));
   }, []);
-  
 
   const axisLimits = {
     x: { min: 0, max: 2100 },
@@ -67,14 +86,23 @@ function App() {
   const initialSelectedModules = {
     wellPlate: null,
     source: null,
-    waste: null
+    waste: null,
   };
 
-  const [selectedModules, setSelectedModules] = useState(initialSelectedModules);
-
+  const [selectedModules, setSelectedModules] = useState(
+    initialSelectedModules
+  );
 
   const reloadPage = () => {
-    window.location.reload();
+    if (isElectron) {
+      console.log("Reloading electron!");
+      const { ipcRenderer } = window.require("electron");
+      ipcRenderer.invoke('perform-reload')
+    }
+    else { 
+      console.log("Browser reload!");
+      window.location.reload();
+    }
   };
 
   const handleButtonClick = useCallback(
@@ -104,37 +132,31 @@ function App() {
 
       if (message === "update_status") {
         // Perform the action for updating the status column in the well information table
-      } 
-      else if (message.startsWith("jobId:")) {
+      } else if (message.startsWith("jobId:")) {
         const jobId = parseInt(message.split(":")[1]);
         console.log(`Received test jobId: ${jobId}`);
         // Do something with the jobId
         jobQueue.jobCompleted(jobId);
-      } 
-      else if (message === "ready") {
+      } else if (message === "ready") {
         // Update start dispensing button
         console.log("Update dispensing button");
         setStartDispensingEnabled(true);
-      } 
-      else if (message.startsWith("dispensefinished:")) {
+      } else if (message.startsWith("dispensefinished:")) {
         // Perform another action based on the message content
         const jobId = message.split(":")[1];
         // console.log("Job finished: ", jobId);
         jobQueue.jobCompleted(jobId);
-      } 
-      else if (message.startsWith("dispensingWell:")) {
+      } else if (message.startsWith("dispensingWell:")) {
         const wellId = message.split(":")[1];
         console.log("wellid = ", wellId);
         setDispensingWell(wellId);
-      } 
-      else if (message.startsWith("completedWell:")) {
+      } else if (message.startsWith("completedWell:")) {
         const wellId = message.split(":")[1];
         setCompletedWells((prevCompletedWells) => [
           ...prevCompletedWells,
           wellId,
         ]);
-      } 
-      else if (message.startsWith("receivedCoordspos:")) {
+      } else if (message.startsWith("receivedCoordspos:")) {
         const posStr = message.split(":")[1];
         const posValues = posStr.split(",");
         const xPos = parseFloat(posValues[0].split("=")[1]);
@@ -146,24 +168,7 @@ function App() {
           `Received positional data: X=${xPos}, Y=${yPos}, Z=${zPos}, PIP=${pipVal}`
         );
         setReceivedCoords({ xPos, yPos, zPos, pipVal });
-
-      } 
-      else if (message.startsWith("pipetteClickedpos:")) {
-        const posStr = message.split(":")[1];
-        const posValues = posStr.split(",");
-        const xPos = parseFloat(posValues[0].split("=")[1]);
-        const yPos = parseFloat(posValues[1].split("=")[1]);
-        const zPos = parseFloat(posValues[2].split("=")[1]);
-        const pipVal = parseInt(posValues[3].split("=")[1]);
-
-        console.log(
-          `Received positional data: X=${xPos}, Y=${yPos}, Z=${zPos}, PIP=${pipVal}`
-        );
-        setReceivedCoords({ xPos, yPos, zPos, pipVal });
-
-        // You can now use the positional data as needed in your application
-      } 
-      else if (message.startsWith("ZMovedpos:")) {
+      } else if (message.startsWith("pipetteClickedpos:")) {
         const posStr = message.split(":")[1];
         const posValues = posStr.split(",");
         const xPos = parseFloat(posValues[0].split("=")[1]);
@@ -177,8 +182,21 @@ function App() {
         setReceivedCoords({ xPos, yPos, zPos, pipVal });
 
         // You can now use the positional data as needed in your application
-      } 
-      else {
+      } else if (message.startsWith("ZMovedpos:")) {
+        const posStr = message.split(":")[1];
+        const posValues = posStr.split(",");
+        const xPos = parseFloat(posValues[0].split("=")[1]);
+        const yPos = parseFloat(posValues[1].split("=")[1]);
+        const zPos = parseFloat(posValues[2].split("=")[1]);
+        const pipVal = parseInt(posValues[3].split("=")[1]);
+
+        console.log(
+          `Received positional data: X=${xPos}, Y=${yPos}, Z=${zPos}, PIP=${pipVal}`
+        );
+        setReceivedCoords({ xPos, yPos, zPos, pipVal });
+
+        // You can now use the positional data as needed in your application
+      } else {
         console.log("Received default message:", message);
 
         // Handle the default case (if the message doesn't match any of the cases)
@@ -190,88 +208,85 @@ function App() {
     // Config has not been loaded yet
     return "Waiting for config...";
   }
-  
-
 
   return (
     <IsElectronContext.Provider value={isElectron}>
+      <ReloadPageContext.Provider value={reloadPage}>
+        <ConfigContext.Provider value={config}>
+          <JobQueueContext.Provider value={jobQueue}>
+            <AxisContext.Provider value={axisLimits}>
+              <WebSocketProvider handleMessage={handleMessage}>
+                <SelectedModulesContext.Provider
+                  value={[selectedModules, setSelectedModules]}
+                >
+                  <ModulePositionsContext.Provider
+                    value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the ModulePositionsContext
+                  >
+                    <div className="App">
+                      <Sidebar
+                        sidebarOpen={sidebarOpen}
+                        setSidebarOpen={setSidebarOpen}
+                        setActiveLayout={setActiveLayout}
+                        activeLayout={activeLayout}
+                      />
 
-    <ConfigContext.Provider value={config}>
-    <JobQueueContext.Provider value={jobQueue}>
-        <AxisContext.Provider value={axisLimits}>
-          <WebSocketProvider handleMessage={handleMessage}>
-          <SelectedModulesContext.Provider value={[selectedModules, setSelectedModules]}>
-
-            <ModulePositionsContext.Provider
-              value={{ savedPositions, setSavedPositions }} // Provide savedPositions and setSavedPositions through the ModulePositionsContext
-            >
-              <div className="App">
-                <Sidebar
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                  setActiveLayout={setActiveLayout}
-                  activeLayout={activeLayout}
-                  reloadPage={reloadPage}
-                />
-
-                {activeLayout === "Home" && (
-                  <Layout
-                    onButtonClick={handleButtonClick}
-                    currentAction={action}
-                    actionVolume={actionVolume}
-                    actionVersion={actionVersion}
-                    onActionComplete={resetAction}
-                    startDispensingEnabled={startDispensingEnabled}
-                    setStartDispensingEnabled={setStartDispensingEnabled}
-                    sendSelectionEnabled={sendSelectionEnabled}
-                    setSendSelectionEnabled={setSendSelectionEnabled}
-                    dispensingWell={dispensingWell}
-                    setDispensingWell={setDispensingWell}
-                    completedWells={completedWells}
-                    setCompletedWells={setCompletedWells}
-                    sidebarOpen={sidebarOpen}
-                    setSidebarOpen={setSidebarOpen}
-                    receivedCoords={receivedCoords}
-                    savedPositions={savedPositions}
-                    selectedPlateId={selectedPlateId}
-                    setSelectedPlateId={setSelectedPlateId}
-                    setActiveLayout={setActiveLayout}
-                  />
-                )}
-                {activeLayout === "DevLayout" && (
-                  <DevLayout
-                    // Pass all required props to DevLayout component
-                    receivedCoords={receivedCoords}
-                  />
-                )}
-                {activeLayout === "PositionalLayout" && (
-                  <DndProvider backend={HTML5Backend}>
-                    <PositionalLayout
-                      // Pass all required props to DevLayout component
-                      receivedCoords={receivedCoords}
-                      savedPositions={savedPositions}
-                      setSavedPositions={setSavedPositions}
-                      setSelectedPlateId={setSelectedPlateId}
-                    />
-                  </DndProvider>
-                )}
-                {/* Add more layout components here with their respective conditions */}
-                {activeLayout === "JobLayout" && (
-                  <JobLayout
-                    // Pass all required props to DevLayout component
-                    receivedCoords={receivedCoords}
-                  />
-                )}
-              </div>
-            </ModulePositionsContext.Provider>
-            </SelectedModulesContext.Provider>
-
-          </WebSocketProvider>
-        </AxisContext.Provider>
-      </JobQueueContext.Provider>
-    </ConfigContext.Provider>
+                      {activeLayout === "Home" && (
+                        <Layout
+                          onButtonClick={handleButtonClick}
+                          currentAction={action}
+                          actionVolume={actionVolume}
+                          actionVersion={actionVersion}
+                          onActionComplete={resetAction}
+                          startDispensingEnabled={startDispensingEnabled}
+                          setStartDispensingEnabled={setStartDispensingEnabled}
+                          sendSelectionEnabled={sendSelectionEnabled}
+                          setSendSelectionEnabled={setSendSelectionEnabled}
+                          dispensingWell={dispensingWell}
+                          setDispensingWell={setDispensingWell}
+                          completedWells={completedWells}
+                          setCompletedWells={setCompletedWells}
+                          sidebarOpen={sidebarOpen}
+                          setSidebarOpen={setSidebarOpen}
+                          receivedCoords={receivedCoords}
+                          savedPositions={savedPositions}
+                          selectedPlateId={selectedPlateId}
+                          setSelectedPlateId={setSelectedPlateId}
+                          setActiveLayout={setActiveLayout}
+                        />
+                      )}
+                      {activeLayout === "DevLayout" && (
+                        <DevLayout
+                          // Pass all required props to DevLayout component
+                          receivedCoords={receivedCoords}
+                        />
+                      )}
+                      {activeLayout === "PositionalLayout" && (
+                        <DndProvider backend={HTML5Backend}>
+                          <PositionalLayout
+                            // Pass all required props to DevLayout component
+                            receivedCoords={receivedCoords}
+                            savedPositions={savedPositions}
+                            setSavedPositions={setSavedPositions}
+                            setSelectedPlateId={setSelectedPlateId}
+                          />
+                        </DndProvider>
+                      )}
+                      {/* Add more layout components here with their respective conditions */}
+                      {activeLayout === "JobLayout" && (
+                        <JobLayout
+                          // Pass all required props to DevLayout component
+                          receivedCoords={receivedCoords}
+                        />
+                      )}
+                    </div>
+                  </ModulePositionsContext.Provider>
+                </SelectedModulesContext.Provider>
+              </WebSocketProvider>
+            </AxisContext.Provider>
+          </JobQueueContext.Provider>
+        </ConfigContext.Provider>
+      </ReloadPageContext.Provider>
     </IsElectronContext.Provider>
-
   );
 }
 

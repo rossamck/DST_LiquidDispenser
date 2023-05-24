@@ -1,12 +1,12 @@
 // JobLayout.jsx
 
-import React from "react";
+import React, { useContext } from "react";
 import Navbar from "./Navbar/Navbar";
 import SidePanelJob from "./SidePanel/SidePanelJob";
 import ContentJob from "./Content/ContentJob";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanelJob from "./InfoPanel/InfoPanelJob";
-// import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
+import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 
 
 
@@ -17,6 +17,16 @@ const JobLayout = ({
 
   
 }) => {
+  
+  const { sendMessage } = useContext(WebSocketContext);
+
+  const { status } = useContext(WebSocketContext);
+  const isStatusConnected = status === 'connected';
+  
+  if (isStatusConnected && receivedCoords === null) {
+    console.log("Status is connected and receivedCoords is null");
+    sendMessage("getCurrentCoords");
+  }
 
   function getJobTitle(message) {
     if (message.includes("selectWells")) {

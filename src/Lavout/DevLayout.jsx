@@ -1,12 +1,12 @@
 // DevLayout.jsx
 
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Navbar from "./Navbar/Navbar";
 import SidePanelDev from "./SidePanel/SidePanelDev";
 import ContentDev from "./Content/ContentDev";
 import StatusIndicator from "./StatusIndicator/StatusIndicator";
 import InfoPanelDev from "./InfoPanel/InfoPanelDev";
-// import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
+import { WebSocketContext } from "../components/WebSocketContext/WebSocketContext";
 
 const DevLayout = ({
   onButtonClick,
@@ -20,9 +20,16 @@ const DevLayout = ({
   const [buttonPressCounts, setButtonPressCounts] = useState([]);
   const [axesNetValues, setAxesNetValues] = useState([]);
 
-    // const { sendMessage } = useContext(WebSocketContext);
+    const { sendMessage } = useContext(WebSocketContext);
 
-
+    const { status } = useContext(WebSocketContext);
+    const isStatusConnected = status === 'connected';
+    
+    if (isStatusConnected && receivedCoords === null) {
+      console.log("Status is connected and receivedCoords is null");
+      sendMessage("getCurrentCoords");
+    }
+    
 
   return (
     <div className="relative flex flex-col min-h-screen">

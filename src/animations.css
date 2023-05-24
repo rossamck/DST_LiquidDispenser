@@ -1,0 +1,11 @@
+@keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  
+  .fade-out {
+    animation-name: fadeout;
+    animation-duration: 2s; /* You can change this to adjust the speed of the fade out */
+    animation-fill-mode: forwards; /* This ensures that the final state of the animation (opacity: 0) is retained after the animation completes */
+  }
+  

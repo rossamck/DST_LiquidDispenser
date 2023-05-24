@@ -39,6 +39,11 @@ const ControlButtons = ({
     }
   }, []);
 
+  useEffect(() => {
+    // Print selectedModules when it updates
+    console.log("Selected modules: ", selectedModules);
+  }, [selectedModules]);
+
   const onSelectWellsClick = () => {
     if (volume <= 0) {
       alert("Please enter a positive volume.");
@@ -69,7 +74,6 @@ const ControlButtons = ({
       ...selectedModules,
       source: { slotId, moduleId }
     });
-    console.log("Selected modules: ", selectedModules);
     setActiveSourceModule(moduleId);
   };
   

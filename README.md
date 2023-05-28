@@ -7,9 +7,9 @@ This repo hosts the software and schematics for the GUSTAVO project.
 
 1. Clone this repository:
 
-   ```bash
-   git clone https://github.com/rossamck/DST_LiquidDispenser.git
-   ```
+```bash
+git clone https://github.com/rossamck/DST_LiquidDispenser.git
+```
 
 2. Navigate to the project directory:
 ```bash

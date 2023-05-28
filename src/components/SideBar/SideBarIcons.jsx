@@ -1,8 +1,31 @@
-import React from "react";
+import React, { useContext } from "react";
 import { MdHome, MdBuild, MdRefresh } from "react-icons/md";
 import { FaRegObjectUngroup, FaTasks } from "react-icons/fa";
+import { WebSocketContext } from "../WebSocketContext/WebSocketContext";
 
 function SidebarIcons({ sidebarOpen, handleButtonClick, activeLayout }) {
+  // Get the WebSocket status from the context
+  const { status } = useContext(WebSocketContext);
+
+  // Determine if the Developer Tools button should be disabled
+  const isDevToolsDisabled = status !== "connected";
+
+  // Define the tooltip for the Developer Tools button
+  const devToolsTooltip = isDevToolsDisabled
+    ? "Please connect before accessing Developer Tools"
+    : "Developer Tools";
+
+  // Define the class for the Developer Tools button
+  const devToolsClass = `text-gray-400 block ${
+    activeLayout === "DevLayout" ? "text-green-500" : "hover:text-white"
+  } mb-7 ${isDevToolsDisabled ? "text-gray-700" : ""}`;
+
+  const handleDevToolsClick = () => {
+    if (!isDevToolsDisabled) {
+      handleButtonClick("DevLayout");
+    }
+  };
+
   return (
     <div
       className={`fixed top-16 left-0.5 mt-11 mb-2 z-20 transition-all duration-500 ${
@@ -48,11 +71,9 @@ function SidebarIcons({ sidebarOpen, handleButtonClick, activeLayout }) {
           <FaTasks className="inline" size={36} />
         </button>
         <button
-          className={`text-gray-400 block ${
-            activeLayout === "DevLayout" ? "text-green-500" : "hover:text-white"
-          } mb-7`}
-          onClick={() => handleButtonClick("DevLayout")}
-          title="Developer Tools"
+          className={devToolsClass}
+          onClick={handleDevToolsClick}
+          title={devToolsTooltip}
         >
           <MdBuild className="inline" size={36} />
         </button>

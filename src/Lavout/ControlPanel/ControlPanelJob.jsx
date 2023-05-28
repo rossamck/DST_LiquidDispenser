@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
+import { Modal, Button } from 'antd';
 import JobQueueContext from "../../context/JobQueueContext";
-import { Modal } from 'react-responsive-modal';
-
-import 'react-responsive-modal/styles.css';
 
 const ControlPanelJob = ( { getJobTitle } ) => {
   const jobQueue = useContext(JobQueueContext);
@@ -15,8 +13,6 @@ const ControlPanelJob = ( { getJobTitle } ) => {
   const onCloseModal = () => {
     setSelectedJob(null);
   };
-
-  
 
   const completedJobs = jobQueue.getCompletedJobs().map((job) => {
     const title = getJobTitle(job.message);
@@ -41,24 +37,21 @@ const ControlPanelJob = ( { getJobTitle } ) => {
       </div>
     );
   });
-  
 
-
-return (
-  <aside id="content" className="col-span-3 bg-gray-700 p-4 h-full pb-20">
-    <h2 className="text-white text-2xl font-bold underline">Completed Jobs:</h2>
-    <div className="h-full overflow-y-auto">
-      {completedJobs}
-    </div>
-    {selectedJob && (
-      <JobDetailModal job={selectedJob} onCloseModal={onCloseModal} />
-    )}
-  </aside>
-);
-
+  return (
+    <aside id="content" className="col-span-3 bg-gray-700 p-4 h-full pb-20">
+      <h2 className="text-white text-2xl font-bold underline">Completed Jobs:</h2>
+      <div className="h-full overflow-y-auto">
+        {completedJobs}
+      </div>
+      {selectedJob && (
+        <JobDetailModal job={selectedJob} isVisible={Boolean(selectedJob)} onCloseModal={onCloseModal} />
+      )}
+    </aside>
+  );
 };
 
-const JobDetailModal = ({ job, onCloseModal }) => {
+const JobDetailModal = ({ job, isVisible, onCloseModal }) => {
   let completedAt = ''; // Initialize completedAt as an empty string
   
   // If job.completedAt exists, format it
@@ -68,19 +61,25 @@ const JobDetailModal = ({ job, onCloseModal }) => {
   }
 
   return (
-    <Modal open={true} onClose={onCloseModal} center>
-      <h2 className="text-lg font-bold">Job Detail</h2>
+    <Modal
+      title="Job Detail"
+      visible={isVisible}
+      onCancel={onCloseModal}
+      footer={[
+        <Button key="back" onClick={onCloseModal}>
+          Close
+        </Button>,
+      ]}
+    >
       <div className="p-4 bg-white rounded-md shadow-md my-4">
         <p>ID: {job.id}</p>
         <p>Status: {job.status}</p>
         {completedAt && <p>Completed: {completedAt}</p>}
         <br></br>
         <p>Message: {job.message}</p>
-       
       </div>
     </Modal>
   );
 };
-
 
 export default ControlPanelJob;

@@ -2,25 +2,20 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-
+import { Modal, Button } from "antd";
 import JobQueueContext from "../../context/JobQueueContext";
-import { Modal } from "react-responsive-modal";
-import "react-responsive-modal/styles.css";
 
 const ContentJob = ({ getJobTitle }) => {
   const jobQueue = useContext(JobQueueContext);
   const [currentJob, setCurrentJob] = useState(jobQueue.currentJob);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
 
   const onOpenModal = (job) => {
     setSelectedJob(job);
-    setModalOpen(true);
   };
 
   const onCloseModal = () => {
     setSelectedJob(null);
-    setModalOpen(false);
   };
 
   const onCurrentJobClick = () => {
@@ -32,7 +27,6 @@ const ContentJob = ({ getJobTitle }) => {
   useEffect(() => {
     setCurrentJob(jobQueue.currentJob);
   }, [jobQueue.currentJob]);
-
   let currentJobContent = null;
   if (currentJob) {
     const { id, message, status } = currentJob;
@@ -79,11 +73,11 @@ const ContentJob = ({ getJobTitle }) => {
       <div className="upcoming-jobs">
         <h2 className="text-lg font-bold">Upcoming Jobs:</h2>
         {upcomingJobsContent}
-      </div>
+        </div>
       {selectedJob && (
         <JobDetailModal
           job={selectedJob}
-          modalOpen={modalOpen}
+          isVisible={Boolean(selectedJob)}
           onCloseModal={onCloseModal}
         />
       )}
@@ -91,21 +85,29 @@ const ContentJob = ({ getJobTitle }) => {
   );
 };
 
-const JobDetailModal = ({ job, modalOpen, onCloseModal }) => {
+const JobDetailModal = ({ job, isVisible, onCloseModal }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Modal open={modalOpen} onClose={onCloseModal} center>
-      <h2 className="text-lg font-bold">Job Detail</h2>
+    <Modal
+      title="Job Detail"
+      visible={isVisible}
+      onCancel={onCloseModal}
+      footer={[
+        <Button key="back" onClick={onCloseModal}>
+          Close
+        </Button>,
+      ]}
+    >
       <div className="p-4 bg-white rounded-md shadow-md my-4">
         <p>ID: {job.id}</p>
         <p>Status: {job.status}</p>
         {expanded ? (
           <p>Message: {job.message}</p>
         ) : (
-          <p>Message: {job.message.slice(0, 500)}...</p>
+          <p>Message: {job.message.slice(0, 500)}</p>
         )}
-        {job.message.length > 500 && (
+        {job.message.length > 250 && (
           <button
             className="text-blue-500 underline flex items-center focus:outline-none"
             onClick={() => setExpanded(!expanded)}
